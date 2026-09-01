@@ -1,9 +1,10 @@
 # 実務Skill一覧・役割マッピング
 
-現時点で実際に稼働している実務Skillは、このPC上ではユーザーレベル
-(`C:\Users\81904\.claude\skills\`)に置かれている。**このリポジトリをclaudeし他のPCで使うには、
-下記のSkillフォルダをこのリポジトリの `.claude/skills/` にコピーし、認証情報を環境変数化して
-からコミットする必要がある(詳細は下部「移設手順」参照)。**
+以下10件の実務Skillは、[t-kuribayashi-keiz/skill-kanri](https://github.com/t-kuribayashi-keiz/skill-kanri)
+リポジトリから移設し、`.claude/skills/` 配下にコミット済み(2026-09-01)。全て指示書
+(SKILL.md + references/*.md)のみで構成されており、スクリプトや鍵ファイルは含まれず、
+ハードコードされた認証情報も確認されなかった。今後Skillを追加・更新する場合も、まず
+skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジトリに反映する運用とする。
 
 ## 役割マッピング
 
@@ -20,9 +21,10 @@
 | `customer-acquisition-consulting` | 集客のデータパイプライン・分析自動化 | analyst |
 | `session-to-skill` | 今の会話の作業手順をSkill化する | cross-functional(型化・再利用の判断) |
 
-## 移設手順(このPC上のSkillをリポジトリに取り込む場合)
+## 移設手順(skill-kanriリポジトリの更新をこちらに反映する場合)
 
-1. 対象フォルダを `.claude/skills/<skill-name>/` にコピーする
+1. [skill-kanri](https://github.com/t-kuribayashi-keiz/skill-kanri) から対象フォルダを
+   `.claude/skills/<skill-name>/` にコピー(上書き)する
 2. フォルダ内のスクリプト(`.gs`、`.ps1`など)にAPIキー・トークン・個人情報がハードコードされて
    いないか確認する。あれば環境変数 or 実行環境のプロパティストア(GASなら
    `PropertiesService`)に切り出す

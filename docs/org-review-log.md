@@ -69,3 +69,28 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   未対応として残っている論点: GA4プロパティID/GSCプロパティURLの正確な値の確認
   (運用セッション側での確認が必要)、Meta広告Threads/Audience Network配置の停止判断の
   エスカレーション
+
+---
+
+## 2026-09-01 実務Skill10件の移設
+
+- 見つかった事実:
+  - 初期構築ログで「未対応」として残っていた実務Skill10件は、このセッション(クラウド
+    実行環境)からは直接アクセスできないユーザーのローカルPC上にしかなかった
+  - ユーザーに確認したところ、実際には別リポジトリ
+    [t-kuribayashi-keiz/skill-kanri](https://github.com/t-kuribayashi-keiz/skill-kanri)
+    に10件全てが整理済みの状態(SKILL.md + references/*.md)で存在しており、アクセス権限も
+    付与された
+  - skill-kanri配下の全ファイルを確認した結果、スクリプト(.gs/.ps1等)や鍵ファイルは
+    一切含まれておらず、APIキー・トークン・パスワード等のハードコードも見つからなかった
+    (`shift-schedule-gas-automation`と`hpb-crm-reconciliation`のbackground.mdには
+    「認証情報は一切含まれていない」旨が明記済みだった)
+- 対応内容:
+  - skill-kanriの10フォルダ全てを `.claude/skills/` 配下にコピーし、コミットした
+  - `skills/README.md` を更新: 移設元をskill-kanriリポジトリと明記し、今後の更新も
+    skill-kanri側で育ててからこちらに反映する運用にした
+  - `README.md` の現状セクションを更新
+- 対応状況: 対応済み。変更したファイル: `.claude/skills/*`(10フォルダ)、
+  `skills/README.md`、`README.md`
+  今後の課題: skill-kanri側で今後Skillが追加・更新された場合の反映を定期棚卸しの
+  チェック項目に加える(現状は手動での気づき依存)

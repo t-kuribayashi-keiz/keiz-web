@@ -25,6 +25,7 @@ docs/org-review-log.md  組織レビュー・変更履歴
 
 ## 現状(2026-09-01時点)
 
-初期スキャフォールドのみ構築済み。実務Skillはまだこのリポジトリに移設されておらず、
-このPCのユーザーレベル(`~/.claude/skills/`)にある。KPI定義もまだ空。
+初期スキャフォールドに加え、パイロットブランド「LUNA」の個別コンテキスト(`brands/luna/`)と、
+実務Skill10件([skill-kanri](https://github.com/t-kuribayashi-keiz/skill-kanri)から移設、
+`.claude/skills/`)を構築済み。全社共通のKPI定義はまだ空。
 詳細は [docs/org-review-log.md](docs/org-review-log.md) を参照。
