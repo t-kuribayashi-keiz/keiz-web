@@ -1,0 +1,13 @@
+{
+  "_comment": "院マスタのテンプレート。実データに差し替えること。id は kpi-history/ や proposals/ から参照するキーとして使う。",
+  "clinics": [
+    {
+      "id": "example-001",
+      "name": "サンプル院",
+      "brand": "LUNA",
+      "area": "",
+      "opened_at": "",
+      "status": "active"
+    }
+  ]
+}
