@@ -19,3 +19,53 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   `session-to-skill`
 - 対応状況: 未対応(スキャフォールド構築のみ。Skill移設・KPI定義の記入・リモートリポジトリ
   への接続は未実施)
+
+---
+
+## 2026-09-01 パイロットブランド「LUNA」の組み込み
+
+- 見つかった事実:
+  - claude.ai上での事前検討(引き継ぎ書)により、複数ブランド(直営/サンズミライ統合、
+    グッド、スマイル、心身堂、アイワ、リクスム、ピラティス、チョコザップ、リラックス、
+    LUNA)のうち、LUNA(LUNA Pilates Studio・戸越銀座店)を最初の着手対象(パイロット
+    ブランド)とする方針が既に決まっていた
+  - LUNAサイトを実際に運用中の既存Claude Codeセッション(session_01KuA5rbdBVGsh4mZYtnqUGy、
+    environment env_014Wg7aVXEn5DVaZcYKadVr4)を特定した。GitHubリポジトリは
+    [Tsukasa0105/luna-pilates-togoshi](https://github.com/Tsukasa0105/luna-pilates-togoshi)
+    (private、デフォルトブランチ `main`)
+  - 当該運用セッションでは、GA4(luna-pilates.com と mypage.luna-pilates.com のクロス
+    ドメイン統合計測)・Google Search Console・Microsoft Clarityの分析連携が既に稼働して
+    おり、2026-07-20〜08-22の実績をまとめた集客パフォーマンス分析レポート(Artifact)が
+    2本公開されていた。これを土台に `brands/luna/` 配下のドキュメントを新設できる状態
+    だった
+  - 一方で、本リポジトリ側にはGA4の正確なプロパティID・Google Search Consoleの確認済み
+    プロパティURLが未記載であり、これらは運用セッション側で確認する必要がある(推測で
+    埋めていない)
+  - 本リポジトリには、LUNAのような「業態がそもそも整骨院と異なり(ピラティススタジオ)、
+    集客チャネルがホームページのみ(SEO/MEO・メタ広告・Google PPC)」というブランドの
+    コンテキストを置く場所がまだ存在しなかった(`data/clinics.json` はテンプレートの
+    ままで、ブランド別ドキュメントの置き場所も未定義)
+- 提案・対応内容:
+  - `data/clinics.json` のテンプレートエントリ(`example-001`)をLUNA戸越銀座店の実データ
+    (id: `luna-togoshiginza`)に置き換えた
+  - 新規に `brands/luna/CLAUDE.md` を作成し、店舗・ドメイン・GitHubリポジトリ・予約
+    システム(hacomono)・分析連携状況・チャネル構成サマリー・既知の重要課題をまとめた。
+    ルートCLAUDE.mdを前提とし、矛盾時はルート優先である旨を明記
+  - `brands/luna/channels/website/` 配下に `seo-meo.md`・`meta-ads.md`・`google-ppc.md`
+    の3ファイルを作成。いずれも実行可能なSkillではなく、運用ノウハウ・実績・注意点を
+    まとめたドキュメント(自動化する段階にはまだ至っていないため)
+  - ルートCLAUDE.mdの「KPI定義・命名規則」セクションに、ブランドごとに業態・集客チャネル
+    が大きく異なる場合は `brands/<ブランド名>/CLAUDE.md` に個別コンテキストを持たせる
+    方針を追記(全社共通KPI定義そのものはまだ埋めていない)
+  - 今後の課題として残したこと: GA4プロパティID・GSCプロパティURLの正確な値の確認、
+    Meta広告Threads/Audience Network配置(キャンペーンID
+    `120251395983210131`、累計421セッション・予約完了0件)の即時停止対応(運用担当への
+    2回の提案が未対応のまま)、チラシQRコードへのUTM付与
+- 対応状況: 対応済み(ドキュメント新設)。変更したファイル:
+  `data/clinics.json`、`brands/luna/CLAUDE.md`、
+  `brands/luna/channels/website/seo-meo.md`、
+  `brands/luna/channels/website/meta-ads.md`、
+  `brands/luna/channels/website/google-ppc.md`、`CLAUDE.md`
+  未対応として残っている論点: GA4プロパティID/GSCプロパティURLの正確な値の確認
+  (運用セッション側での確認が必要)、Meta広告Threads/Audience Network配置の停止判断の
+  エスカレーション

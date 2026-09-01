@@ -1,13 +1,16 @@
 {
-  "_comment": "院マスタのテンプレート。実データに差し替えること。id は kpi-history/ や proposals/ から参照するキーとして使う。",
+  "_comment": "院マスタ。id は kpi-history/ や proposals/ から参照するキーとして使う。ブランド別の詳細コンテキストは brands/<ブランド名>/CLAUDE.md を参照。",
   "clinics": [
     {
-      "id": "example-001",
-      "name": "サンプル院",
+      "id": "luna-togoshiginza",
+      "name": "LUNA Pilates Studio 戸越銀座店",
       "brand": "LUNA",
-      "area": "",
+      "area": "東京都品川区 戸越銀座",
       "opened_at": "",
-      "status": "active"
+      "status": "active",
+      "type": "pilates_studio",
+      "acquisition_channels": ["organic_search", "organic_social", "paid_social", "paid_search", "referral", "direct"],
+      "notes": "整骨院ではなくピラティススタジオブランド。集客チャネルはホームページのみ(SEO/MEO・メタ広告・Google PPC)。詳細は brands/luna/CLAUDE.md 参照。"
     }
   ]
 }
