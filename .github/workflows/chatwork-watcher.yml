@@ -65,13 +65,16 @@ jobs:
         env:
           TZ: Asia/Tokyo
         run: |
-          if git diff --quiet -- data/chatwork-watcher-state.json; then
+          # Stage first, then compare against the index: on the very first run the state file is
+          # untracked, and `git diff` doesn't see untracked files — which would leave the position
+          # permanently uncommitted and re-report the same messages on every run.
+          git add data/chatwork-watcher-state.json
+          if git diff --cached --quiet -- data/chatwork-watcher-state.json; then
             echo "state unchanged"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/chatwork-watcher-state.json
           git commit -m "Advance the Chatwork watcher position [skip ci]"
           # Another run may have pushed while this one was working; rebase rather than fail.
           for attempt in 1 2 3; do
