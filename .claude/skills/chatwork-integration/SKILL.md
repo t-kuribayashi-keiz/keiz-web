@@ -40,6 +40,35 @@ automated today) is in
    in the state file instead; the read-marking endpoint would clobber the account owner's own
    unread badges in their Chatwork client.
 
+## 依頼の共通言語(マーカー規約)
+
+依頼かどうかをキーワードから推測するのではなく、**依頼者が明示的にマーカーを付ける**のが
+この組織の規約。マーカーは`data/chatwork-rooms.json`の`mention_markers`が正で、現在は
+`@claude` / `＠claude` / `@クロード` / `＠クロード`(大文字小文字は区別しない)。
+
+Chatwork公式の`[To:]`メンションは実在アカウントが必要なので、あえて**単なるテキスト規約**に
+してある。Chatworkの席を増やさずに済み、誰でも今すぐ使える。
+
+現場に伝える書式はこれだけ:
+
+```
+@claude 西新宿店のHPBクーポン、期限を9月末から10月末に変更お願いします
+```
+
+店舗名・媒体・やってほしいことが1文に入っていれば十分で、決まったフォーマットは強制しない
+(足りない情報はClaude側から聞き返す)。
+
+### マーカーあり/なしの扱いの違い
+
+| | 判定 | 扱い |
+|---|---|---|
+| マーカーあり | **明示的な依頼** | 対応対象。判断して栗林さんに実行可否を確認する |
+| マーカーなし・キーワード一致のみ | 参考(不確実) | 依頼でないことも多い。**空振りなら黙って無視してよい** |
+
+キーワード検知は「マーカー規約が浸透するまで実依頼を取りこぼさない」ための移行措置。
+浸透したらそのルームの`require_mention`を`true`にすればキーワード検知が切れ、誤検知は
+ゼロになる。1つのIssueに両方が混ざる場合、報告は必ず節を分けて出す。
+
 ## Architecture
 
 Chatwork polling runs in **GitHub Actions**, not in a Claude session, because that is where the
@@ -77,13 +106,17 @@ The API base is `https://api.chatwork.com/v2`, authenticated with the header
 
 ## Adding a brand or a room
 
-1. Add an entry to `data/chatwork-rooms.json` with the room's exact name, its `brand`, and the
-   `watch_keywords` that should flag a message for review.
-2. Confirm the token's Chatwork account is actually a member of that room.
-3. Nothing else. The workflow iterates whatever is in the config — no new workflow, no new script.
+1. Add an entry to `data/chatwork-rooms.json` with the room's exact name and its `brand`.
+2. Decide the room's trigger: `require_mention: true` for marker-only (no false positives, but
+   the room's members have to know the convention), or `false` plus `watch_keywords` while the
+   convention spreads.
+3. Tell that room's members the marker convention — a room set to marker-only detects nothing
+   until someone actually types `@claude`.
+4. Confirm the token's Chatwork account is actually a member of that room.
+5. Nothing else. The workflow iterates whatever is in the config — no new workflow, no new script.
 
-Keep `watch_keywords` deliberately broad. A false positive costs one notification that Claude
-dismisses; a false negative means a real request silently goes unhandled.
+Where keywords are in play, keep them deliberately broad: a false positive costs one line in an
+Issue that Claude dismisses, while a false negative means a real request silently goes unhandled.
 
 ## What this skill does not do
 
