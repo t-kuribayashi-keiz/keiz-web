@@ -184,3 +184,48 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   未対応として残っている論点: 直営整骨院グループが実際にアイワ接骨師会(または類似の
   業界団体)をレセプト業務で利用しているかの確認、リクスムが社内のどの範囲の採用で
   使われているかの確認
+
+---
+
+## 2026-09-02 SalonBoard操作専任エージェント「salonboard-operator」の新設
+
+- 見つかった事実:
+  - `hpb-salonboard-update` Skill(`.claude/skills/hpb-salonboard-update/`)は、SalonBoard
+    (salonboard.com、HotPepper Beautyの管理画面)でのクーポン更新等の定型作業を扱うが、
+    SKILL.md自体に「`claude-in-chrome` MCPツール(ユーザーの実Chromeのログイン状態を
+    使う)が必須」と明記されている
+  - このSkillはこれまで `skills/README.md` の役割マッピング上、暫定的に`implementer`
+    が担当する想定になっていたが、`implementer`の`tools:`定義(Read, Write, Edit, Bash,
+    Grep, Glob)にはブラウザ操作ツールが含まれておらず、ミスマッチだった。汎用の
+    `implementer`に混ぜるより、ブラウザ操作が前提のこの業務専用エージェントに切り出す
+    方が責務の境界として適切と判断した
+  - ユーザー確認の結果、適用範囲は直営に限定せず、**HPBを使う全ブランド共通**の
+    エージェントとする方針が確定した。現時点でどのブランドがHPBを使っているかは
+    `data/clinics.json` 側では未確定だが、将来他ブランドでの利用が判明した際にそのまま
+    使えるよう、ブランド非依存の設計にした
+  - 正確な`claude-in-chrome` MCPツール名は、このクラウド実行環境からは確認できない
+    (ブラウザ操作はユーザーのローカルPC上でのみ利用可能なため)。誤ったツール名を
+    `tools:`に書いて機能を壊すリスクを避けるため、`tools:`行は明示的に指定せず全ツール
+    利用可能な状態にした
+- 提案・対応内容:
+  - `.claude/agents/salonboard-operator.md` を新設。YAML frontmatterは既存4エージェント
+    と同形式(name, description)だが、上記理由により`tools:`は省略した。本文冒頭に
+    「このエージェントはユーザーのローカルPC上のClaude Code(実Chromeのログイン状態に
+    アクセスできる環境)で動かす必要があり、クラウド実行環境では機能しない」旨を明記
+  - SKILL.md側の非交渉ルール(パスワード代行入力禁止、反映は必ず都度確認、
+    salonboard.comのみが編集対象)を要約し、詳細手順はSKILL.md本体・`references/`への
+    リンクに留めて重複を避けた
+  - `data/proposals/`との関わりを明記: SalonBoardの定型更新は運用保守寄りで
+    `data/proposals/`を経由しない直接依頼もあり得るが、その場合もSkill側の
+    「Logging」ルール(`hpb_work_log.csv`)に従うこと。KPI・施策に関わる変更の場合は
+    analyst/measurerが追えるよう`data/proposals/`側にも一言記録することが望ましい旨を
+    追記した
+  - ルートCLAUDE.mdの「組織構成」表に`salonboard-operator`の行を追加
+  - `skills/README.md`の役割マッピング表で、`hpb-salonboard-update`の対応役割を
+    `implementer(定型実装・更新作業)`から`salonboard-operator(要ローカル実行環境。
+    ブラウザ操作ツールを持たないimplementerからは分離)`に変更
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/salonboard-operator.md`(新規)、
+  `CLAUDE.md`、`skills/README.md`、`docs/org-review-log.md`
+  未対応として残っている論点: 正確な`claude-in-chrome` MCPツール名の確定(ローカル
+  実行環境側で確認が必要。確定次第`tools:`行を具体化する)、HPBを実際に利用している
+  ブランド・院の範囲の確定(`data/clinics.json`側での反映は未実施)
