@@ -9,15 +9,25 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
 
 ## Non-negotiable rules
 
-1. **Never type the SalonBoard password.** Logging in is the one step that always stays with the user — have them log into SalonBoard in their real Chrome (via the `claude-in-chrome` MCP tools, not the sandboxed browser tools, since only the real Chrome carries their session) before any automation starts. If no tab is logged in yet, ask them to log in and confirm rather than attempting it yourself.
+1. **Never type the SalonBoard password.** Logging in is the one step that always stays with the user — have them log into SalonBoard in their real Chrome (via the `mcp__claude-in-chrome__*` MCP tools, **not** the sandboxed `mcp__Claude_Browser__*` tools, since only the real Chrome carries their session) before any automation starts. If no tab is logged in yet, ask them to log in and confirm rather than attempting it yourself. A Chrome that isn't logged in returns `ユーザエラー / 認証エラーです。ログインしなおしてください。` at `CNC/groupTop/` — that's the signal to hand it back to the user, not to try logging in.
 2. **Draft-saving and publishing are two separate decisions — treat them that way.** SalonBoard's coupon editor (and likely other tabs) only stages a change when you click 登録; a banner then says the change is *not yet live* until someone clicks a separate "◯◯情報を反映する" button (found on the relevant 掲載管理TOP page). The user has explicitly said they want to review the draft state before anything goes live. So: batch-editing/saving many items under one approval is fine, but **always stop and ask again, freshly, before clicking any 反映/publish button** — never fold that into the earlier "please make these edits" approval, no matter how routine the batch felt.
 3. **salonboard.com is the only editable surface.** beauty.hotpepper.jp is the public, read-only consumer-facing site — never mistake it for the admin backend, and never attempt to "log in" or edit there.
+
+## Before any browser action
+
+- **Load the MCP tool schemas first.** `mcp__claude-in-chrome__*` tools are deferred in this environment — batch every tool you expect to need into **one** `ToolSearch` call (`select:` accepts a comma-separated list). Loading them one at a time wastes a round-trip each.
+- **Pick the right Chrome when several are connected.** `list_connected_browsers` can return more than one, and until one is selected *every* browser call — including `tabs_context_mcp` — fails. Do not pick one yourself: list them all via `AskUserQuestion` and then `select_browser` with the chosen deviceId. Only one of them is likely to hold the 本部 SalonBoard session.
+
+## Read-only tasks
+
+Steps 0, 6 and the CSV row below exist to cost out *work*. For a purely read-only task (listing coupons, checking what's currently live, answering a question about a salon's listing) skip step 0/6 and skip the `hpb_work_log.csv` row — the overhead outweighs the value. Everything else in the workflow still applies, and the moment the task turns into an edit, the full workflow is back on.
 
 ## Standard workflow
 
 0. **Ask for a usage-quota screenshot before starting.** The user wants to know each task's real cost against their Claude plan limits, which a token count alone can't show (they run several things concurrently). Ask them to send a screenshot of Settings → 使用量 (Usage) before you begin — see `references/usage-quota-tracking.md` for what to read off it. Skip this only if the user explicitly says not to bother for a given task.
 1. **Confirm scope before touching anything.** Nail down: which salon(s) (name is enough — see Multi-store below), which SalonBoard section (クーポン, スタッフ, メニュー, フォトギャラリー, etc. — クーポン is the best-understood so far, see `references/coupon-editing.md`), the exact find/replace text or change, and whether currently-unpublished/archived items are in scope alongside live ones.
-2. **Find every match before editing anything.** Prefer reading the whole listing page's text in one shot (e.g. a page-text extraction tool) over scrolling and screenshotting row by row — listings can run 30+ rows including old unpublished drafts, and eyeballing screenshots misses matches or costs many extra round-trips.
+1b. **Confirm you're in the right salon before editing.** Every SalonBoard page footer carries `<salon name>様 / <salon ID> / …` (e.g. `都賀駅前整骨院様 / H000523612`). Read it and check it against the intended salon before the first edit — with ~150 salons behind one login, editing the wrong one is the expensive mistake.
+2. **Find every match before editing anything.** Prefer reading the whole listing page's text in one shot (e.g. a page-text extraction tool) over scrolling and screenshotting row by row — listings can run 30+ rows including old unpublished drafts, and eyeballing screenshots misses matches or costs many extra round-trips. **But page text alone cannot tell you what is live.** The 順番 (order) number and the 非掲載にする / 掲載にする buttons are images, so they never appear in extracted text — a coupon list comes back as one flat run of rows with no visible boundary between the live block and the unpublished block. Use page text for *text matching*, then a screenshot pass for the *live/unpublished split*. `read_page` is not a substitute: on a 38-row coupon list it returned only 6 of the order textboxes and none of the row buttons.
 3. **Show the user the full match list and wait for approval.** This is where mistaken matches or scope surprises get caught cheaply, before any edit is made.
 4. **Edit and save (登録) every approved item in one pass.** No need to re-confirm per item — the user's approval of the list already covers each individual save.
 5. **Stop before publishing.** Ask explicitly, in that specific conversation, before clicking the 反映/publish button — see rule 2 above.
@@ -26,9 +36,30 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
 
 ## Multi-store account
 
-The headquarters account's salon list lives at `salonboard.com/CNC/groupTop/`. Search that list for the target salon's exact name to jump into its SalonBoard without a separate login — the headquarters login covers every salon underneath it.
+The headquarters account's salon list lives at `salonboard.com/CNC/groupTop/`. Search that list for the target salon's exact name to jump into its SalonBoard without a separate login — the headquarters login covers every salon underneath it. As of 2026-09-02 the list holds ~160 salons; `get_page_text` on that page returns the whole `salon ID + name` table in one call, which is the cheapest way to resolve a name to an ID.
+
+**The salon-name links are `javascript:void(0);` and clicking them by element ref silently does nothing** — the tool returns `Clicked on element ref_N` and the page stays on `CNC/groupTop/`. Click them by screenshot coordinate instead. More generally: a click that reports success is not proof of navigation, so **verify the resulting URL** (`tabs_context_mcp` or a screenshot) after any click that is supposed to move you, rather than assuming it landed.
+
+Once inside a salon, the section URLs below can be reached by direct `navigate` — the salon context is held in the session, so there's no need to re-click through the nav each time.
 
 ## Section-specific details
+
+Section URLs under `https://salonboard.com/`, confirmed 2026-09-02 — all reachable by direct `navigate` once inside a salon:
+
+| Section | URL |
+|---|---|
+| **反映 (publish) — 掲載管理TOP** | `CNK/reflect/reflectTop` |
+| サロン | `CNK/draft/salonEdit` |
+| スタッフ | `CNK/draft/staffList` |
+| メニュー | `CNK/draft/menuEdit` |
+| クーポン | `CNK/draft/couponList` |
+| フォトギャラリー | `CNK/draft/photoGalleryEdit` |
+| こだわり | `CNK/draft/kodawariList` |
+| 特集 | `CNK/draft/specialList` |
+| ブログ | `KLP/blog/blogList` |
+| 口コミ | `KLP/review/reviewList` |
+
+`CNK/reflect/reflectTop` is the page that actually publishes staged changes — **never navigate there casually**, and never click its 反映 buttons without the fresh, explicit approval required by rule 2.
 
 Detailed, field-level notes (exact click paths, character limits, quirks of specific tools like unstable element references after navigation) live in `references/`, one file per SalonBoard section, so this file stays short:
 
@@ -46,4 +77,4 @@ The user wants work time, token consumption, and plan-quota impact tracked for e
 - **Tokens**: `tokens_effective` — this task's own effective-token total, computed only from assistant turns whose timestamp falls inside that same start/end window (plus any subagent transcripts spawned for the task, in full). See `references/token-usage-logging.md` for the exact method (weights cache reads/writes/output differently — same approach the `explain-usage` skill uses).
 - **Plan quota**: `usage_session_pct_delta` / `usage_weekly_pct_delta` — from the before/after usage screenshots (Standard workflow steps 0 and 6). See `references/usage-quota-tracking.md` for what to read and how to compute the delta, including the caveats about concurrent tasks and reset timing.
 
-Do this proactively, without being asked each time — the user wants all of these figures computed and logged as a standard part of finishing any task here.
+Do this proactively, without being asked each time — the user wants all of these figures computed and logged as a standard part of finishing any task here. The one exception is a purely read-only task — see **Read-only tasks** above.

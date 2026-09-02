@@ -229,3 +229,50 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   未対応として残っている論点: 正確な`claude-in-chrome` MCPツール名の確定(ローカル
   実行環境側で確認が必要。確定次第`tools:`行を具体化する)、HPBを実際に利用している
   ブランド・院の範囲の確定(`data/clinics.json`側での反映は未実施)
+
+---
+
+## 2026-09-02 salonboard-operator のローカル実機検証と修正
+
+- きっかけ: 前項で新設した `salonboard-operator` を、実際にブラウザ操作ができる環境
+  (ユーザーのローカルPC、実Chrome + `claude-in-chrome` MCP)で初めて動作検証した
+- 検証内容: 都賀駅前整骨院(H000523612)のクーポン一覧を**読み取りのみ**で閲覧。
+  編集(登録)・反映(publish)・掲載状態変更は一切行っていない
+- 判明した不具合:
+  - **`salonboard-operator` がエージェントとして登録されていなかった**。原因は
+    YAML frontmatter のパースエラーで、`description` の中に
+    `Brand-agnostic: `(コロン+半角スペース)が含まれていたこと。YAMLのクォートなし
+    プレーンスカラーには `": "` を含められないため frontmatter 全体の解析に失敗し、
+    このファイルだけがエージェント一覧から欠落していた(他4エージェントは正常に登録)。
+    Claude Code再起動でも直らない、ファイル固有の不具合だった
+  - 前項で「未対応」としていた `claude-in-chrome` MCPツール名は、実機で確定できた
+- 対応内容:
+  - `description` の `Brand-agnostic: ` を `Brand-agnostic — ` に修正(frontmatter修復)
+  - `tools:` 行を実測ベースで具体化。サンドボックスブラウザ `mcp__Claude_Browser__*`
+    (SalonBoardのログインセッションを持たない)や、SalonBoard運用に不要なGmail/Drive/
+    Calendar等のMCPツールを露出させないため、明示指定は安全側の改善でもある
+  - エージェント本文に、MCPツールが遅延ロードのため `ToolSearch` で一括ロードが必要な
+    こと、Chromeが複数接続されている場合は自分で選ばず `AskUserQuestion` →
+    `select_browser` でユーザーに選ばせること(未ログインのChromeを掴むと
+    `CNC/groupTop/` が認証エラーを返す)を追記
+  - `hpb-salonboard-update` SKILL.md / `references/coupon-editing.md` に実機で判明した
+    知見を反映: 各セクションの実URL一覧(反映ページ = `CNK/reflect/reflectTop`)、
+    `CNC/groupTop/` のサロン名リンクは ref クリックが**成功を返すのに遷移しない**ため
+    座標クリック+URL検証が必要なこと、`get_page_text` だけでは掲載/非掲載を判別
+    できない(順番・掲載切替ボタンが画像のため)こと、`read_page filter=interactive`
+    は行を取りこぼすこと、「チェック」列(OK / 要確認)の存在、「非掲載にする」の
+    真下約20pxに「削除する」がある誤クリック危険、フッターでのサロンID照合、
+    読み取り専用タスクでは使用量スクショと `hpb_work_log.csv` 記録を省略してよいこと
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/salonboard-operator.md`、
+  `.claude/skills/hpb-salonboard-update/SKILL.md`、
+  `.claude/skills/hpb-salonboard-update/references/coupon-editing.md`、
+  `docs/org-review-log.md`
+  未検証として残っている論点:
+  (1) 修正後に `salonboard-operator` がエージェント一覧に登録されること、および
+      自然文(「◯◯院のクーポン直して」等)で自動トリガーされることの確認
+      (Claude Codeの再起動が必要)
+  (2) **非交渉ルール2(登録の一括承認 ≠ 反映の承認)の実地検証**。今回は読み取り
+      のみだったため、編集→登録→反映前に必ず停止するかは未確認。次回、クーポン1件の
+      文言変更で検証する
+  (3) HPBを実際に利用しているブランド・院の範囲の確定(`data/clinics.json` 側は未反映、
+      前項から継続)
