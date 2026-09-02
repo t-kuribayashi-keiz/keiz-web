@@ -243,6 +243,19 @@ def render_report(results: list[tuple[dict, list[dict]]], problems: list[str]) -
     return "\n".join(lines)
 
 
+def list_rooms(token: str) -> None:
+    """Print every room the token's account can see, for filling in the config.
+
+    Read-only and state-free: use it to find a room's exact name before adding it to
+    data/chatwork-rooms.json. Note the output lands in the Actions log, so it shows every
+    room name the account is a member of.
+    """
+    rooms = api_get("/rooms", token) or []
+    print(f"{len(rooms)} room(s) visible to this token:")
+    for room in sorted(rooms, key=lambda r: str(r.get("type", ""))):
+        print(f"  [{room.get('type'):6}] id={room.get('room_id'):<12} name={room.get('name')!r}")
+
+
 def main() -> int:
     token = os.environ.get("CHATWORK_API_TOKEN", "").strip()
     if not token:
@@ -250,6 +263,10 @@ def main() -> int:
             "CHATWORK_API_TOKEN is not set. In GitHub Actions it comes from the repository secret "
             "of the same name; check the workflow's env block and the secret's name."
         )
+
+    if os.environ.get("CHATWORK_LIST_ROOMS", "").strip().lower() in {"1", "true", "yes"}:
+        list_rooms(token)
+        return 0
 
     configured = load_config()
     state = load_state()

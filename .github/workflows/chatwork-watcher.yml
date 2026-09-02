@@ -14,6 +14,11 @@ on:
     # plenty of headroom for these rooms.
     - cron: "*/30 * * * *"
   workflow_dispatch:
+    inputs:
+      list_rooms:
+        description: "ルーム一覧(名前とID)を出力するだけ。監視・Issue起票・状態更新は行わない"
+        type: boolean
+        default: false
 
 # Only one run at a time: two concurrent runs would both advance the state file and could
 # double-report or lose a message.
@@ -35,6 +40,8 @@ jobs:
         id: poll
         env:
           CHATWORK_API_TOKEN: ${{ secrets.CHATWORK_API_TOKEN }}
+          # Empty (falsy) on scheduled runs, which have no inputs.
+          CHATWORK_LIST_ROOMS: ${{ inputs.list_rooms }}
           TZ: Asia/Tokyo
         run: |
           python3 scripts/chatwork_watcher.py
