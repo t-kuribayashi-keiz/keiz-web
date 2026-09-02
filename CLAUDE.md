@@ -15,6 +15,7 @@
 | 効果計測担当 | [measurer.md](.claude/agents/measurer.md) | 実装後のKPI変化を `/data/kpi-history/` に記録し、分析担当へフィードバック |
 | SalonBoard操作担当 | [salonboard-operator.md](.claude/agents/salonboard-operator.md) | HotPepper Beauty SalonBoard(salonboard.com)の定型更新・反映作業(ブランド非依存、要ローカル実行環境) |
 | スマイル マーケティング参謀 | [smile-marketing-strategist.md](.claude/agents/smile-marketing-strategist.md) | スマイルブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドで同様の役割が必要になれば同じ型で追加する) |
+| コンテンツライター | [content-writer.md](.claude/agents/content-writer.md) | 承認済みの執筆指示書を、ブログ・広告文・口コミ返信等の完成コンテンツに仕上げる(ブランド非依存) |
 | 横断オーケストレーター | [cross-functional.md](.claude/agents/cross-functional.md) | 複数業務・複数院にまたがる重複/共通パターンを検出し、棚卸しを行う |
 
 実務そのもの(SalonBoard更新、CRM突合、シフト自動化など)は `.claude/skills/` 配下の

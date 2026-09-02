@@ -423,3 +423,35 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   URL・所在が未確認(`brands/smile/CLAUDE.md`に要確認として明記済み)。これが無いと
   定量分析のミッションが実データに基づいて実行できない。GA4/GSC/MEOツールとの連携も
   同様に未確認
+
+---
+
+## 2026-09-02 コンテンツライター「content-writer」エージェントの新設と役割分担の整理
+
+- 見つかった事実:
+  - `smile-marketing-strategist`が作る「執筆指示書」を実際のブログ本文・広告コピーに
+    仕上げる担当が未定義だった。既存の`implementer`は「コード・自動化スクリプトの実装」が
+    本来の役割で、文章執筆とは性質が異なる
+  - ユーザーに確認したところ、専用の「コンテンツライター」エージェントを新設する方針が
+    確定した
+- 提案・対応内容:
+  - `.claude/agents/content-writer.md` を新設。ブランド非依存(執筆指示書に必要な
+    ブランド固有ファクト・SEOルールは指示書を書く側=smile-marketing-strategist等が
+    既に埋め込んでいる前提)で、承認済みの`## 執筆指示書`セクションを一字一句守って
+    完成コンテンツに仕上げ、施策案Markdownの末尾に`## 完成コンテンツ`として追記する
+    役割とした。指示書が曖昧・矛盾する場合は憶測で進めず差し戻す方針も明記した
+  - `smile-marketing-strategist.md`の「執筆指示書」「やらないこと」セクションで、
+    執筆担当を「implementerまたは別セッション」から`content-writer`に明確化した
+  - ルートCLAUDE.mdの「組織構成」表に`content-writer`の行を追加した
+  - 現時点での役割分担を整理: `smile-marketing-strategist`(スマイルのWEB集客分析・
+    戦略・指示書作成)→`content-writer`(指示書から完成コンテンツへ)→`implementer`
+    (コード実装が必要な施策のみ)→`measurer`(効果測定、施策を出したエージェントへ
+    フィードバック)。`analyst`はスマイルのWEB集客以外(全ブランド横断のKPI・音声・
+    CRM・SalonBoard実績分析等)を引き続き担当する
+  - `measurer.md`の「分析担当(analyst)が次回参照できるよう」という記述もanalyst固定に
+    なっていたため、施策を出した担当(analystまたはブランド専属エージェント)に一般化した
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/content-writer.md`(新規)、
+  `.claude/agents/smile-marketing-strategist.md`、`.claude/agents/measurer.md`、
+  `CLAUDE.md`、`docs/org-review-log.md`
+  未対応として残っている論点: なし(このタスクの範囲では)。引き続き集客スプレッドシート
+  のURL確認が必要

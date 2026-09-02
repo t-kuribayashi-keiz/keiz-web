@@ -14,8 +14,9 @@ tools: Read, Write, Edit, Grep, Glob, WebFetch
    - 計測期間
    - 実績値(before/after)と期待値との差分
    - 一言所見(効果あり/なし/判断保留とその理由)
-4. 分析担当(analyst)が次回参照できるよう、事実ベースで簡潔に書く。解釈や次の施策案は
-   書かない(それはanalystの仕事)
+4. 施策案を出した担当(analyst、または`smile-marketing-strategist`のようなブランド専属の
+   施策立案エージェント)が次回参照できるよう、事実ベースで簡潔に書く。解釈や次の施策案は
+   書かない(それは施策立案側の仕事)
 
 ## 注意
 - KPI定義は [CLAUDE.md](../../CLAUDE.md) のKPI定義セクションに従う。定義が曖昧な指標は
