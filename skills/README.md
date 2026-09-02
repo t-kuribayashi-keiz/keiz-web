@@ -10,7 +10,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 
 | Skill | 主担当業務 | 対応する役割(agent) |
 |---|---|---|
-| `hpb-salonboard-update` | SalonBoardのクーポン・掲載情報更新 | implementer(定型実装・更新作業) |
+| `hpb-salonboard-update` | SalonBoardのクーポン・掲載情報更新 | salonboard-operator(要ローカル実行環境。ブラウザ操作ツールを持たないimplementerからは分離) |
 | `hpb-crm-reconciliation` | CRM×HotPepper Beauty来店データの突合ロジック(GAS) | implementer / analyst(判定ロジック改善時) |
 | `karte-demographics-chart` | カルテデータから男女比・年代構成グラフを作成 | analyst(分析・可視化) |
 | `shift-schedule-gas-automation` | スタッフのシフト/公休入力の自動化(GAS) | implementer |

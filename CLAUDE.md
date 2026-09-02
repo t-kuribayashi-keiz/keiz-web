@@ -13,11 +13,17 @@
 | 分析・施策担当 | [analyst.md](.claude/agents/analyst.md) | KPI・音声データ等を分析し、施策案を `/data/proposals/` に出力 |
 | 実装担当 | [implementer.md](.claude/agents/implementer.md) | 施策案を受け取り、コード・自動化スクリプト(GAS等)として実装 |
 | 効果計測担当 | [measurer.md](.claude/agents/measurer.md) | 実装後のKPI変化を `/data/kpi-history/` に記録し、分析担当へフィードバック |
+| SalonBoard操作担当 | [salonboard-operator.md](.claude/agents/salonboard-operator.md) | HotPepper Beauty SalonBoard(salonboard.com)の定型更新・反映作業(ブランド非依存、要ローカル実行環境) |
 | 横断オーケストレーター | [cross-functional.md](.claude/agents/cross-functional.md) | 複数業務・複数院にまたがる重複/共通パターンを検出し、棚卸しを行う |
 
 実務そのもの(SalonBoard更新、CRM突合、シフト自動化など)は `.claude/skills/` 配下の
 Skillとして実装します。1業務=1Skillを原則とし、疎結合に保つことで追加・入れ替え・統合を
 容易にします。既存Skillの一覧と役割マッピングは [skills/README.md](skills/README.md) を参照。
+
+コンテキストの置き場所は、店舗ブランド(整骨院チェーン等)は `brands/<ブランド名>/CLAUDE.md`、
+採用・レセプト代行のようなブランド横断の社内機能は `functions/<機能名>/CLAUDE.md` として
+区別します(例: [functions/recruiting/CLAUDE.md](functions/recruiting/CLAUDE.md)、
+[functions/receipt-agency/CLAUDE.md](functions/receipt-agency/CLAUDE.md))。
 
 ## 業務フロー(横串の刺し方)
 
