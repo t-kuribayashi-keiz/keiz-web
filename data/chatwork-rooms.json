@@ -6,14 +6,6 @@
 
   "rooms": [
     {
-      "room_name": "マイチャット",
-      "brand": "(送信テスト用)",
-      "purpose": "【一時的なテスト用エントリ】outbox経由のChatwork投稿が実際に通るかを、他の人に影響を与えずに検証するためのもの。検証が終わったら削除する。",
-      "require_mention": true,
-      "allow_auto_hearing": true,
-      "notes": "2026-09-02追加(room_id=284517272)。require_mention=trueなので、マーカーなしのメッセージは検知しない(個人メモでの誤検知を防ぐため)。検証完了後に削除予定。"
-    },
-    {
       "room_name": "【WEBマーケ】ケイズ×リラックス",
       "brand": "リラックス",
       "purpose": "リラックスブランドのWEBマーケ全般。SalonBoard(HPB)および自社HPの修正依頼がここに流れてくる。",

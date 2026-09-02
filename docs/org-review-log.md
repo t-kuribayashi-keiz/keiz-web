@@ -1004,6 +1004,7 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   `data/chatwork-outbox/README.md`(新規)、`scripts/chatwork_watcher.py`、
   `data/chatwork-rooms.json`、`.claude/skills/chatwork-integration/SKILL.md`、
   `functions/chatwork-integration/CLAUDE.md`、`docs/org-review-log.md`
-  未対応として残っている論点: 実際にoutbox経由でChatworkへ投稿できるかの疎通確認。
+  2026-09-02中に実API疎通も確認済み(マイチャット宛にテスト送信し、message_id取得・キュー自動削除まで成功)。
+  未対応として残っている論点:
   ②判断+通知を担うRoutineが、ツール経由作成ではGitHub連携もリポジトリも渡らない制約
   (claude.aiのRoutines UIからの作成が必要)。マーカー規約のメンバー周知
