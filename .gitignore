@@ -3,3 +3,7 @@
 *.key
 *credentials*
 *secret*
+
+# Transient output of scripts/chatwork_watcher.py (becomes an Issue body, never a commit)
+chatwork-report.md
+__pycache__/

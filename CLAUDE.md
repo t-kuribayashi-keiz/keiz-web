@@ -27,6 +27,13 @@ Skillとして実装します。1業務=1Skillを原則とし、疎結合に保�
 区別します(例: [functions/recruiting/CLAUDE.md](functions/recruiting/CLAUDE.md)、
 [functions/receipt-agency/CLAUDE.md](functions/receipt-agency/CLAUDE.md))。
 
+複数ブランドで共通の外部サービス(Chatwork、広告費スプレッドシート等)を扱う場合は、
+**APIの読み書き手順そのものはブランド非依存のSkillとして1つにまとめ、ブランド固有の情報
+(どのルーム/シートがどのブランドか)は`data/`配下の設定ファイルに切り出す**。こうすると
+ブランドの追加が設定1行で済み、コードの分岐が増えません(例:
+[functions/chatwork-integration/CLAUDE.md](functions/chatwork-integration/CLAUDE.md) と
+[data/chatwork-rooms.json](data/chatwork-rooms.json))。
+
 ## 業務フロー(横串の刺し方)
 
 1. **analyst** が施策案をMarkdownで `/data/proposals/YYYY-MM-DD_<件名>.md` に出力
