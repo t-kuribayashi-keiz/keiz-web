@@ -40,6 +40,14 @@ SEEN_ID_WINDOW = 200
 # messages would be noise, so only look at messages from the recent past.
 FIRST_RUN_LOOKBACK_SECONDS = 6 * 60 * 60
 
+# A GitHub Issue body caps at 65,536 characters, and a single Chatwork message can be a
+# multi-thousand-character document (confirmed 2026-09-02: one pasted 指示書 matched on a
+# generic keyword). Without these caps a few long messages make `gh issue create` fail, which
+# would silently drop a real request. Truncated text always keeps the Chatwork link to the full
+# message, so nothing is lost — the Issue is a pointer, not an archive.
+MAX_MESSAGE_CHARS = 1200
+MAX_HITS_PER_ROOM = 20
+
 # Chatwork's own markup, stripped so the reported text reads like text. Never treat these as
 # trusted structure: a user can type them literally.
 MARKUP_PATTERNS = [
@@ -91,6 +99,16 @@ def strip_markup(body: str) -> str:
     for pattern, replacement in MARKUP_PATTERNS:
         text = pattern.sub(replacement, text)
     return text.strip()
+
+
+def truncate(text: str) -> str:
+    if len(text) <= MAX_MESSAGE_CHARS:
+        return text
+    omitted = len(text) - MAX_MESSAGE_CHARS
+    return (
+        text[:MAX_MESSAGE_CHARS]
+        + f"\n\n…(以降{omitted:,}文字を省略。全文は下のChatworkリンクから)"
+    )
 
 
 def load_config() -> list[dict]:
@@ -190,7 +208,7 @@ def collect_hits(entry: dict, room_id: int, token: str, room_state: dict) -> tup
                 "sender": str(message.get("account", {}).get("name", "(不明)")),
                 "send_time": send_time,
                 "matched_keywords": matches,
-                "text": strip_markup(body),
+                "text": truncate(strip_markup(body)),
                 "url": f"https://www.chatwork.com/#!rid{room_id}-{message_id}",
             }
         )
@@ -200,6 +218,15 @@ def collect_hits(entry: dict, room_id: int, token: str, room_state: dict) -> tup
         "last_send_time": newest_send_time,
         "seen_ids": (list(seen_ids) + processed_ids)[-SEEN_ID_WINDOW:],
     }
+
+    if len(hits) > MAX_HITS_PER_ROOM:
+        # Keep the newest, since those are the ones still actionable. The dropped ones stay
+        # visible in Chatwork, and the state file still advances past them so they won't
+        # reappear on the next run.
+        dropped = len(hits) - MAX_HITS_PER_ROOM
+        hits = hits[-MAX_HITS_PER_ROOM:]
+        hits[0]["note"] = f"(このルームでは他に{dropped}件が一致したが、件数上限のため省略)"
+
     return hits, new_room_state
 
 
@@ -226,6 +253,8 @@ def render_report(results: list[tuple[dict, list[dict]]], problems: list[str]) -
             lines.append("")
             lines.append(f"- 一致キーワード: {', '.join(hit['matched_keywords'])}")
             lines.append(f"- Chatworkで開く: {hit['url']}")
+            if hit.get("note"):
+                lines.append(f"- {hit['note']}")
             lines.append("")
 
     if problems:
