@@ -1,6 +1,6 @@
 # クーポン (Coupon) tab — click path and gotchas
 
-Learned while updating coupon text for 都賀駅前整骨院 (H000523612) on 2026-09-01, extended by a read-only re-walk of the same salon on 2026-09-02.
+Learned while updating coupon text for 都賀駅前整骨院 (H000523612) on 2026-09-01, extended by a read-only re-walk of the same salon on 2026-09-02, and by creating a new coupon from scratch at 姿勢堂 段原鍼灸接骨院 (H000657363) later the same day.
 
 ## Getting to the list
 
@@ -47,3 +47,20 @@ To edit a field: search for its textbox, then set its full corrected value in on
 ## After 登録
 
 Clicking 登録 shows a confirmation page ("登録が完了しました") with the same "not yet reflected" warning and a button back to the list — OR it may go straight back to the list page directly (both were observed; don't assume which happens, just check the resulting page). Either way, **the edit is only a draft until 反映 is pressed on 掲載管理TOP** — see the non-negotiable rule in SKILL.md.
+
+**登録 can fail with a session error that discards nothing.** `couponEdit/doRegister` can come back as a ユーザエラー: 「ユーザまたは、お店が切り替わっているため、操作を続けることができません。最初から操作しなおしてください。」(confirmed 2026-09-02, cause not isolated — it happened after navigating away from the edit form and back mid-task before submitting). Nothing was created when this happened; the fix is simply to start over from `CNC/groupTop/`, re-enter the salon, reopen the form, and fill it in one continuous run without navigating elsewhere in between. Always verify by reloading the coupon list afterward rather than trusting the click alone.
+
+## Creating a new coupon
+
+Via クーポン新規追加 (a button both above and below the list) rather than 詳細, the form has one extra required step and some differences from editing an existing coupon:
+
+- **ビビビ祭用クーポン設定** appears at the top and must be answered before the rest of the form is usable — pick **設定しない** for an ordinary coupon. Only pick "ビビビ祭用に設定する" if the task is explicitly about that campaign (see the news-feed notice about ビビビ祭 wording/compliance).
+- **写真 has no "reuse another salon's image" option** — 画像ID is a read-only label assigned after upload, not something you can type in to pull an existing image by ID. The only input is a local file (drag-and-drop or ファイルを選択, via the `file_upload` MCP tool with a ref to the `input[type=file]` — note the visible "ファイルを選択" element found by `find` is often the wrapping `<label>`, not the input itself; search more specifically (e.g. "input type file") to get the actual file input ref). If you're replicating a coupon that already exists at another salon and don't have the image as a local file, ask the user to send it rather than trying to fetch it from SalonBoard yourself.
+- **アイコン用カテゴリ選択は別モーダルで、チェックボックスはDOM順が画面の見た目と一致しない.** `read_page` returns them as opaque `MC01`, `MC02`, … values with no adjacent label text, so you can't map a category name to a ref reliably. Take a screenshot of the open modal and click by coordinate instead, then re-screenshot to confirm the right boxes ended up checked before clicking the modal's own 登録.
+- All other fields (種別, クーポン名, クーポン内容, 提示条件, 利用条件, 有効期限, 検索用カテゴリ, 価格, 所要目安時間) behave the same as in the edit form described above.
+
+To replicate a coupon that already exists elsewhere: open that coupon's 詳細 on a salon that has it, screenshot the filled-in form to read every field's actual value (`get_page_text` shows character-count labels like `34/36` but not the field contents — you need a screenshot), then reproduce those values on the new salon's 新規追加 form.
+
+## Publishing (反映)
+
+反映申請 lives on 掲載管理TOP (`CNK/reflect/reflectTop`), one row per section (サロン, スタッフ, フォトギャラリー, メニュー, こだわり, 特集, クーポン, …) — each with its own independent 反映申請 button. Click only the button in the row for the section you actually changed; sections already 反映済み show a greyed-out 反映申請 button in the same column, which is easy to mistake for the live one at a glance. **Re-screenshot immediately before clicking** — the row's vertical position shifts depending on how much content is above it (which salon, how many prior sections have data), so a coordinate reused from an earlier screenshot or a different salon will land on the wrong row. After a successful click the row's status changes from 未申請 to 反映待ち with a timestamp; the change usually goes live within ~15 minutes (SalonBoard's own estimate, can take longer during maintenance).

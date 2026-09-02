@@ -20,6 +20,7 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
   - **If you are running as the `salonboard-operator` subagent, you cannot do this** — `AskUserQuestion` is unavailable inside subagents (`No such tool available`, confirmed 2026-09-02). Either the caller hands you a deviceId, or exactly one browser is connected; otherwise stop and return the candidate list to the caller. Do **not** try each browser in turn until one works.
 - **`tabs_context_mcp` does not work as the first item of a `browser_batch`.** Inside a batch, `createIfEmpty: true` is ignored and the batch fails with `No tab available`. Call it standalone first, then batch the rest.
 - **`scroll` already returns a screenshot.** Don't follow a scroll with an explicit screenshot in the same batch — you get the same image twice and pay for both.
+- **Screenshot resolution and scroll position can drift mid-session** — the same tab returned 1568×726 at one point and 958×888 later with no explicit resize (confirmed 2026-09-02). Coordinates computed from an earlier screenshot can miss once this happens. Always click against the *most recent* screenshot, never a cached one from a few turns back. If a screenshot comes back entirely blank, that almost always means the scroll position has gone past the end of the content into empty page background, not that the page failed to load — scroll back (up, or to a known anchor via `find` + `scroll_to`) and re-screenshot rather than guessing coordinates blind.
 
 ## Read-only tasks
 
@@ -69,6 +70,15 @@ Detailed, field-level notes (exact click paths, character limits, quirks of spec
 - `references/coupon-editing.md` — クーポン (coupon) tab: the only section mapped out so far.
 
 If a task touches a section without a reference file yet (スタッフ, メニュー, フォトギャラリー, こだわり, 特集, ブログ, 口コミ), work it out live, then **write a new reference file capturing what you learned** (structure, gotchas, field names/limits) so the next task in that section skips the rediscovery. Follow the same shape as `coupon-editing.md`.
+
+## Continuous learning
+
+The rule above isn't limited to brand-new sections. **At the end of every task under this skill, check whether anything happened that isn't already written down here or in `references/`** — an unexpected error message, a UI quirk, a click that reported success but did nothing, a form field or modal that behaved differently than expected, a tool limitation you worked around. If so, append it before finishing:
+
+- Environment/tooling issues (browser automation quirks, MCP tool limits) → a bullet under **Before any browser action** above.
+- SalonBoard-specific behavior (a section's form fields, click paths, error messages) → the matching `references/*.md` file, or a new one if the section doesn't have one yet.
+
+Small, incremental notes are fine — don't wait for something dramatic. The point is that the next task (yours or another session's) starts from what this one learned instead of rediscovering it from scratch. `references/coupon-editing.md` is the working example of this — keep extending it the same way.
 
 ## Logging
 
