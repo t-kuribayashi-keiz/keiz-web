@@ -16,7 +16,10 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
 ## Before any browser action
 
 - **Load the MCP tool schemas first.** `mcp__claude-in-chrome__*` tools are deferred in this environment — batch every tool you expect to need into **one** `ToolSearch` call (`select:` accepts a comma-separated list). Loading them one at a time wastes a round-trip each.
-- **Pick the right Chrome when several are connected.** `list_connected_browsers` can return more than one, and until one is selected *every* browser call — including `tabs_context_mcp` — fails. Do not pick one yourself: list them all via `AskUserQuestion` and then `select_browser` with the chosen deviceId. Only one of them is likely to hold the 本部 SalonBoard session.
+- **Pick the right Chrome when several are connected.** `list_connected_browsers` can return more than one, and until one is selected *every* browser call — including `tabs_context_mcp` — fails. Only one of them is likely to hold the 本部 SalonBoard session, so never guess: put every browser in front of the user with `AskUserQuestion`, then `select_browser` with the deviceId they choose. Confirm the choice is actually logged in by loading `CNC/groupTop/` before starting work.
+  - **If you are running as the `salonboard-operator` subagent, you cannot do this** — `AskUserQuestion` is unavailable inside subagents (`No such tool available`, confirmed 2026-09-02). Either the caller hands you a deviceId, or exactly one browser is connected; otherwise stop and return the candidate list to the caller. Do **not** try each browser in turn until one works.
+- **`tabs_context_mcp` does not work as the first item of a `browser_batch`.** Inside a batch, `createIfEmpty: true` is ignored and the batch fails with `No tab available`. Call it standalone first, then batch the rest.
+- **`scroll` already returns a screenshot.** Don't follow a scroll with an explicit screenshot in the same batch — you get the same image twice and pay for both.
 
 ## Read-only tasks
 

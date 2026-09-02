@@ -276,3 +276,45 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
       文言変更で検証する
   (3) HPBを実際に利用しているブランド・院の範囲の確定(`data/clinics.json` 側は未反映、
       前項から継続)
+
+---
+
+## 2026-09-02 salonboard-operator 登録後の再検証(サブエージェント制約の判明)
+
+- 前項のfrontmatter修正後、Claude Codeを再起動して `salonboard-operator` が
+  エージェント一覧に登録されたことを確認。絞り込んだ `tools:` のまま、都賀駅前整骨院
+  (H000523612)のクーポン一覧を**読み取りのみ**で完走できた(掲載中17件を抽出。
+  前回の独立実行と件数・内容が一致)。編集・登録・反映・掲載状態変更・ファイル書き込みは
+  いずれも行っていない
+- 前項で追記したSKILL.mdの新記述(フッターでのサロンID照合、認証エラーのシグナル、
+  「page textで本文・screenshotで掲載状態」の二段構え)は、実際に運用され有効だった
+- 判明した制約: **`AskUserQuestion` はサブエージェント内では利用できない**
+  (実測エラー: `No such tool available: AskUserQuestion. AskUserQuestion is not
+  available inside subagents.`)。`tools:` に列挙しても解決しないプラットフォーム側の
+  制約。前項で追記した「複数Chrome接続時は AskUserQuestion でユーザーに選ばせる」
+  という手順は、サブエージェントとして起動される限り**実行不可能**だった
+- 実際に起きた逸脱: 上記により問い合わせ手段を失ったエージェントは、Browser 1 →
+  Browser 2 の順に**総当たり**でログイン済みブラウザを特定した。今回は読み取り専用
+  だったため実害は無いが、編集タスクで同じ回避策を取ると意図しない院を編集する事故に
+  直結する
+- 対応内容:
+  - `tools:` から `AskUserQuestion` を削除(解決しないため、列挙は誤解のもと)
+  - **ブラウザ選定を呼び出し元(親セッション)の責務に変更**。親が
+    `list_connected_browsers` → `AskUserQuestion` → `select_browser` →
+    `CNC/groupTop/` でログイン確認まで済ませ、確定した deviceId を渡して委譲する。
+    エージェント側は「1台だけなら使ってよい／複数あって deviceId 未指定なら作業に
+    入らず候補一覧を返して親に差し戻す／**総当たりは禁止**」と明記
+  - エージェント冒頭に「このエージェントはユーザーに質問できない」前提を明記
+  - SKILL.md 側にも同趣旨の但し書きを追加(メインセッションから使う場合は
+    AskUserQuestion が使えるため、両方の場合を書き分けた)
+  - 実測で判明した細かい挙動をSKILL.mdに追記:
+    `browser_batch` の1個目に `tabs_context_mcp` を置くと `createIfEmpty` が効かず
+    `No tab available` になる / `scroll` 自体がスクリーンショットを返すため
+    batch内で scroll 直後に screenshot を足すと同じ画像を2枚払うことになる
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/salonboard-operator.md`、
+  `.claude/skills/hpb-salonboard-update/SKILL.md`、`docs/org-review-log.md`
+  未検証として残っている論点:
+  (1) 自然文(「◯◯院のクーポン直して」等)でエージェントが自動トリガーされること
+  (2) **非交渉ルール2(登録の一括承認 ≠ 反映の承認)の実地検証**。2回の検証はいずれも
+      読み取りのみだったため、編集→登録→反映前に必ず停止するかは依然として未確認
+  (3) HPBを実際に利用しているブランド・院の範囲の確定(`data/clinics.json` 側は未反映)
