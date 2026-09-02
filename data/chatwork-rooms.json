@@ -13,6 +13,9 @@
       "_require_mention_comment": "false = マーカーがなくてもwatch_keywordsに当たれば「参考(低確度)」として報告する。マーカー規約が浸透するまでの移行措置。浸透後はtrueにしてキーワード検知を切り、誤検知をゼロにする。",
       "require_mention": false,
 
+      "_allow_auto_hearing_comment": "true = 着手に必要な情報を集める質問(kind: hearing)を、栗林さんの都度承認なしに自動投稿してよいルーム(2026-09-02に合意)。対応の約束・完了報告・経営判断・実作業は対象外で、それらは常に都度承認が必要。トークンは栗林さん個人アカウントのため、自動投稿には必ず「Claudeによる自動確認」ヘッダが付く。",
+      "allow_auto_hearing": true,
+
       "watch_keywords": [
         "サロンボード",
         "SalonBoard",

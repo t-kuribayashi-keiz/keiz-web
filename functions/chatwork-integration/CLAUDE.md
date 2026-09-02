@@ -18,6 +18,9 @@
 | [data/chatwork-rooms.json](../../data/chatwork-rooms.json) | 監視対象ルームの設定(ルーム名・ブランド・検知キーワード) |
 | [scripts/chatwork_watcher.py](../../scripts/chatwork_watcher.py) | ポーリング・粗い事前フィルタ・レポート生成 |
 | [.github/workflows/chatwork-watcher.yml](../../.github/workflows/chatwork-watcher.yml) | 30分間隔のcron実行、検知時にGitHub Issueを起票 |
+| [scripts/chatwork_send.py](../../scripts/chatwork_send.py) | キューに積まれた質問文をChatworkへ投稿(送信側) |
+| [.github/workflows/chatwork-send.yml](../../.github/workflows/chatwork-send.yml) | outboxへのpush契機(+30分cronの保険)で送信 |
+| [data/chatwork-outbox/](../../data/chatwork-outbox/) | Claudeが送りたいメッセージのキュー。投稿後にワークフローが削除する |
 | `data/chatwork-watcher-state.json` | 各ルームの最終確認位置(ワークフローが自動更新・自動コミット。手で触らない) |
 
 ## 認証情報の置き場所
@@ -54,6 +57,29 @@ Chatwork公式の`[To:]`メンションは実在アカウントが必要なた�
 キーワードに当たれば「参考(不確実)」として報告する(`require_mention: false`)。Issue上では
 「明示的な依頼」と「参考」を節で分けて出し、参考の方は空振りなら無視してよい扱いとする。
 浸透後は`require_mention: true`にすればキーワード検知が切れ、誤検知はゼロになる。
+
+## Claudeの権限範囲(2026-09-02にユーザーと合意)
+
+栗林さんが「チャットを確認するころには必要な情報がすべて集まって、あと実行するだけ」の状態を
+望んだため、**ヒアリング(不足情報の確認)だけはClaudeが都度承認なしに実行してよい**という
+権限を明示的に付与した。
+
+| | 内容 |
+|---|---|
+| ✅ 承認なしで可 | 着手に必要な情報を集める質問(対象店舗、対象クーポン、変更後の期限、正確な文言など) |
+| ❌ 常に都度承認 | 対応の約束・期限のコミット、完了報告、料金/方針などの経営判断、公開に影響する実作業 |
+
+機械的な担保: ルームに`allow_auto_hearing: true`、キューのファイルに`kind: "hearing"`、
+1,500文字以内という3条件を`scripts/chatwork_send.py`が強制する。ただし**上の表の線引き自体は
+機械判定できない**ため、判断はClaude側の責務。
+
+**トークンが栗林さん個人アカウントのものである以上、自動投稿は栗林さんの発言として表示される。**
+そのため自動送信メッセージには必ず「Claudeによる自動確認」ヘッダを付け、相手が誰に聞かれて
+いるのかを誤認しないようにしている。このヘッダは同時に、Claude自身の投稿を再検知して
+自問自答するループの防止にも使っている(`AUTO_POST_MARKER`)。
+
+将来的にChatwork上でClaude専用アカウントを用意すれば、この「本人名義で投稿される」問題は
+解消できる(Chatworkの席が1つ必要)。現状はヘッダ明示で運用する。
 
 ## 処理フロー
 

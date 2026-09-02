@@ -48,6 +48,12 @@ FIRST_RUN_LOOKBACK_SECONDS = 6 * 60 * 60
 MAX_MESSAGE_CHARS = 1200
 MAX_HITS_PER_ROOM = 20
 
+# Messages this organization posted automatically (see scripts/chatwork_send.py) carry this
+# marker. They must never be re-detected: a question Claude asked would otherwise come back as
+# a new "request" on the next run, and asking again would loop. Keep in sync with
+# AUTO_POST_MARKER in chatwork_send.py.
+AUTO_POST_MARKER = "Claudeによる自動確認"
+
 # Chatwork's own markup, stripped so the reported text reads like text. Never treat these as
 # trusted structure: a user can type them literally.
 MARKUP_PATTERNS = [
@@ -197,6 +203,10 @@ def classify(body: str, entry: dict, markers: list[str]) -> tuple[str, list[str]
     while the marker convention spreads; those are guesses and are reported as such. Returns
     None when the message is just conversation.
     """
+    if AUTO_POST_MARKER in body:
+        # One of our own auto-sent messages. Re-detecting it would have Claude answer itself.
+        return None
+
     found_markers = matched_keywords(body, markers)
     if found_markers:
         return "mention", found_markers

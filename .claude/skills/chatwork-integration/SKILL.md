@@ -33,10 +33,25 @@ automated today) is in
    notification/report for the user. The actual work (especially anything that changes a live
    listing) still goes through that domain's own approval rules — for SalonBoard that means
    `salonboard-operator`'s rule that 反映/publish is always a separate, fresh confirmation.
-4. **Never post to Chatwork without the user's explicit go-ahead for that specific message.**
-   The token belongs to a real person's account, so anything posted appears as if they wrote it.
-   Drafting a reply is fine; sending it is a separate decision.
-5. **Never mark messages as read on the user's behalf.** Use `force=1` reads and track position
+4. **Only information-gathering questions may be posted without asking first.** The user granted
+   this narrowly (2026-09-02) so that by the time they read the chat, a request already has
+   everything needed and is ready to execute. What that covers, and what it does not:
+
+   | | |
+   |---|---|
+   | ✅ Send without asking | Questions that gather what is missing to act: which store, which coupon, the new deadline, the exact wording, which file |
+   | ❌ Always ask first | Committing to do the work or to a timeline, reporting something as done, answering a pricing/policy/business question, anything that changes a live listing |
+
+   Mechanics and further limits: the room needs `allow_auto_hearing`, the queued message needs
+   `kind: "hearing"`, and questions go out **as one consolidated message**, never a stream —
+   `scripts/chatwork_send.py` enforces all three. Since the token belongs to a real person's
+   account, every auto-sent message carries a visible `Claudeによる自動確認` header so the
+   recipient is not misled about who is asking; never post in a way that hides that.
+5. **Executing the request always needs the user's approval.** Gathering information is not
+   approval to act. This is the whole point of the split: hearing runs on its own, execution
+   waits for the user, and each domain's own rules still apply on top (for SalonBoard, 反映 is
+   a separate fresh confirmation, and it only runs on the user's local machine).
+6. **Never mark messages as read on the user's behalf.** Use `force=1` reads and track position
    in the state file instead; the read-marking endpoint would clobber the account owner's own
    unread badges in their Chatwork client.
 
@@ -71,24 +86,33 @@ Chatwork公式の`[To:]`メンションは実在アカウントが必要なの�
 
 ## Architecture
 
-Chatwork polling runs in **GitHub Actions**, not in a Claude session, because that is where the
-token is:
+Chatwork traffic runs through **GitHub Actions**, not a Claude session, because that is where the
+token is. Claude never touches the API in either direction; it reads Issues and writes queue
+files.
 
 ```
-GitHub Actions (cron)
-  └─ scripts/chatwork_watcher.py
-       ├─ reads data/chatwork-rooms.json      (which rooms, what keywords)
-       ├─ reads data/chatwork-watcher-state.json (last message seen per room)
-       ├─ calls Chatwork API with CHATWORK_API_TOKEN (from GitHub Secrets)
-       └─ writes a report of candidate requests
-  └─ opens a GitHub Issue when there are candidates
-       └─ Claude reads the Issue, judges intent, notifies the user for approval
+受信  GitHub Actions (cron 30分)
+        └─ scripts/chatwork_watcher.py
+             ├─ data/chatwork-rooms.json         (どのルーム・何を合図に)
+             ├─ data/chatwork-watcher-state.json (ルームごとの既読位置)
+             └─ Chatwork API を CHATWORK_API_TOKEN で読む
+        └─ 該当あれば GitHub Issue を起票
+             └─ Claude が読んで判断
+
+送信  Claude が data/chatwork-outbox/*.json に質問文を置く
+        └─ GitHub Actions (push契機 / cron 30分)
+             └─ scripts/chatwork_send.py が Chatwork へ投稿し、キューを消す
 ```
 
-The split matters: the workflow does only a **coarse keyword pre-filter** and never decides what a
-message means. Judging "is this actually a fix request, and what does it need?" is Claude's job,
-because that judgement needs the brand context in `brands/<name>/CLAUDE.md` and the operational
-rules in the relevant skill.
+Two splits matter here:
+
+- **Detection vs. judgement.** The workflow does only a coarse marker/keyword match and never
+  decides what a message means. Judging "is this actually a request, and what does it need?" is
+  Claude's job, because that needs the brand context in `brands/<name>/CLAUDE.md` and the
+  operational rules in the relevant skill. It also means Actions needs no LLM key and no cost.
+- **Hearing vs. executing.** Claude gathers missing information on its own (rule 4) so a request
+  is ready to act on by the time the user looks at it, and then stops. Executing waits for the
+  user (rule 5).
 
 ## Reading rooms
 
@@ -103,6 +127,26 @@ The API base is `https://api.chatwork.com/v2`, authenticated with the header
   silently watching nothing. A name that matches several rooms is also an error — tighten the name.
 - Room membership is whatever the token's account can see. A room the account was removed from
   disappears from `GET /rooms` and will surface as an unresolved name.
+
+## ヒアリングを送る手順
+
+着手に必要な情報が足りない依頼を見つけたら、栗林さんの確認を待たずに聞きに行ってよい(rule 4)。
+Claudeから直接Chatwork APIは叩けないので、キューにファイルを置いてコミットする:
+
+1. 何が足りないかを洗い出す。**依頼者に聞かないと分からないことだけ**にする — 院マスタ
+   (`data/clinics.json`)やブランドドキュメントを読めば分かることは自分で調べる。
+   聞かなくていいことを聞くのが一番うっとうしい。
+2. `data/chatwork-outbox/<ISO日時>-<短い英字>.json` を作る。形式は
+   [data/chatwork-outbox/README.md](../../../data/chatwork-outbox/README.md)。
+   質問は**1通にまとめる**(番号付きの箇条書きが読みやすい)。
+3. `main`にコミット・push する。pushを契機に送信ワークフローが動き、投稿後にキューを消す。
+4. 何を聞いたかをIssueにコメントし、Issueは開いたままにする(回答待ちの状態)。
+5. 回答が来たら次のwatcher実行でIssueに載る(自動投稿は`AUTO_POST_MARKER`で除外されるので、
+   自分の質問を自分で再検知することはない)。情報が揃ったら栗林さんに実行可否を確認する。
+
+送ってよい内容の線引きは rule 4 の表が正。`scripts/chatwork_send.py` が `kind`・
+`allow_auto_hearing`・文字数を機械的に拒否するが、**表の線引きそのものは機械では判定できない**
+ので、`kind: "hearing"` に約束や完了報告を混ぜないこと。
 
 ## Adding a brand or a room
 

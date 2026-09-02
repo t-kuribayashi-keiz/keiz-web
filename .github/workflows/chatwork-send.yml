@@ -1,0 +1,62 @@
+name: Chatwork message sender
+
+# Delivers messages Claude queued in data/chatwork-outbox/ to Chatwork. Claude cannot post
+# directly — the token only reaches GitHub Actions — so this workflow is the delivery half of
+# the loop. See .claude/skills/chatwork-integration/SKILL.md.
+#
+# Only information-gathering questions (kind: "hearing") to rooms with allow_auto_hearing may
+# be delivered this way; the sender script refuses anything else.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/chatwork-outbox/**"
+  # Safety net: if a queued message is committed while another run holds the lock, or a push
+  # event is missed, the next scheduled pass still delivers it.
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+# Never two senders at once: both would read the same queue and double-post.
+concurrency:
+  group: chatwork-send
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Deliver queued messages
+        env:
+          CHATWORK_API_TOKEN: ${{ secrets.CHATWORK_API_TOKEN }}
+          TZ: Asia/Tokyo
+        run: python3 scripts/chatwork_send.py
+
+      - name: Clear the delivered messages from the queue
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          git add -A data/chatwork-outbox
+          if git diff --cached --quiet -- data/chatwork-outbox; then
+            echo "nothing was delivered"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Clear delivered Chatwork messages from the outbox [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            git pull --rebase origin main || exit 1
+          done
+          echo "could not push after 3 attempts; the queue files are deleted locally only" >&2
+          exit 1
