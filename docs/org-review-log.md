@@ -551,3 +551,25 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   未対応として残っている論点: 「アイワ」チャネルの正体確認、スマイルの広告費対象院数
   (6 vs 11)の確認、`smile-marketing-strategist`からの実際のSheets API呼び出し
   フロー(curl+openssl手順)の組み込み
+
+---
+
+## 2026-09-02 smile-marketing-strategistへのSheets API実データ連携組み込み
+
+- 対応内容:
+  - `.claude/agents/smile-marketing-strategist.md`に「実データへのアクセス(Sheets API
+    連携)」セクションを新設。集客KPI(`smile-good-reporter`)・広告費実額
+    (`ad-spend-reporter`)の2つのサービスアカウントについて、対象シート・参照ドキュメント・
+    技術手順(`.claude/skills/customer-acquisition-consulting/references/ga4-gsc-service-account-setup.md`
+    のcurl+openssl JWT手順への参照)を明記した
+  - `tools:`に`Bash`を追加(curl+opensslでのJWT署名・OAuthトークン取得・Sheets API
+    呼び出しに必要なため)
+  - 鍵ファイルはローカルPC(Keizgroup500)にのみ存在するため、このエージェントが
+    クラウド実行環境で呼ばれた場合は実データ取得を試みず、ローカルPCでの再実行が
+    必要であることをユーザーに明示するようルール化した(鍵の中身をチャットに
+    貼り付けない・要求しないという非交渉ルールを本エージェントにも適用)
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/smile-marketing-strategist.md`、
+  `docs/org-review-log.md`
+  未対応として残っている論点: 「アイワ」チャネルの正体確認、スマイルの広告費対象院数
+  (6 vs 11)の確認。実際にローカルPC上で本エージェントを起動し、Sheets APIから
+  実データを取得できるかのエンドツーエンド検証はまだ実施していない
