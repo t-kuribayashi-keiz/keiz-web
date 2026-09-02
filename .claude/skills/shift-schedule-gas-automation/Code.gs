@@ -6,18 +6,23 @@
  * 機能:
  *   ① 月次シートを作成（「原本」テンプレートをコピーし、日付を自動配置。日本の祝日は日付の文字を赤にします）
  *   ② 公休を自動入力（希望休(赤字)を除いた残り日数を、以下のルールで自動割り振り）
- *        ・各資格（柔道整復師/鍼灸師/ピラティスなど）を持つスタッフが全出勤日で最低1人は勤務（ハード制約）
+ *        ・各資格（柔道整復師/鍼灸師など）を持つスタッフ、およびピラティス対応スタッフが、
+ *          全出勤日で最低1人は勤務（ハード制約）
  *        ・院長は月初1〜7日間、希望休を含めて公休1日まで（ハード制約）
  *        ・同じスタッフに公休を2日以上連続させない（原則禁止。避けられない場合のみ警告の上で許容）
  *        ・同じスタッフを6日以上連続で勤務させない（MAX_CONSECUTIVE_WORK_DAYSを超える手前で公休を差し込む）
  *        ・女性スタッフ／新患対応可スタッフが、できるだけ全出勤日で0人にならないようにする（ソフト制約）
  *        ・候補日が複数ある場合はランダムに選ぶことで、毎回同じ割当パターンに固定化しないようにする
- *      ※性別・資格・新患対応・院長は「スタッフマスター」シート（名前/性別/資格/新患対応/院長）から取得します
+ *      ※性別・資格・新患対応・院長・ピラティスは「スタッフマスター」シート
+ *        （名前/性別/資格/新患対応/院長/ピラティス）から取得します
  *   ③ 行事欄（院長会議・AM2.3年目研修など、会社/エリア共通の定例予定）
  *        ・日付行のすぐ下に、EVENT_ROW_COUNT行ぶんの空欄を用意（希望休/公休の自動入力・自動クリアの対象外）
  *        ・原本テンプレートに直接記入しておけば、月次シートを作成するたびにそのまま引き継がれる
  *        ・原本テンプレートが未対応(行が無い)の場合は、メニューの「行事欄をテンプレートに追加」を
  *          最初に1回だけ実行してください
+ *   ④ スマホ/iPad用「実行用」シート（カスタムメニューの代わりにボタン操作で実行）
+ *        ・下記「注意」の通り、カスタムメニューはスマホ/iPadアプリに表示されないため、代わりに
+ *          「実行用」シート上の図形(ボタン)をタップして①②を実行できるようにする
  *
  * インストール方法:
  *   1. スプレッドシートのメニュー「拡張機能」→「Apps Script」を開く
@@ -26,13 +31,17 @@
  *   4. 初回実行時は権限の承認が必要です（祝日取得は外部URL取得の承認が必要です）
  *   5. 行事欄を初めて使う場合は、メニューの「行事欄をテンプレートに追加（初回のみ）」を実行してから
  *      「① 月次シートを作成」を行ってください
+ *   6. スマホ/iPadからも操作したい場合は、メニューの「実行用シートを作成（スマホ/iPad向け・初回のみ）」
+ *      を実行し、表示される手順に従ってPCで図形(ボタン)を1回だけ設定してください
  *
  * 注意（スマホ/iPadでメニューが出ない件）:
  *   Apps Scriptで作ったカスタムメニュー（「休暇シート自動化」）は、Googleスプレッドシートの仕様上、
  *   Android/iOSアプリ版やモバイルブラウザ版には表示されません（PC版のブラウザでのみ操作できます）。
- *   これはGoogle側の仕様上の制限であり、このスクリプト側では解決できません。モバイルからもボタン操作
- *   したい場合は、別途「ウェブアプリ」として公開しモバイルのブラウザからURLを開いて操作する仕組みを
- *   新たに作る必要があります（相応の追加実装が必要になるため、必要であれば別途ご相談ください）。
+ *   これはGoogle側の仕様上の制限であり、メニュー自体をモバイルに表示させることはできません。
+ *   ただし、シートに挿入した「図形描画」にスクリプトを割り当てる方法（Googleスプレッドシートの
+ *   公式機能）はモバイルアプリでも動作するため、上記④の「実行用」シートでこれをボタン代わりに
+ *   利用しています（ui.prompt/ui.alertのようなダイアログもモバイルでは動作しないため、
+ *   「実行用」シートの入力セルと結果セルでやり取りする作りにしています）。
  */
 
 /** ===== 設定（シート構造。原本テンプレートを元に決定） ===== */
@@ -116,17 +125,29 @@ const MASTER_SHEET_NAME = 'スタッフマスター';
 const DIRECTOR_EARLY_WEEK_DAYS = 7;
 const DIRECTOR_EARLY_WEEK_MAX = 1;
 
-// 「全出勤日、最低1人は勤務している」ことを保証したい資格の一覧
+// 「全出勤日、最低1人は勤務している」ことを保証したい資格（スタッフマスターの「資格」欄の値）の一覧
 // （このリストにある資格を持つ人がロスター内に1人もいない場合は、その資格の制約は自動的にスキップされます）
-// ピラティスは対応できるスタッフが限られており、院によっては2名いる場合もあるため、他の資格と同様に
-// 「全出勤日で最低1人」のハード制約対象としてここに含めている。
-const QUALIFICATIONS = ['柔道整復師', '鍼灸師', 'ピラティス'];
+// ピラティスは対応できるスタッフが限られており、院によっては2名いる場合もあるが、「資格」欄とは別に
+// スタッフマスターの専用列（○欄）で管理するため、ここには含めない（autoFillRegularHolidaysCore内で
+// 資格と同じ「全出勤日で最低1人」のハード制約として合流させている）。
+const QUALIFICATIONS = ['柔道整復師', '鍼灸師'];
 
 // 同じスタッフの公休を何日まで連続で許容するか（1 = 連続させない。原則禁止で運用）
 const MAX_CONSECUTIVE_OFF_DAYS = 1;
 
 // 同じスタッフを連続で勤務させてよい日数の上限（これを超える手前で公休を優先的に差し込む）
 const MAX_CONSECUTIVE_WORK_DAYS = 5;
+
+// 「実行用」シート名（スマホ/iPad向け）。カスタムメニューの代わりに、このシート上の図形(ボタン)に
+// スクリプトを割り当てて実行できるようにするための入力欄・結果欄のセル位置。
+const RUN_SHEET_NAME = '実行用';
+const RUN_CREATE_YEAR_CELL = 'B4';
+const RUN_CREATE_MONTH_CELL = 'B5';
+const RUN_CREATE_QUOTA_CELL = 'B6';
+const RUN_CREATE_RESULT_CELL = 'B9';
+const RUN_FILL_TARGET_CELL = 'B13';
+const RUN_FILL_QUOTA_CELL = 'B14';
+const RUN_FILL_RESULT_CELL = 'B17';
 
 /** ===== メニュー ===== */
 function onOpen() {
@@ -137,6 +158,8 @@ function onOpen() {
     .addSeparator()
     .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
     .addItem('行事欄をテンプレートに追加（初回のみ）', 'insertEventRowIntoTemplate')
+    .addSeparator()
+    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate')
     .addToUi();
 }
 
@@ -173,19 +196,25 @@ function createMonthlySheets() {
     return;
   }
 
+  const result = createMonthlySheetCore(ss, year, month, quota);
+  ui.alert(result.ok ? '月次シート作成 完了' : '月次シート作成 エラー', result.message, ui.ButtonSet.OK);
+}
+
+// 年・月・公休数から月次シートを作成する本体処理（ui.prompt/ui.alertを使わないため、①のメニューからも、
+// スマホ/iPad向けの「実行用」シートのボタン（runCreateMonthlySheetFromButton）からも共通で呼び出せる）。
+// 戻り値: { ok: boolean, message: string }
+function createMonthlySheetCore(ss, year, month, quota) {
   const rosterNotes = [];
 
   // コピー元は常に「原本」テンプレートを使用
   const srcSheet = ss.getSheetByName(TEMPLATE_SHEET_NAME);
   if (!srcSheet) {
-    ui.alert(`シート「${TEMPLATE_SHEET_NAME}」が見つかりませんでした。`);
-    return;
+    return { ok: false, message: `シート「${TEMPLATE_SHEET_NAME}」が見つかりませんでした。` };
   }
 
   const newName = `${year}年${month}月`;
   if (ss.getSheetByName(newName)) {
-    ui.alert(`シート「${newName}」は既に存在します。`);
-    return;
+    return { ok: false, message: `シート「${newName}」は既に存在します。` };
   }
 
   const newSheet = srcSheet.copyTo(ss);
@@ -240,7 +269,7 @@ function createMonthlySheets() {
   if (rosterNotes.length) {
     completionMsg += `\n\n※${rosterNotes.join('\n※')}`;
   }
-  ui.alert('月次シート作成 完了', completionMsg, ui.ButtonSet.OK);
+  return { ok: true, message: completionMsg };
 }
 
 // P列(名前)にスタッフ名を記載する（Q列は既存のCOUNTIF式が自動で日数を数える）。
@@ -387,14 +416,17 @@ function fillCalendarDates(sheet, year, month) {
 
   sheet.getRange(topRow, 1, numRows, 14).setBackgrounds(bgGrid);
 
+  // ui.alertはモバイル(実行用シートのボタン)から呼ばれた場合に動作しないため、ここでは出さず、
+  // 呼び出し元へ警告文字列として返す（呼び出し元がPC/モバイルいずれの経路でも表示できるようにする）
+  let overflowWarning = null;
   if (day <= lastDate) {
-    SpreadsheetApp.getUi().alert(
+    overflowWarning =
       `「${sheet.getName()}」: ${month}月は5週間のフォーマットに収まりません` +
-        `（${day}日以降が配置できていません）。テンプレートの行数を手動で確認してください。`
-    );
+      `（${day}日以降が配置できていません）。テンプレートの行数を手動で確認してください。`;
   }
 
-  return holidayResult.error;
+  if (holidayResult.error && overflowWarning) return `${holidayResult.error}\n${overflowWarning}`;
+  return holidayResult.error || overflowWarning;
 }
 
 /** ===================================================================
@@ -458,6 +490,121 @@ function insertEventRowIntoTemplate() {
 }
 
 /** ===================================================================
+ *  「実行用」シート（スマホ/iPad向け・カスタムメニューの代わりにボタン操作で実行）
+ *  =================================================================== */
+
+// 「実行用」シートの雛形を作成する（初回のみ）。
+// スマホ/iPadのGoogleスプレッドシートアプリはカスタムメニュー「休暇シート自動化」を表示できないため、
+// 代わりにこのシート上へ「図形描画」で作ったボタンにスクリプトを割り当てて実行する運用にする
+// （図形へのスクリプト割り当てはカスタムメニューと違いモバイルアプリでも動作する。ただし割り当ての
+// 設定自体はPCからしか行えないため、雛形作成後に1回だけPCで設定する必要がある）。
+function createRunSheetTemplate() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss.getSheetByName(RUN_SHEET_NAME)) {
+    ui.alert(`「${RUN_SHEET_NAME}」は既に存在します。`);
+    return;
+  }
+  const sheet = ss.insertSheet(RUN_SHEET_NAME, 0);
+
+  sheet.getRange('A1').setValue('実行用シート（スマホ・iPadからはここから操作してください）').setFontWeight('bold').setFontSize(12);
+
+  sheet.getRange('A3').setValue('① 月次シートを作成').setFontWeight('bold');
+  sheet.getRange('A4').setValue('年');
+  sheet.getRange('A5').setValue('月');
+  sheet.getRange('A6').setValue('公休数（取得可能日数）');
+  sheet.getRange('A7').setValue('（この下にボタンを配置）').setFontColor('#999999').setFontStyle('italic');
+  sheet.getRange('A9').setValue('実行結果');
+  sheet.getRange(RUN_CREATE_YEAR_CELL).setNumberFormat('0');
+  sheet.getRange(RUN_CREATE_MONTH_CELL).setNumberFormat('0');
+  sheet.getRange(RUN_CREATE_QUOTA_CELL).setNumberFormat('0');
+  sheet.getRange('B9:B11').merge().setWrap(true).setVerticalAlignment('top');
+
+  sheet.getRange('A13').setValue('② 公休を自動入力').setFontWeight('bold');
+  sheet.getRange('A14').setValue('対象シート名（例: 2026年10月）');
+  sheet.getRange('A15').setValue('公休数（空欄なら対象シートの「取得可能」欄から自動検出）');
+  sheet.getRange('A16').setValue('（この下にボタンを配置）').setFontColor('#999999').setFontStyle('italic');
+  sheet.getRange('A18').setValue('実行結果');
+  sheet.getRange('B18:B20').merge().setWrap(true).setVerticalAlignment('top');
+
+  sheet.setColumnWidth(1, 320);
+  sheet.setColumnWidth(2, 260);
+
+  ui.alert(
+    '実行用シート作成 完了',
+    `「${RUN_SHEET_NAME}」シートを作成しました。スマホ/iPadからボタン感覚で実行できるようにするには、` +
+      'あと1回だけ、PCで以下の設定が必要です（画像へのスクリプト割り当てはPCからしか行えません）。\n\n' +
+      '1.「挿入」→「図形描画」でボタン用の四角形を2つ作成し、保存してシートに挿入する\n' +
+      '   （①用はA7付近、②用はA16付近に配置してください）\n' +
+      '2. 挿入した図形を右クリック →「スクリプトを割り当てる」を選択\n' +
+      '3. ①の図形には「runCreateMonthlySheetFromButton」、②の図形には「runAutoFillFromButton」と入力\n\n' +
+      '設定後は、スマホ/iPadのスプレッドシートアプリからでもこの図形をタップするだけで実行できます。\n' +
+      '実行前に、①は年・月・公休数を、②は対象シート名（・必要なら公休数）をB列に入力してください。',
+    ui.ButtonSet.OK
+  );
+}
+
+// 「実行用」シートのボタン（①用の図形）に割り当てる関数。
+// ui.prompt/ui.alertはモバイルアプリで動作しないため使わず、入力はB列のセルから読み取り、
+// 結果はB9セルへ書き込む（あわせてトーストでも簡易通知する）。
+function runCreateMonthlySheetFromButton() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const runSheet = ss.getSheetByName(RUN_SHEET_NAME);
+  if (!runSheet) return; // 「実行用」シートが無い場合は何もしない
+
+  const resultCell = runSheet.getRange(RUN_CREATE_RESULT_CELL);
+  const year = parseInt(runSheet.getRange(RUN_CREATE_YEAR_CELL).getValue(), 10);
+  const month = parseInt(runSheet.getRange(RUN_CREATE_MONTH_CELL).getValue(), 10);
+  const quota = parseInt(runSheet.getRange(RUN_CREATE_QUOTA_CELL).getValue(), 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(quota)) {
+    resultCell.setValue('年・月・公休数をすべて入力してから実行してください。');
+    return;
+  }
+
+  try {
+    const result = createMonthlySheetCore(ss, year, month, quota);
+    resultCell.setValue(result.message);
+    ss.toast(result.ok ? `シート「${year}年${month}月」を作成しました。` : result.message, '月次シート作成', 8);
+  } catch (e) {
+    resultCell.setValue(`エラー: ${e}`);
+  }
+}
+
+// 「実行用」シートのボタン（②用の図形）に割り当てる関数。
+// 対象シート名はB列で指定する（getActiveSheet()はこの「実行用」シート自身になってしまうため使えない）。
+function runAutoFillFromButton() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const runSheet = ss.getSheetByName(RUN_SHEET_NAME);
+  if (!runSheet) return; // 「実行用」シートが無い場合は何もしない
+
+  const resultCell = runSheet.getRange(RUN_FILL_RESULT_CELL);
+  const targetName = String(runSheet.getRange(RUN_FILL_TARGET_CELL).getValue() || '').trim();
+  const targetSheet = ss.getSheetByName(targetName);
+  if (!targetSheet) {
+    resultCell.setValue(`シート「${targetName}」が見つかりません。対象シート名を確認してください。`);
+    return;
+  }
+
+  let quota = parseInt(runSheet.getRange(RUN_FILL_QUOTA_CELL).getValue(), 10);
+  if (isNaN(quota)) quota = getQuotaFromNote(targetSheet);
+  if (quota === null || isNaN(quota)) {
+    resultCell.setValue(
+      '公休数を入力するか、対象シートの「取得可能」欄に数値を入れてから実行してください。'
+    );
+    return;
+  }
+
+  try {
+    const result = autoFillRegularHolidaysCore(targetSheet, quota);
+    resultCell.setValue(result.message);
+    ss.toast(`${result.writeCount}件の公休を自動入力しました。`, '公休自動入力', 8);
+  } catch (e) {
+    resultCell.setValue(`エラー: ${e}`);
+  }
+}
+
+/** ===================================================================
  *  スタッフマスター
  *  =================================================================== */
 
@@ -470,8 +617,8 @@ function createStaffMasterTemplate() {
     return;
   }
   const sheet = ss.insertSheet(MASTER_SHEET_NAME, 0);
-  const header = ['名前', '性別', '資格', '新患対応', '院長'];
-  const colWidths = [120, 90, 160, 110, 90]; // 入力しやすいよう、見出しの文字数に関わらず十分な幅を確保
+  const header = ['名前', '性別', '資格', '新患対応', '院長', 'ピラティス'];
+  const colWidths = [120, 90, 160, 110, 90, 90]; // 入力しやすいよう、見出しの文字数に関わらず十分な幅を確保
   sheet.getRange(1, 1, 1, header.length).setValues([header]).setFontWeight('bold');
   sheet.setFrozenRows(1);
   colWidths.forEach((w, i) => sheet.setColumnWidth(i + 1, w));
@@ -484,7 +631,9 @@ function createStaffMasterTemplate() {
       '・性別: 「女」を含む場合（「女」「女性」どちらも可）のみ女性としてカウントします\n' +
       `・資格: ${QUALIFICATIONS.join('、')} など（複数ある場合は「、」区切り）\n` +
       '・新患対応: 対応可能なら「〇」（空欄は対応不可扱い）\n' +
-      `・院長: 対象者なら「〇」（月初1〜${DIRECTOR_EARLY_WEEK_DAYS}日は、希望休を含めて公休${DIRECTOR_EARLY_WEEK_MAX}日までに制限されます）`,
+      `・院長: 対象者なら「〇」（月初1〜${DIRECTOR_EARLY_WEEK_DAYS}日は、希望休を含めて公休${DIRECTOR_EARLY_WEEK_MAX}日までに制限されます）\n` +
+      '・ピラティス: 対応可能なら「〇」（空欄は対応不可扱い。対応スタッフが限られているため、' +
+      '資格と同様に全出勤日で最低1人配置されるよう自動入力が調整します）',
     ui.ButtonSet.OK
   );
 }
@@ -495,7 +644,7 @@ function surnameOf(name) {
 }
 
 // スタッフマスターを読み込み、
-// { byName: { 姓: {fullName, gender, qualifications, newPatient, director} }, collisions: [...] }
+// { byName: { 姓: {fullName, gender, qualifications, newPatient, director, pilates} }, collisions: [...] }
 // の形で返す。カレンダー上の記入・集計はすべて「姓」で行うため、マスターの名前欄がフルネームでも姓だけをキーにする。
 // マスターシートが無い場合は null を返す
 function loadStaffMaster(ss) {
@@ -511,6 +660,7 @@ function loadStaffMaster(ss) {
   const idxQual = header.indexOf('資格');
   const idxNewPatient = header.findIndex((h) => h.indexOf('新患') !== -1);
   const idxDirector = header.indexOf('院長');
+  const idxPilates = header.indexOf('ピラティス');
   if (idxName === -1) return { byName: {}, collisions: [] };
 
   const byName = {};
@@ -528,11 +678,13 @@ function loadStaffMaster(ss) {
     const newPatient = /^(〇|○|o|yes|true|1)$/i.test(newPatientRaw);
     const directorRaw = idxDirector !== -1 ? String(row[idxDirector] || '').trim() : '';
     const director = /^(〇|○|o|yes|true|1)$/i.test(directorRaw);
+    const pilatesRaw = idxPilates !== -1 ? String(row[idxPilates] || '').trim() : '';
+    const pilates = /^(〇|○|o|yes|true|1)$/i.test(pilatesRaw);
 
     if (byName[displayName]) {
       collisions.push(`${byName[displayName].fullName} / ${fullName}`);
     }
-    byName[displayName] = { fullName, gender, qualifications, newPatient, director };
+    byName[displayName] = { fullName, gender, qualifications, newPatient, director, pilates };
   }
   return { byName, collisions };
 }
@@ -584,6 +736,25 @@ function autoFillRegularHolidays() {
     }
   }
 
+  const result = autoFillRegularHolidaysCore(sheet, quota);
+  ui.alert('公休自動入力 完了', result.message, ui.ButtonSet.OK);
+}
+
+// シートと公休数(quota)を受け取り、公休の自動入力本体処理を行う（ui.prompt/ui.alertを使わないため、
+// ②のメニューからも、スマホ/iPad向けの「実行用」シートのボタン（runAutoFillFromButton）からも
+// 共通で呼び出せる）。
+// 戻り値: { writeCount: number, message: string }
+function autoFillRegularHolidaysCore(sheet, quota) {
+  const roster = findRoster(sheet);
+  if (!roster.length) {
+    return {
+      writeCount: 0,
+      message:
+        'スタッフ一覧が見つかりませんでした。' +
+        '「名前」という見出しの下にスタッフ名が並んでいるか確認してください（カレンダー下部の集計表）。',
+    };
+  }
+
   // カレンダー範囲を一括取得（4行目〜最終slot行、A〜N列）
   const topRow = DATE_ROWS[0];
   const bottomRow = CALENDAR_BOTTOM_ROW;
@@ -619,11 +790,13 @@ function autoFillRegularHolidays() {
   });
 
   if (!days.length) {
-    ui.alert('カレンダーに日付が入力されていません。先に「① 月次シートを作成」で日付を配置してください。');
-    return;
+    return {
+      writeCount: 0,
+      message: 'カレンダーに日付が入力されていません。先に「① 月次シートを作成」で日付を配置してください。',
+    };
   }
 
-  // スタッフマスターを読み込み（性別・資格・新患対応・院長）
+  // スタッフマスターを読み込み（性別・資格・新患対応・院長・ピラティス）
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const masterRaw = loadStaffMaster(ss);
   const masterWarnings = [];
@@ -634,11 +807,12 @@ function autoFillRegularHolidays() {
       qualifications: [],
       newPatient: false,
       director: false,
+      pilates: false,
     };
   });
   if (masterRaw === null) {
     masterWarnings.push(
-      `「${MASTER_SHEET_NAME}」シートが見つからないため、性別・資格・新患対応の条件は考慮せずに処理しました。` +
+      `「${MASTER_SHEET_NAME}」シートが見つからないため、性別・資格・新患対応・ピラティスの条件は考慮せずに処理しました。` +
         '（メニューの「スタッフマスターの雛形を作成」から作成できます）'
     );
   } else {
@@ -655,7 +829,7 @@ function autoFillRegularHolidays() {
       masterWarnings.push(
         `「${MASTER_SHEET_NAME}」に未登録のスタッフ: ${unregistered.join(
           '、'
-        )}（性別・資格・新患対応なしとして処理しました）`
+        )}（性別・資格・新患対応・ピラティスなしとして処理しました）`
       );
     }
   }
@@ -667,6 +841,13 @@ function autoFillRegularHolidays() {
   const femaleNames = roster.filter((n) => master[n].gender.indexOf('女') !== -1);
   const newPatientNames = roster.filter((n) => master[n].newPatient);
   const directorNames = roster.filter((n) => master[n].director);
+  const pilatesNames = roster.filter((n) => master[n].pilates);
+
+  // 資格（柔道整復師/鍼灸師など）とピラティス対応を、同じ「全出勤日で最低1人」のハード制約として
+  // まとめて扱うためのグループ一覧（ピラティスは資格欄とは別の専用列で管理するため、ここで合流させる）
+  const coverageGroups = QUALIFICATIONS.map((q) => ({ label: q, names: qualifiedByQual[q] })).concat([
+    { label: 'ピラティス', names: pilatesNames },
+  ]);
 
   // 院長ルール：月初DIRECTOR_EARLY_WEEK_DAYS日間の休み日数を、希望休の分も含めてカウント
   const directorEarlyWeekCount = {};
@@ -686,9 +867,9 @@ function autoFillRegularHolidays() {
   days.forEach((day) => {
     const working = roster.filter((n) => !day.filledNames.has(n));
     const reasons = [];
-    QUALIFICATIONS.forEach((q) => {
-      if (qualifiedByQual[q].length > 0 && !working.some((n) => qualifiedByQual[q].includes(n))) {
-        reasons.push(`${q}0人`);
+    coverageGroups.forEach(({ label, names }) => {
+      if (names.length > 0 && !working.some((n) => names.includes(n))) {
+        reasons.push(`${label}0人`);
       }
     });
     if (femaleNames.length > 0 && !working.some((n) => femaleNames.includes(n))) {
@@ -734,7 +915,7 @@ function autoFillRegularHolidays() {
     needs,
     days,
     roster,
-    qualifiedByQual,
+    coverageGroups,
     directorNames,
     directorEarlyWeekCount,
     values,
@@ -758,7 +939,7 @@ function autoFillRegularHolidays() {
         staff.name,
         days,
         roster,
-        qualifiedByQual,
+        coverageGroups,
         femaleNames,
         newPatientNames,
         directorNames,
@@ -839,7 +1020,7 @@ function autoFillRegularHolidays() {
       '、'
     )}`;
   }
-  ui.alert('公休自動入力 完了', msg, ui.ButtonSet.OK);
+  return { writeCount: writes.length, message: msg };
 }
 
 // 配列をシャッフルしたコピーを返す（元の配列は変更しない）。
@@ -855,9 +1036,11 @@ function shuffle(array) {
 
 // staffName をその日に休ませた場合に破られるハード制約を、
 //   absolute: 院長ルール（連勤解消のためでも絶対に上書きしてはいけない）
-//   overridable: 資格カバレッジ（他にどうしても方法が無い場合、連勤解消の最終手段としてのみ上書きしてよい）
+//   overridable: 資格/ピラティスカバレッジ（他にどうしても方法が無い場合、連勤解消の最終手段としてのみ
+//                上書きしてよい）
 // の2種類に分けて返す（どちらも無ければ両方とも空配列）。
-function hardConstraintReasons(day, staffName, roster, qualifiedByQual, directorNames, directorEarlyWeekCount) {
+// coverageGroups は { label, names }[] の形（資格ごとのグループ＋ピラティス対応グループ）。
+function hardConstraintReasons(day, staffName, roster, coverageGroups, directorNames, directorEarlyWeekCount) {
   const absolute = [];
   const overridable = [];
 
@@ -870,25 +1053,24 @@ function hardConstraintReasons(day, staffName, roster, qualifiedByQual, director
   }
 
   const workingNames = roster.filter((n) => !day.filledNames.has(n) && n !== staffName);
-  QUALIFICATIONS.forEach((q) => {
-    const holders = qualifiedByQual[q];
-    if (!holders || holders.length === 0) return; // ロスターに該当資格者がいなければ制約なし
-    if (!workingNames.some((n) => holders.includes(n))) overridable.push(`資格カバレッジ(${q}が0人)`);
+  coverageGroups.forEach(({ label, names }) => {
+    if (!names || names.length === 0) return; // ロスターに該当者がいなければ制約なし
+    if (!workingNames.some((n) => names.includes(n))) overridable.push(`資格カバレッジ(${label}が0人)`);
   });
 
   return { absolute, overridable };
 }
 
-// staffName をその日に休ませることが、資格カバレッジ(ハード制約)・院長ルール(ハード制約)に違反しないかを判定
-// （通常の割当では、資格カバレッジ・院長ルールのどちらも一切上書きしない。上書きが許されるのは
-// breakLongWorkStreaksの最終手段の探索(pickBreakDayInStreak)だけ）
-function violatesHardConstraints(day, staffName, roster, qualifiedByQual, directorNames, directorEarlyWeekCount) {
+// staffName をその日に休ませることが、資格/ピラティスカバレッジ(ハード制約)・院長ルール(ハード制約)に
+// 違反しないかを判定（通常の割当では、カバレッジ・院長ルールのどちらも一切上書きしない。上書きが
+// 許されるのは breakLongWorkStreaksの最終手段の探索(pickBreakDayInStreak)だけ）
+function violatesHardConstraints(day, staffName, roster, coverageGroups, directorNames, directorEarlyWeekCount) {
   if (day.filledNames.has(staffName)) return true; // 既にその日は休み扱い
   const { absolute, overridable } = hardConstraintReasons(
     day,
     staffName,
     roster,
-    qualifiedByQual,
+    coverageGroups,
     directorNames,
     directorEarlyWeekCount
   );
@@ -904,7 +1086,7 @@ function wouldViolateConsecutiveOff(days, dayIndex, staffName) {
   return (!!prev && prev.filledNames.has(staffName)) || (!!next && next.filledNames.has(staffName));
 }
 
-// staffName を休みにできる日の中から、資格カバレッジ・院長ルール(ハード制約)を守った上で、
+// staffName を休みにできる日の中から、資格/ピラティスカバレッジ・院長ルール(ハード制約)を守った上で、
 // 連休(公休の連続)にならない日を最優先候補とし、その中で「その時点で最も休みが少ない日」を優先して選ぶ。
 // 同条件の候補が複数ある場合はランダムに選ぶ（月内でまんべんなく、かつ毎回同じパターンにならないようにするため）。
 // 連休を避けられる候補が1つも無い場合のみ、連休ありも候補に含めて選ぶ（その場合 reasons に「連休になります」が入る）
@@ -912,7 +1094,7 @@ function pickDayForStaff(
   staffName,
   days,
   roster,
-  qualifiedByQual,
+  coverageGroups,
   femaleNames,
   newPatientNames,
   directorNames,
@@ -920,7 +1102,7 @@ function pickDayForStaff(
 ) {
   const candidates = [];
   days.forEach((day, index) => {
-    if (violatesHardConstraints(day, staffName, roster, qualifiedByQual, directorNames, directorEarlyWeekCount)) {
+    if (violatesHardConstraints(day, staffName, roster, coverageGroups, directorNames, directorEarlyWeekCount)) {
       return;
     }
 
@@ -995,7 +1177,7 @@ function findFirstOverLongWorkStreak(days, staffName, max) {
 // どちらの段階でも、連休(公休の連続)にならない日を優先し、その中で「その時点で最も休んでいる人数が少ない日」を
 // 優先する（pickDayForStaffと同じ考え方。位置ではなく混雑度で選ぶことで、全スタッフが同じ日に集中するのを防ぐ）。
 // 同条件の候補が複数ある場合はランダムに選ぶ。戻り値: { index, consecutive, hardReasons } | null
-function pickBreakDayInStreak(streak, staffName, days, roster, qualifiedByQual, directorNames, directorEarlyWeekCount) {
+function pickBreakDayInStreak(streak, staffName, days, roster, coverageGroups, directorNames, directorEarlyWeekCount) {
   const buildCandidates = (allowQualificationOverride) => {
     const list = [];
     for (let i = streak.start; i <= streak.end; i++) {
@@ -1004,7 +1186,7 @@ function pickBreakDayInStreak(streak, staffName, days, roster, qualifiedByQual, 
         day,
         staffName,
         roster,
-        qualifiedByQual,
+        coverageGroups,
         directorNames,
         directorEarlyWeekCount
       );
@@ -1046,13 +1228,13 @@ function pickBreakDayInStreak(streak, staffName, days, roster, qualifiedByQual, 
 }
 
 // 連勤上限(MAX_CONSECUTIVE_WORK_DAYS)を超える区間を検出し、各スタッフの公休予算(need)の範囲内で、
-// 資格カバレッジ・院長ルールを守れる位置に公休を差し込んで解消する（この処理は①の希望休の状態に対して先に行い、
-// その後に残りの公休予算を通常のラウンドロビン割当(pickDayForStaff)で埋める）。
+// 資格/ピラティスカバレッジ・院長ルールを守れる位置に公休を差し込んで解消する（この処理は①の希望休の
+// 状態に対して先に行い、その後に残りの公休予算を通常のラウンドロビン割当(pickDayForStaff)で埋める）。
 function breakLongWorkStreaks(
   needs,
   days,
   roster,
-  qualifiedByQual,
+  coverageGroups,
   directorNames,
   directorEarlyWeekCount,
   values,
@@ -1082,7 +1264,7 @@ function breakLongWorkStreaks(
         staff.name,
         days,
         roster,
-        qualifiedByQual,
+        coverageGroups,
         directorNames,
         directorEarlyWeekCount
       );
