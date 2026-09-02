@@ -58,13 +58,22 @@
 [brands/smile/CLAUDE.md](../../brands/smile/CLAUDE.md)の「分析基盤へのアクセス方法」
 参照、同じ制約)。
 
-**サービスアカウントの方針**: このシートは5ブランド共有のリソースのため、専用の共有
-サービスアカウント `ad-spend-reporter@keizgroup-automation.iam.gserviceaccount.com`
-(予定)を1つ発行し、5ブランド分をこの1アカウントでカバーする(2026-09-02、栗林さんと
-合意)。GCPプロジェクトは全社共通の`keizgroup-automation`を使う([brands/smile/CLAUDE.md](../../brands/smile/CLAUDE.md)の
-`smile-good-reporter`と同じプロジェクト)。鍵ファイルの取り扱いは
-`.claude/skills/customer-acquisition-consulting/`の非交渉ルールに従い、このクラウド
-セッションでは扱わずローカルPC側でセットアップする。
+**サービスアカウント設定済み(2026-09-02)**: このシートは5ブランド共有のリソースのため、
+専用の共有サービスアカウント
+`ad-spend-reporter@keizgroup-automation.iam.gserviceaccount.com` を1つ発行し、
+5ブランド分をこの1アカウントでカバーする方針で、ローカルPC(Keizgroup500)側で作成済み。
+GCPプロジェクトは全社共通の`keizgroup-automation`
+([brands/smile/CLAUDE.md](../../brands/smile/CLAUDE.md)の`smile-good-reporter`と同じ
+プロジェクト、プロジェクト番号578587097928)。
+
+- 「広告費」シートに閲覧者(コメント可)権限で共有済み。このシートのオーナーは
+  `ga_admin@keizgroup.jp`で、栗林さんの編集者権限では直接共有できなかったため、
+  オーナー側で別途権限付与してもらう経緯があった
+- スモークテスト成功: 「広告費各詳細」タブ(gid=1636696360)のA1:E10からプラチナ/
+  ゴールド/正会員/PPC等の実データを取得できることを確認済み
+- 鍵ファイルはローカルPC(Keizgroup500)の `claude\keys\ad-spend-reporter.json` に
+  保存済み。**鍵の中身はチャット・リポジトリのどちらにも一切含めていない**
+  (`.claude/skills/customer-acquisition-consulting/`の非交渉ルールに準拠)
 
 ## 活用予定
 

@@ -104,16 +104,24 @@ KPI管理に使用している。**グッドブランドも同じシートで管
 適用することにした(2026-09-02、栗林さんと合意)。
 
 **サービスアカウントの発行単位**: ブランド単位(法人単位)。GCPプロジェクトは全社共通で
-1つ(例: `keizgroup-automation`)にまとめるが、サービスアカウントはブランドごとに分ける
+1つ(`keizgroup-automation`)にまとめるが、サービスアカウントはブランドごとに分ける
 方針とした。理由: (1) 鍵漏洩時の被害範囲を限定できる、(2) ブランドとの関係が終了した際に
 そのアカウントごと削除すれば済む、(3) この組織自体が`brands/<ブランド名>/CLAUDE.md`で
 ブランドごとに文脈を分ける設計になっており、認証情報の境界もそれに合わせる方が一貫する。
 
-- グッド・スマイル(同じスプレッドシートを共有)は1つのサービスアカウント
-  `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com`(予定)を共有する
-- 鍵ファイルの取り扱いは`.claude/skills/customer-acquisition-consulting/`の非交渉ルールに
-  従う: **鍵の中身をチャットに貼り付けない**。ローカルPCでの取得・保管を前提とし、この
-  クラウドセッションでは扱わない
+### サービスアカウント設定済み(2026-09-02)
+
+- グッド・スマイル(同じスプレッドシートを共有)用に、サービスアカウント
+  `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com` をローカルPC
+  (Keizgroup500)側で作成済み。GCPプロジェクトは`keizgroup-automation`
+  (プロジェクト番号578587097928、組織keizgroup.jp)。Google Sheets API有効化済み
+- 「グッド・スマイル月次報告」シートに閲覧者権限で共有済み
+- スモークテスト成功: 「集計用 (栗林)」タブから実データ取得を確認済み。「報告用」タブは
+  グラフが埋め込みオブジェクトのためセル値としては空応答になるが、これは想定通りの挙動
+  (グラフの参照元は「集計用 (栗林)」側を読むこと)
+- 鍵ファイルはローカルPC(Keizgroup500)の `claude\keys\smile-good-reporter.json` に
+  保存済み。**鍵の中身はチャット・リポジトリのどちらにも一切含めていない**
+  (`.claude/skills/customer-acquisition-consulting/`の非交渉ルールに準拠)
 - セットアップ手順は`references/ga4-gsc-service-account-setup.md`のGCP Console
-  クリックパスに従う(このシートについてはSheets APIのみ有効化すればよく、GA4/GSC
-  Admin APIは不要)
+  クリックパスに従った(このシートについてはSheets APIのみで、GA4/GSC Admin APIは
+  未使用)
