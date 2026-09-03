@@ -1,0 +1,94 @@
+name: Chatwork request watcher
+
+# Polls the Chatwork rooms listed in data/chatwork-rooms.json for messages that look like
+# WEB修正依頼 (SalonBoard / HP), and opens an Issue when it finds any so Claude can judge them
+# and notify the user. See .claude/skills/chatwork-integration/SKILL.md.
+#
+# The API token lives only in the CHATWORK_API_TOKEN repository secret; it is never in the repo
+# and never reaches a Claude session.
+
+on:
+  schedule:
+    # Every 30 minutes. Shorter intervals detect faster but burn more Actions minutes on a
+    # private repo; the watcher reads the latest 100 messages per run, so this cadence has
+    # plenty of headroom for these rooms.
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      list_rooms:
+        description: "ルーム一覧(名前とID)を出力するだけ。監視・Issue起票・状態更新は行わない"
+        type: boolean
+        default: false
+
+# Only one run at a time: two concurrent runs would both advance the state file and could
+# double-report or lose a message.
+concurrency:
+  group: chatwork-watcher
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Poll Chatwork
+        id: poll
+        env:
+          CHATWORK_API_TOKEN: ${{ secrets.CHATWORK_API_TOKEN }}
+          # Empty (falsy) on scheduled runs, which have no inputs.
+          CHATWORK_LIST_ROOMS: ${{ inputs.list_rooms }}
+          TZ: Asia/Tokyo
+        run: |
+          python3 scripts/chatwork_watcher.py
+          if [ -f chatwork-report.md ]; then
+            echo "has_report=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_report=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open an Issue for the detected requests
+        if: steps.poll.outputs.has_report == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TZ: Asia/Tokyo
+        run: |
+          # --force so this is idempotent: creates the label on a fresh clone, no-ops after.
+          # gh issue create fails outright on a label that doesn't exist yet.
+          gh label create chatwork-request \
+            --color FBCA04 \
+            --description "Chatworkで検知したWEB修正依頼の候補" \
+            --force
+          gh issue create \
+            --title "Chatwork: WEB修正依頼の可能性を検知 ($(date '+%Y-%m-%d %H:%M'))" \
+            --body-file chatwork-report.md \
+            --label chatwork-request
+
+      - name: Save the watcher position
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          # Stage first, then compare against the index: on the very first run the state file is
+          # untracked, and `git diff` doesn't see untracked files — which would leave the position
+          # permanently uncommitted and re-report the same messages on every run.
+          git add data/chatwork-watcher-state.json
+          if git diff --cached --quiet -- data/chatwork-watcher-state.json; then
+            echo "state unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Advance the Chatwork watcher position [skip ci]"
+          # Another run may have pushed while this one was working; rebase rather than fail.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git pull --rebase origin "${GITHUB_REF_NAME}" || exit 1
+          done
+          echo "could not push the state file after 3 attempts" >&2
+          exit 1

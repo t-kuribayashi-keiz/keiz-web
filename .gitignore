@@ -1,5 +1,20 @@
 .env
 .env.*
 *.key
+*.pem
+*.p12
 *credentials*
 *secret*
+
+# サービスアカウントの鍵。ファイル名に .key も credentials も入らないので、
+# 上のパターンでは止まらない。鍵はローカルPCの claude\keys\ に置く運用で、
+# リポジトリ内に現れること自体が事故だが、`git add -A` で一発で公開されるため二重に塞ぐ。
+keys/
+*service*account*.json
+*-reporter.json
+*-writer.json
+gcp-*.json
+
+# Transient output of scripts/chatwork_watcher.py (becomes an Issue body, never a commit)
+chatwork-report.md
+__pycache__/

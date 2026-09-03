@@ -1,0 +1,30 @@
+{
+  "_comment": "EPARK掲載店舗リストのB列『契約法人名』を、KPIシート「年間計画・目標」タブのQ/R/S列(Epark店舗数 直営/サンズ/ミライ)のどれに数えるかの対応表。法人名は表記ゆれ(『株式会社 エフアール』のように空白が入る行がある)があるため、完全一致ではなく部分一致で判定する。ここに無い法人名が出てきたら、勝手に直営へ寄せずに処理を止めること(店舗数が静かにずれるため)。",
+  "_source": "https://docs.google.com/spreadsheets/d/1TNuyQL0Wi96jdVdpiT9ZDGjw9JlncT5eaKUeiVQ9KPs/",
+  "_verified": "2026-09-03。2026/8タブの158行をこの表で分類すると 直営131 / サンズ8 / ミライ8 / スマイル11 となり、KPIシート2026年8月行のQ=131・R=8・S=8・T=147と完全に一致した。",
+  "groups": {
+    "chokuei": {
+      "label": "直営",
+      "plan_column": "Q",
+      "match": ["クラシオン", "ケイズ", "エフアール", "フォース", "ドリームジャパン", "アポロ", "バーニング", "トラスト"]
+    },
+    "sans": {
+      "label": "サンズ",
+      "plan_column": "R",
+      "match": ["太洋メディカル", "サンズ"],
+      "notes": "太洋メディカル配下は『たいよう鍼灸整骨院』等で、data/clinics.json では corporation=サンズ。法人名だけ見ると別法人に見えるが同じ括り。"
+    },
+    "mirai": {
+      "label": "ミライ",
+      "plan_column": "S",
+      "match": ["光井JAPAN", "ミライ"],
+      "notes": "光井JAPAN配下は『弁慶はりきゅう整骨院』等で、data/clinics.json では corporation=ミライ。"
+    },
+    "excluded": {
+      "label": "集計対象外",
+      "plan_column": null,
+      "match": ["スマイルストーリー"],
+      "notes": "このKPIシートは直営+サンズミライ(149店舗グループ)が対象。スマイルはEPARKに11院掲載されているが、Q/R/S/Tのどれにも含めない。"
+    }
+  }
+}
