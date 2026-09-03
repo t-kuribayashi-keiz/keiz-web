@@ -1298,22 +1298,47 @@ def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict
                 sums[bucket][1] += number
         (colored if tinted else plain).append((row_index, label, cell_background(values[0])))
 
+    source["_colored"] = (
+        f"{len(colored)}件 [" + ", ".join(label for _, label, _ in colored[:8]) + "]"
+    )
     print(f"  色付きの店舗 {len(colored)}件 / 色なし {len(plain)}件")
     for row_index, label, rgb in colored[:25]:
         print(f"    [{row_index}行] {label!r} rgb=({rgb[0]:.2f},{rgb[1]:.2f},{rgb[2]:.2f})")
 
     total_row_values = rows[source["total_row"] - 1]
+    detail = []
     for name, cols, index in (("紹介", referral_cols, 0), ("オフライン合計", offline_cols, 1)):
         header_total = sum(
             parse_number(cell(total_row_values, index_to_col(c))) or 0.0 for c in sorted(cols)
         )
         both = sums["plain"][index] + sums["colored"][index]
-        print(f"  {name}: {source['total_row']}行目={header_total:g} / "
-              f"色なしのみ={sums['plain'][index]:g} / 全店舗={both:g}")
+        line = (f"{name}: {source['total_row']}行目={header_total:g} / "
+                f"色なしのみ={sums['plain'][index]:g} / 全店舗={both:g}")
+        print("  " + line)
+        detail.append(line)
+    source["_colored"] = source.get("_colored", "") + " || " + " || ".join(detail)
+
+
+def find_offline_total_cell(rows: list[list]) -> tuple[str, float] | None:
+    """シート自身が持っている「オフライン合計」の値を探す。
+
+    サンズもミライも2行目に見出し「オフライン合計」があり、その真下(3行目)に値が入っている。
+    こちらの範囲指定の合計とこの値が一致すれば、範囲の指定が正しいことの裏取りになる。
+    """
+    for row_index, row in enumerate(rows[:4], start=1):
+        for col_index, value in enumerate(row, start=1):
+            if normalize(value) == "オフライン合計":
+                column = index_to_col(col_index)
+                below = rows[row_index] if row_index < len(rows) else []
+                number = parse_number(cell(below, column))
+                if number is not None:
+                    return f"{column}{row_index + 1}", number
+    return None
 
 
 def inspect_referral(service) -> int:
     """紹介・オフライン合計の3シートの構造を出すだけ。書き込みはしない。"""
+    summary = []
     for source in load_referral_sources():
         sid = source["spreadsheet_id"]
         print(f"\n=== {source['label']} ({sid}) ===")
@@ -1347,6 +1372,7 @@ def inspect_referral(service) -> int:
             report_colored_stores(service, sid, title, source, rows)
 
         print("\n-- 指定された範囲の5行目の値 --")
+        totals = {}
         for name, ranges in (("紹介", source["referral_ranges"]),
                              ("オフライン合計", source["offline_ranges"])):
             total = 0.0
@@ -1359,6 +1385,24 @@ def inspect_referral(service) -> int:
                     total += value or 0.0
             print(f"  {name}: 合計={total:g}")
             print(f"    {' '.join(parts)}")
+            totals[name] = total
+
+        builtin = find_offline_total_cell(rows)
+        if builtin:
+            ref, value = builtin
+            mark = "一致" if abs(value - totals["オフライン合計"]) < 0.5 else "**不一致**"
+            print(f"  シート自身のオフライン合計 {ref}={value:g} → こちらの計算と{mark}")
+        summary.append((source["label"], title, totals, builtin, source.get("_colored")))
+
+    print("\n\n=== まとめ ===")
+    for label, title, totals, builtin, colored in summary:
+        line = (f"{label:4s} タブ={title!r} 紹介={totals['紹介']:g} "
+                f"オフライン合計={totals['オフライン合計']:g}")
+        if builtin:
+            line += f" (シート自身の値 {builtin[0]}={builtin[1]:g})"
+        if colored:
+            line += f" 色付き店舗={colored}"
+        print("  " + line)
     return 0
 
 
