@@ -38,6 +38,7 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 - **集計自動化の残り工程** — ④(F列紹介・J列オフライン合計・X列AI の転記方法)と
   ⑥(Googleトレンド)は「別途指示」とのこと。③(V/W列のPPC・META)は自動化保留の判断済み
 - **「年間計画・目標」タブのL列(店舗数)の自動化** — 2026-09-03に栗林さんの判断で当面手動。
+  KPIシートに「店舗マスタ」タブがあることが分かったので、自動化する際はまずそこを見る。
   ただしL列は1店舗当たりの計算(ダッシュボードAH・AK〜AOの分母)に効くので、速報値に
   更新する際はL列も人が見直す必要がある
 - **工程⑤(ダッシュボードAG〜AOへの書き込み)の実装** — 算出式は確定済み(9項目とも2026年8月と一致)
@@ -50,12 +51,10 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 ## 設定・環境
 
-- **サービスアカウント`chokuei-sunsumirai-kpi-writer`のセットアップ** — 手順は
-  [functions/kpi-aggregation/CLAUDE.md](../functions/kpi-aggregation/CLAUDE.md)の
-  「セットアップ手順」。栗林さん側は3シートの共有(KPIシートは**編集者**)と
-  GitHubシークレット`GCP_KPI_WRITER_KEY`の登録、鍵の発行はローカルセッション。
-  完了後に`kpi-aggregate`ワークフローを`calibrate`→`dry-run`→`apply`の順で実行する
-  (`workflow_dispatch`は`main`にマージしないと表示されない)
+- **`kpi-aggregate`ワークフローの初回実行** — サービスアカウントのセットアップは
+  2026-09-03に完了(3シート共有・鍵発行・`GCP_KPI_WRITER_KEY`登録すべて済み)。
+  残るは`main`へのマージ(`workflow_dispatch`は`main`にファイルが無いと表示されない)と、
+  `calibrate`→`dry-run`→`apply`の順の実行
 
 - **Chatwork依頼Issueを処理するRoutineの作り直し** — ツール経由で作成したRoutineには
   GitHub連携もリポジトリも渡らない可能性があり(作成時に警告あり)、claude.aiのRoutines UIからの
