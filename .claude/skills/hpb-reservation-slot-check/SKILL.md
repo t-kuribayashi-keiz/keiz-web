@@ -100,6 +100,12 @@ ported 1:1) and runs daily at 13:00 JST via `.github/workflows/hpb-reservation-s
 "HPB予約枠確認" spreadsheet with it as Editor; no new key/secret needed. Check window is a
 daily-rolling "当日PM〜2日後PM" (`default_date_window()`), per the user's own spec.
 
+**Target tab is "AIチェック用ver.2", not "AIチェック用".** The user duplicated the original
+tab so their existing manual workflow on "AIチェック用" keeps working untouched while this
+automation runs against the copy — `WORKSHEET_NAME` in both `hpb_slot_check.py` and
+`salonboard_root_cause.py` points at `"AIチェック用ver.2"`. **Never hardcode "AIチェック用"
+(without `ver.2`) anywhere in this automation** — that tab is explicitly off-limits to it.
+
 **K/L is overwritten in place every run, so a "K,L履歴" tab (auto-created on first run)
 keeps what the live columns can't: a full timeline.** Because the window rolls forward one
 day at a time, the same target date gets evaluated by up to 3 different runs before it

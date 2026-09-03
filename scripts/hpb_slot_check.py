@@ -8,8 +8,13 @@
 詳細はそちらを参照。ロジックを変える場合は、あちらのSKILL.mdの非交渉ルール(まず
 コピーで検証、main_process相当を無断で流さない)も踏まえること。
 
-**既定はドライラン。** 書き込むには --apply を明示する。本番の「AIチェック用」シートを
+**既定はドライラン。** 書き込むには --apply を明示する。本番の「AIチェック用ver.2」タブを
 触るため、既定で書き込む設計にはしない(kpi_aggregate.pyと同じ方針)。
+
+**書き込み対象は「AIチェック用ver.2」タブだけ。** 元の「AIチェック用」タブは既存の(手動の)
+確認フローのために残されているので、このスクリプトからは一切参照・変更しない
+(栗林さん指定)。読み取りも書き込みも`WORKSHEET_NAME`定数経由のみに限定し、
+シート名をハードコードで増やさないこと。
 
 認証: 環境変数 GCP_KPI_WRITER_KEY にサービスアカウントのJSON全文
 (kpi_aggregate.pyと同じ書き込み用サービスアカウントを流用。
@@ -32,7 +37,7 @@ import sys
 import jpholiday
 
 SHEET_ID = "15lWYMvRjY3hGVvPu_IgmGHx4ER3joCERFDEzVd8aLrI"
-WORKSHEET_NAME = "AIチェック用"
+WORKSHEET_NAME = "AIチェック用ver.2"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 

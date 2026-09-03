@@ -44,7 +44,9 @@ import re
 import sys
 
 SHEET_ID = "15lWYMvRjY3hGVvPu_IgmGHx4ER3joCERFDEzVd8aLrI"
-WORKSHEET_NAME = "AIチェック用"
+# hpb_slot_check.pyと同じタブ名で揃える(栗林さんが「AIチェック用」を複製して作った
+# 「AIチェック用ver.2」が自動化の対象。元の「AIチェック用」タブには一切触れないこと)。
+WORKSHEET_NAME = "AIチェック用ver.2"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # --- 要検証: 実際のログインページで確認していないセレクタ ------------------------
