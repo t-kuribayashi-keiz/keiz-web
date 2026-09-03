@@ -715,8 +715,13 @@ def extract(service, month_label: str) -> dict[str, float]:
 BATCH_READ_CHUNK = 50
 
 
-def read_cells(service, refs: list[tuple[str, str]]) -> list[str]:
-    """(タブ名, セル)のリストをまとめて読む。並び順は入力どおり。"""
+def read_cells(service, refs: list[tuple[str, str]], raw: bool = False) -> list[str]:
+    """(タブ名, セル)のリストをまとめて読む。並び順は入力どおり。
+
+    raw=True は表示用ではなく実際に入っている値を返す。書き込みの読み返しはこちらを使う
+    (表示は書式で丸められる。1.3605442176870748 を書いたセルが『1.4』と読める)。
+    人に見せる書き込み前の値は表示のままでよいので、既定はFORMATTED_VALUE。
+    """
     values: list[str] = []
     for start in range(0, len(refs), BATCH_READ_CHUNK):
         chunk = refs[start:start + BATCH_READ_CHUNK]
@@ -726,7 +731,7 @@ def read_cells(service, refs: list[tuple[str, str]]) -> list[str]:
             .batchGet(
                 spreadsheetId=SPREADSHEET_ID,
                 ranges=[f"'{title}'!{ref}" for title, ref in chunk],
-                valueRenderOption="FORMATTED_VALUE",
+                valueRenderOption="UNFORMATTED_VALUE" if raw else "FORMATTED_VALUE",
             )
             .execute()
         )
@@ -746,10 +751,10 @@ def snapshot(service, cells: dict[str, str]) -> dict[str, str]:
 def values_match(actual, expected) -> bool:
     """読み返した値が、書いた値と同じとみなせるか。
 
-    完全一致にできない理由: 読み返しは表示用の値で、有効数字10桁程度に丸められる
-    (14.533333333333333 と書いて 14.53333333 が返る)。整数の転記では完全一致するが、
-    ⑤の1店舗当たりの数字は割り算の結果なので必ずずれる。
+    実際に入っている値で読み返しても、浮動小数の丸めでわずかにずれることがある。
     丸め以上のずれは見逃したくないので、許容幅は丸め幅ぎりぎりに絞る。
+    **表示用の値と比べてはいけない**。書式が小数1桁なら 8.506666… が『8.5』になり、
+    正しく書けたセルを不一致と判定する(逆に、桁を落として書いた誤りは見逃す)。
     """
     got, want = parse_number(actual), parse_number(expected)
     if got is None or want is None:
@@ -771,9 +776,19 @@ def write_cells(service, planned: dict[str, tuple[str, str, object]]) -> None:
 
 
 def verify(service, planned: dict[str, tuple[str, str, object]]) -> list[str]:
-    """書き込み後に読み返し、一致しないものを返す。"""
+    """書き込み後に読み返し、一致しないものを返す。
+
+    **実際に入っている値で比べる。** 表示用の値は書式で丸められるので、正しく書けた
+    セルが不一致に見える。ダッシュボードの行が小数1桁表示になった日に、
+    1.3605442176870748 と書いたAJ30が『1.4』と読めて、書き込み自体は成功しているのに
+    このチェックが落ちた(2026-09-03)。
+    """
     labels = list(planned)
-    actuals = read_cells(service, [(planned[label][0], planned[label][1]) for label in labels])
+    actuals = read_cells(
+        service,
+        [(planned[label][0], planned[label][1]) for label in labels],
+        raw=True,
+    )
     mismatches = []
     for label, actual in zip(labels, actuals):
         title, ref, expected = planned[label]

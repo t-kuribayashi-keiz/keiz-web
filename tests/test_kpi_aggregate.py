@@ -283,6 +283,40 @@ class TestValuesMatch(unittest.TestCase):
         self.assertFalse(kpi.values_match("", 14.5))
         self.assertFalse(kpi.values_match("エラー", 14.5))
 
+    def test_the_display_rounded_read_back_is_a_mismatch(self):
+        """表示用の値を読み返すと、正しく書けたセルが落ちる。
+
+        2026-09-03、ダッシュボードの行が小数1桁表示になり、実際に起きた。書けた値は
+        正しいのにこのチェックが落ちる。だから読み返しは UNFORMATTED_VALUE で読む
+        (read_cells(raw=True))。この照合を緩めて通すのは逆方向で、
+        桁を落として書いた本物の誤りまで見逃す。
+        """
+        for shown, written in (("1.4", 1.3605442176870748),
+                               ("8.5", 8.506666666666668),
+                               ("2.0", 1.96),
+                               ("4.1", 4.066666666666666),
+                               ("19.3", 19.31111111111111)):
+            self.assertFalse(kpi.values_match(shown, written), shown)
+
+    def test_the_read_back_asks_for_the_stored_value(self):
+        """verify は表示用ではなく実際の値を読む。"""
+        calls = []
+
+        def fake_read_cells(service, refs, raw=False):
+            calls.append(raw)
+            return ["1.3605442176870748"]
+
+        original = kpi.read_cells
+        kpi.read_cells = fake_read_cells
+        try:
+            mismatches = kpi.verify(
+                None, {"dash_epark": ("ダッシュボード", "AJ30", 1.3605442176870748)}
+            )
+        finally:
+            kpi.read_cells = original
+        self.assertEqual(calls, [True])
+        self.assertEqual(mismatches, [])
+
 
 class TestBackupTabs(unittest.TestCase):
     """複製・バックアップのタブは実データと同じ形なので、読めてしまう。中身は古い。"""
