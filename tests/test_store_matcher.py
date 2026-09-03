@@ -35,6 +35,24 @@ class TestNormalization(unittest.TestCase):
             normalize_store_name("たいよう鍼灸整骨院 枚方公園"),
         )
 
+    def test_case_is_ignored(self):
+        """広告費シートは『たいよう鍼灸整骨院BRANCH松井山手』、院マスタは『branch松井山手院』。"""
+        self.assertEqual(
+            normalize_store_name("たいよう鍼灸整骨院BRANCH松井山手"),
+            normalize_store_name("たいよう鍼灸整骨院 branch松井山手院"),
+        )
+
+    def test_only_leading_brackets_are_dropped(self):
+        """先頭の冠文字は装飾だが、途中・末尾の括弧は店舗を識別する情報。中身を消さない。"""
+        self.assertEqual(normalize_store_name("おかだ鍼灸整骨院（御殿山）"), "おかだ〇御殿山")
+
+    def test_brand_prefix_is_stripped(self):
+        """広告費シートは『リフレッシュセンターリラックス梅ヶ丘店』、院マスタは『梅ヶ丘店』。"""
+        self.assertEqual(
+            normalize_store_name("リフレッシュセンターリラックス梅ヶ丘店"),
+            normalize_store_name("梅ヶ丘店"),
+        )
+
     def test_shin_kyu_spelling_variants_unify(self):
         self.assertEqual(
             normalize_store_name("すまいる針灸接骨院 六甲道院"),
@@ -69,7 +87,10 @@ class TestMatching(unittest.TestCase):
                 name.replace("整骨院", "整体院").replace("接骨院", "整体院"),
                 name.replace("鍼灸", "針灸"),
                 name.replace(" ", "　"),
+                name.upper(),
             ]
+            if clinic["brand"] == "リラックス":
+                variants.append("リフレッシュセンターリラックス" + name)
             for variant in variants:
                 result = self.matcher.match(variant)
                 if result["group"] != group_of(clinic):
@@ -87,6 +108,19 @@ class TestMatching(unittest.TestCase):
     def test_unknown_store_is_not_silently_counted_as_chokuei(self):
         result = self.matcher.match("まだマスタに無い整骨院 どこか院")
         self.assertIsNone(result["group"])
+
+    def test_names_seen_in_the_ad_spend_sheet(self):
+        """2026-07の実行で突き合わせられなかった実際の店舗名。全部当たること。"""
+        expected = {
+            "たいよう鍼灸整骨院BRANCH松井山手": "サンズ",
+            "おかだ鍼灸整骨院（御殿山）": "サンズ",
+            "薬園台駅東口接骨院": "直営",
+            "高円寺店": "リラックス",
+            "リフレッシュセンターリラックスたまプラーザ東急百貨店": "リラックス",
+            "リフレッシュセンターリラックスFKDインターパーク店": "リラックス",
+        }
+        for name, group in expected.items():
+            self.assertEqual(self.matcher.match(name)["group"], group, name)
 
     def test_group_of_folds_chokuei_corporations_together(self):
         """M列・Q列(直営)は法人を分けないので、直営配下は全部『直営』に畳む。"""

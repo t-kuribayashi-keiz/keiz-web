@@ -9,7 +9,14 @@
       "opened_at": "",
       "status": "active",
       "type": "pilates_studio",
-      "acquisition_channels": ["organic_search", "organic_social", "paid_social", "paid_search", "referral", "direct"],
+      "acquisition_channels": [
+        "organic_search",
+        "organic_social",
+        "paid_social",
+        "paid_search",
+        "referral",
+        "direct"
+      ],
       "notes": "整骨院ではなくピラティススタジオブランド。集客チャネルはホームページのみ(SEO/MEO・メタ広告・Google PPC)。詳細は brands/luna/CLAUDE.md 参照。"
     },
     {
@@ -3198,6 +3205,38 @@
       "type": "relaxation_salon",
       "acquisition_channels": [],
       "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。id `relax-togoshiginza` はLUNAブランドの `luna-togoshiginza` と地名(戸越銀座)が同じだが、ブランドプレフィックスが異なるため衝突しない。"
+    },
+    {
+      "id": "chokuei-yakuendai",
+      "name": "薬園台駅東口接骨院",
+      "brand": "直営",
+      "corporation": "アポロ",
+      "area": "千葉県船橋市",
+      "address": "",
+      "phone": "",
+      "website": "https://chiryouin.biz/yakuendai/",
+      "email": "",
+      "opened_at": "",
+      "status": "active",
+      "type": "seikotsuin",
+      "acquisition_channels": [],
+      "notes": "2026-09-03に追加。広告費シートに金額があるのに院マスタに無く、店舗数の集計が止まったことで発覚。所属は推測ではなくKPIシート内の記載で確定した(店舗一覧に『薬園台駅東口接骨院 / 直営』、別の表に『118 / 薬園台駅東口接骨院 / アポロ』)。同シート内に『薬園台駅東口整体院』の表記もあり、HPB掲載時に整骨院→整体院へ改名している例。住所・電話・メールは未取得。"
+    },
+    {
+      "id": "relax-koenji",
+      "name": "高円寺店",
+      "brand": "リラックス",
+      "corporation": "リラックス",
+      "area": "東京都杉並区",
+      "address": "",
+      "phone": "",
+      "website": "",
+      "email": "",
+      "opened_at": "2026-07",
+      "status": "active",
+      "type": "relaxation_salon",
+      "acquisition_channels": [],
+      "notes": "2026年7月開店。広告費シートに金額があるのに院マスタに無く、店舗数の集計が止まったことで発覚したため、突き合わせが通るよう先に登録した。住所・電話・自社サイトURLは未取得(docs/backlog.md の情報待ち)。"
     }
   ]
 }

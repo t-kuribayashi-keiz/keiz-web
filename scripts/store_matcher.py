@@ -29,6 +29,7 @@ import unicodedata
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLINICS_PATH = os.path.join(REPO_ROOT, "data", "clinics.json")
+ALIASES_PATH = os.path.join(REPO_ROOT, "data", "store-name-aliases.json")
 
 # 院の種別を表す語。媒体によって整骨院/整体院/接骨院が入れ替わるため、1つの記号に潰して
 # 「〇」として扱う。潰すだけで消さないのは、「わかば」と「わかば整骨院」を同一視しないため。
@@ -39,18 +40,51 @@ CLINIC_TYPE_WORDS = (
 )
 TYPE_TOKEN = "〇"
 
-# 冠文字(【肩こり・腰痛なら】など)。中身ごと落とす。院マスタ側には括弧付きの名前が
-# 1件も無いことを確認済みなので、落として困る名前は今のところ存在しない。
-BRACKETED = re.compile(r"[【\[（(〔「『《〈][^】\]）)〕」』》〉]*[】\]）)〕」』》〉]")
+# 冠文字(【肩こり・腰痛なら】など)。**先頭にあるものだけ**中身ごと落とす。
+# 途中や末尾の括弧は落とさない: 「おかだ鍼灸整骨院（御殿山）」の（御殿山）は装飾ではなく
+# 店舗を識別する情報で、落とすと院マスタの「おかだ鍼灸整骨院 枚方御殿山院」に当たらなくなる。
+# 先頭以外の括弧は、括弧の記号だけ外して中身は残す。
+OPEN_BRACKETS = "【[（(〔「『《〈"
+CLOSE_BRACKETS = "】]）)〕」』》〉"
+LEADING_BRACKETED = re.compile(
+    f"^(?:[{re.escape(OPEN_BRACKETS)}][^{re.escape(CLOSE_BRACKETS)}]*[{re.escape(CLOSE_BRACKETS)}]\\s*)+"
+)
+BRACKET_CHARS = re.compile(f"[{re.escape(OPEN_BRACKETS + CLOSE_BRACKETS)}]")
 
 # 類似度で拾うときの下限。これを下回る候補は見ない。
 SIMILARITY_THRESHOLD = 0.82
+# 屋号(記号〇より前)が一致したときに、支店名の部分をどこまで緩く見るか。
+BRANCH_SIMILARITY_THRESHOLD = 0.6
+
+
+def load_aliases() -> dict:
+    with open(ALIASES_PATH, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+_ALIASES = None
 
 
 def normalize_store_name(name: str) -> str:
     """媒体をまたいでも同じ形になるように店舗名をならす。"""
-    text = unicodedata.normalize("NFKC", str(name))
-    text = BRACKETED.sub("", text)
+    global _ALIASES
+    if _ALIASES is None:
+        _ALIASES = load_aliases()
+
+    text = str(_ALIASES["aliases"].get(str(name).strip(), name))
+    text = unicodedata.normalize("NFKC", text).casefold()
+    text = LEADING_BRACKETED.sub("", text)
+
+    # 媒体側にだけ付いているブランド名の冠を落とす。
+    # 「リフレッシュセンターリラックス梅ヶ丘店」→「梅ヶ丘店」(院マスタは店舗名だけを持つ)。
+    for prefix in _ALIASES["strip_prefixes"]:
+        head = unicodedata.normalize("NFKC", prefix).casefold()
+        stripped = re.sub(r"\s+", "", text)
+        if stripped.startswith(re.sub(r"\s+", "", head)) and len(stripped) > len(re.sub(r"\s+", "", head)):
+            text = stripped[len(re.sub(r"\s+", "", head)):]
+            break
+
+    text = BRACKET_CHARS.sub("", text)
     text = re.sub(r"\s+", "", text)
     text = text.replace("針灸", "鍼灸")          # 院マスタ内にも両方の表記がある
     for word in CLINIC_TYPE_WORDS:
@@ -82,6 +116,39 @@ class StoreMatcher:
         for clinic in self.clinics:
             self.by_normalized.setdefault(normalize_store_name(clinic["name"]), []).append(clinic)
         self.normalized_names = list(self.by_normalized)
+
+    @staticmethod
+    def _split(normalized: str) -> tuple[str, str] | None:
+        """「たいよう〇branch松井山手」→ ("たいよう", "branch松井山手")。
+
+        屋号(種別語より前)と支店名に分ける。媒体によって支店名の書き方が一番揺れる
+        (「（御殿山）」と「枚方御殿山院」など)ので、屋号が一致していることを確かめたうえで
+        支店名だけ緩く比べたい。
+        """
+        if TYPE_TOKEN not in normalized:
+            return None
+        head, _, tail = normalized.partition(TYPE_TOKEN)
+        return (head, tail) if head else None
+
+    def _match_by_branch(self, normalized: str) -> list[dict]:
+        """屋号が一致し、支店名も矛盾しない院を集める。"""
+        split = self._split(normalized)
+        if not split:
+            return []
+        head, tail = split
+        found = []
+        for candidate, clinics in self.by_normalized.items():
+            other = self._split(candidate)
+            if not other or other[0] != head:
+                continue
+            other_tail = other[1]
+            if tail and other_tail:
+                contained = tail in other_tail or other_tail in tail
+                ratio = difflib.SequenceMatcher(None, tail, other_tail).ratio()
+                if not contained and ratio < BRANCH_SIMILARITY_THRESHOLD:
+                    continue
+            found.extend(clinics)
+        return found
 
     def match(self, name: str) -> dict:
         """1件の店舗名を判定する。
@@ -118,10 +185,18 @@ class StoreMatcher:
             for candidate in self.normalized_names
         ]
         near = [candidate for ratio, candidate in scored if ratio >= SIMILARITY_THRESHOLD]
-        if not near:
+        clinics = [clinic for candidate in near for clinic in self.by_normalized[candidate]]
+        how = "similar"
+
+        if not clinics:
+            # 屋号+支店名で見る。全体の類似度だと、支店名の書き方の差
+            # (「（御殿山）」と「枚方御殿山院」)で閾値を割ってしまう。
+            clinics = self._match_by_branch(normalized)
+            how = "branch"
+
+        if not clinics:
             return {"group": None, "how": "unmatched", "clinic": None, "candidates": []}
 
-        clinics = [clinic for candidate in near for clinic in self.by_normalized[candidate]]
         groups = {group_of(clinic) for clinic in clinics}
         names = [clinic["name"] for clinic in clinics]
         if len(groups) > 1:
@@ -129,7 +204,7 @@ class StoreMatcher:
             return {"group": None, "how": "ambiguous", "clinic": None, "candidates": names}
         return {
             "group": groups.pop(),
-            "how": "similar",
+            "how": how,
             "clinic": clinics[0] if len(clinics) == 1 else None,
             "candidates": names,
         }
