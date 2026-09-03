@@ -1,0 +1,64 @@
+name: Monthly KPI transfer
+
+# Transfers the settled (速報値) numbers into 「【2026年_月次報告】集客数」 for a given month.
+# See functions/kpi-aggregation/CLAUDE.md.
+#
+# Deliberately manual-only — no cron. This writes into a live business spreadsheet, and the
+# 速報値 tabs only exist once someone has built them, so there is no date on which running
+# unattended is safe. The month is always named explicitly.
+#
+# The service account key lives only in the GCP_KPI_WRITER_KEY repository secret; it is never
+# in the repo and never reaches a Claude session.
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "対象月(例: 2026年8月)"
+        required: true
+        type: string
+      mode:
+        description: "calibrate=既に速報値が入っている月で答え合わせ / dry-run=書き込む内容の確認 / apply=本番書き込み"
+        required: true
+        type: choice
+        options:
+          - calibrate
+          - dry-run
+          - apply
+        default: calibrate
+
+# Two concurrent runs could write the same row from different reads.
+concurrency:
+  group: kpi-aggregate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Transfer
+        env:
+          GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          case "${{ inputs.mode }}" in
+            calibrate) flag="--calibrate" ;;
+            apply)     flag="--apply" ;;
+            *)         flag="" ;;
+          esac
+          python3 scripts/kpi_aggregate.py --month "${{ inputs.month }}" $flag

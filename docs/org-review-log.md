@@ -1139,3 +1139,24 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   次にやること: サービスアカウント`chokuei-sunsumirai-kpi-writer`の鍵設定(ローカルセッション)を
   待って、`--month 2026年7月 --calibrate`で全項目一致を確認する。工程⑤の書き込みは算出式が
   確定しているので、①②の検証が通り次第すぐ実装できる
+
+
+## 2026-09-03 集計自動化: サービスアカウントのセットアップ手順を整理
+
+- 栗林さんから「鍵設定って私は何をやればいいんだっけ?」との確認。会話の中に散っていたので
+  `functions/kpi-aggregation/CLAUDE.md`に「セットアップ手順」として集約した
+- 人にしかできないのは4つ: (1)「【2026年_月次報告】集客数」に**編集者**で共有、
+  (2)「広告費」に閲覧者で共有、(3)「EPARK掲載店舗リスト」に閲覧者で共有、
+  (4) GitHubシークレット`GCP_KPI_WRITER_KEY`に鍵JSONを登録。
+  3シートともオーナーが栗林さんではないため、共有できない場合はオーナー依頼になる
+  (「広告費」で同じ経緯があった)
+- (4)は`gh secret set GCP_KPI_WRITER_KEY < 鍵ファイル`で行う。**画面に貼らない**ことで、
+  鍵がどのセッションのコンテキストにも入らない。Chatworkトークンと同じ扱い
+- GCPの鍵発行はブラウザ/gcloudが要るのでクラウドからは実行できず、ローカルセッションに委譲する
+- `.github/workflows/kpi-aggregate.yml`を新設。**cronは付けない**: 本番の業務シートに書き込む
+  処理で、しかも速報値タブは人が作ってはじめて存在するため、無人で走らせて安全な日が無い。
+  対象月と`calibrate` / `dry-run` / `apply`を毎回明示する手動実行のみ。
+  `workflow_dispatch`はワークフローファイルがデフォルトブランチに無いと表示されないため、
+  実行前に`main`へのマージが要る点も記載した
+- 対応状況: 着手。変更したファイル: `.github/workflows/kpi-aggregate.yml`(新規)、
+  `functions/kpi-aggregation/CLAUDE.md`、`docs/backlog.md`、`docs/org-review-log.md`

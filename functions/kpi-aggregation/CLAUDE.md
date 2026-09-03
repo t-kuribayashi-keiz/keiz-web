@@ -69,6 +69,43 @@ GASはスプレッドシート内部で動くため鍵も権限付与も不要�
 サービスアカウント: `chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`
 (既存2つと違い**書き込み権限を持つ**ため、名前でそれが分かるようにしている)
 
+## セットアップ手順(2026-09-03 時点で未完了)
+
+サービスアカウント`chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`が
+使えるようになるまでの作業。**鍵の中身はチャットにもリポジトリにも一切入れない。**
+
+### 栗林さんにしかできないこと(スプレッドシートの共有とシークレット登録)
+
+| # | 作業 | 対象 | 権限 | オーナー |
+|---|---|---|---|---|
+| 1 | 共有 | 「【2026年_月次報告】集客数」 | **編集者**(書き込むため) | `mar-yoshida@keizgroup.jp` |
+| 2 | 共有 | 「広告費」 | 閲覧者 | `ga_admin@keizgroup.jp` |
+| 3 | 共有 | 「EPARK掲載店舗リスト」 | 閲覧者 | `k-yadomaru@keizgroup.jp` |
+| 4 | GitHubシークレット `GCP_KPI_WRITER_KEY` に鍵JSONを登録 | このリポジトリ | — | — |
+
+栗林さんの編集者権限では共有できないシートがある(「広告費」のときにオーナー側で権限付与を
+してもらった経緯がある)。その場合はオーナーに依頼する。
+
+4はローカルPCで `gh secret set GCP_KPI_WRITER_KEY < 鍵ファイルのパス` を使う。
+**画面に貼り付けない**ためで、こうすれば鍵がどのセッションのコンテキストにも入らない。
+
+### ローカルのClaude Codeセッションにやらせること
+
+GCPの鍵発行はブラウザ/`gcloud`が要るのでクラウド側からは実行できない。ローカルセッションに
+依頼する(貼り付け用の指示文は org-review-log 2026-09-03 の項)。
+
+- サービスアカウントの作成(既にあればスキップ)と、JSON鍵の発行・`claude\keys\`への保存
+- 上記1〜3の共有が効いているかの読み取りスモークテスト
+- 鍵は既存2つ(`smile-good-reporter` / `ad-spend-reporter`)と同じ場所・同じ扱いにする
+
+### 動作確認
+
+`.github/workflows/kpi-aggregate.yml` を手動実行する(cronは無し。本番の業務シートに書き込む
+処理を無人で走らせて安全な日は無いため)。**`workflow_dispatch`はワークフローファイルが
+デフォルトブランチに無いと出てこない**ので、先に`main`へマージする必要がある。
+
+順番は `calibrate`(2026年7月など既に速報値が入っている月)→ `dry-run` → `apply`。
+
 ## ファイル
 
 | ファイル | 用途 |

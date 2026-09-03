@@ -50,6 +50,13 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 ## 設定・環境
 
+- **サービスアカウント`chokuei-sunsumirai-kpi-writer`のセットアップ** — 手順は
+  [functions/kpi-aggregation/CLAUDE.md](../functions/kpi-aggregation/CLAUDE.md)の
+  「セットアップ手順」。栗林さん側は3シートの共有(KPIシートは**編集者**)と
+  GitHubシークレット`GCP_KPI_WRITER_KEY`の登録、鍵の発行はローカルセッション。
+  完了後に`kpi-aggregate`ワークフローを`calibrate`→`dry-run`→`apply`の順で実行する
+  (`workflow_dispatch`は`main`にマージしないと表示されない)
+
 - **Chatwork依頼Issueを処理するRoutineの作り直し** — ツール経由で作成したRoutineには
   GitHub連携もリポジトリも渡らない可能性があり(作成時に警告あり)、claude.aiのRoutines UIからの
   作成が必要かもしれない。検証セッション(session_01HeMFkYUpAEhhR3vMQTVeFd /
