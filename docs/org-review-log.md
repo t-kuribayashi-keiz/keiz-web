@@ -1451,3 +1451,108 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
 
 棚卸しのみ・対応は未実施。ユーザーが優先順位を判断中。
 変更したファイル: `docs/org-review-log.md`(本エントリの追記のみ)
+
+---
+
+## 2026-09-03 棚卸し第1弾の対応
+
+- きっかけ: 直前の「2026-09-03 組織全体棚卸し」で見つかったA〜Iのうち、栗林さんが
+  「判断不要・低リスク」として承認した5件を実施した(判断が必要な論点はA〜Iのまま
+  `docs/org-review-log.md`・`docs/backlog.md`に残し、今回は着手していない)
+
+### 1. 並行セッション対策(learnings/)を7Skillへ横展開
+
+- 対応: `hpb-crm-reconciliation`、`karte-demographics-chart`、`shift-schedule-gas-automation`、
+  `dji-mic-auto-upload`、`gdrive-store-staff-folders`、`customer-acquisition-consulting`、
+  `chatwork-integration`の7Skillそれぞれに、`hpb-salonboard-update/learnings/README.md`と
+  同内容(参照先パスのみ調整)の`learnings/README.md`を新設。各SKILL.mdの末尾に「並行セッション
+  対策」節を追記し、`learnings/`への新規ファイル作成・gitコマンド禁止・タスク開始前の
+  `learnings/`読了を明記した上で、詳細は
+  `hpb-salonboard-update/references/concurrent-sessions.md`への相対パス参照とした
+  (このファイル自体は複製せず共通ドキュメントのまま)
+- `hpb-crm-reconciliation`はLoggingセクションで`hpb_work_log.csv`への言及があったため、
+  同節に`hpb_work_log.d/`パターン(1行1ファイル)への言及もあわせて追記した
+- これで並行運用の仕組みを持つSkillは8件(`hpb-salonboard-update`含む)になった。残り
+  (`org-structure-artifact`、`org-structure-table`、`session-to-skill`)は元々複数セッション
+  同時運用が想定される業務ではないため対象外とした(今回の指示範囲にも含まれていない)
+- 対応状況: 対応済み。変更したファイル:
+  `.claude/skills/hpb-crm-reconciliation/learnings/README.md`(新規)、
+  `.claude/skills/hpb-crm-reconciliation/SKILL.md`、
+  `.claude/skills/karte-demographics-chart/learnings/README.md`(新規)、
+  `.claude/skills/karte-demographics-chart/SKILL.md`、
+  `.claude/skills/shift-schedule-gas-automation/learnings/README.md`(新規)、
+  `.claude/skills/shift-schedule-gas-automation/SKILL.md`、
+  `.claude/skills/dji-mic-auto-upload/learnings/README.md`(新規)、
+  `.claude/skills/dji-mic-auto-upload/SKILL.md`、
+  `.claude/skills/gdrive-store-staff-folders/learnings/README.md`(新規)、
+  `.claude/skills/gdrive-store-staff-folders/SKILL.md`、
+  `.claude/skills/customer-acquisition-consulting/learnings/README.md`(新規)、
+  `.claude/skills/customer-acquisition-consulting/SKILL.md`、
+  `.claude/skills/chatwork-integration/learnings/README.md`(新規)、
+  `.claude/skills/chatwork-integration/SKILL.md`
+
+### 2. `functions/kpi-aggregation`を`skills/README.md`の役割マッピングに登録
+
+- 対応: `skills/README.md`の役割マッピング表に「`kpi-aggregation`(実体は
+  `functions/kpi-aggregation/`)」の行を追加し、対応役割を`implementer`(自動化の保守)とした。
+  表の直後に、`.claude/skills/`配下にSkillフォルダを新設せず`functions/kpi-aggregation/CLAUDE.md`
+  の既存実装(`scripts/kpi_aggregate.py`・`scripts/store_matcher.py`・GitHub Actions・テスト)を
+  そのまま実体として扱う例外である旨を明記した(他のfunctions配下の機能=`receipt-agency`・
+  `recruiting`・`ad-spend-tracking`はSkill化されていないのと異なる理由も付記)
+- 対応状況: 対応済み。変更したファイル: `skills/README.md`
+
+### 3. `org-structure-artifact` vs `org-structure-table`の重複疑いを検証
+
+- 検証結果: 両SKILL.mdの全文を読んだ結果、**別物であり統合は不要**と判断した。
+  `org-structure-table`は「写真/手書きの会議資料 → ○×△マトリクスのGoogle Sheets」、
+  `org-structure-artifact`は「既にテキスト化されたCSV/表 → HTML Artifact+PDFの多セクション
+  文書(あるべき体制→現メンバー当てはめ→評価マトリクス)」であり、入力形式・出力形式・
+  作成ツール(PowerShell+Excel COM vs artifact-design/artifact-diagramming)のいずれも異なる。
+  唯一重なるのは`org-structure-artifact`の「03 評価マトリクス」セクションが
+  ○/△/×表という点だが、これは文書全体の1セクションに過ぎず主成果物ではない
+- 対応: `org-structure-artifact/SKILL.md`の「Likely overlap」という古い自己申告の記述を、
+  上記の検証結果・比較表・使い分け基準に書き換えた。`org-structure-table/SKILL.md`の
+  「Likely overlap with a related deliverable」節も同様に、検証済みで別物である旨・使い分け
+  基準に書き換えた(見出しも「Relationship to `org-structure-artifact` (verified 2026-09-03,
+  not a duplicate)」に変更)
+- 対応状況: 対応済み(検証・記述の是正のみ。統合作業は元々発生しない結論のため対象外)。
+  変更したファイル: `.claude/skills/org-structure-artifact/SKILL.md`、
+  `.claude/skills/org-structure-table/SKILL.md`
+
+### 4. `hpb-crm-reconciliation`の対象院数を実数に更新
+
+- 対応: SKILL.mdのdescription・本文・Loggingセクション、および`references/background.md`の
+  「~150 chiropractic salons」という概数表現を、`data/clinics.json`確定時点(2026-09-03)の
+  実数(直営135・サンズミライ18・心身堂7・スマイル11・グッド7・リラックス25・LUNA1、
+  合計204)に置き換えた。ただし**このCRM×HPB突合スプレッドシートが実際にどのブランドを
+  対象にしているかは未確認**であるため、「204院全体か、整骨院系ブランド(直営+サンズミライ+
+  心身堂+スマイル+グッド≒178、LUNA=ピラティス・リラックス=マッサージ店のため対象外の
+  可能性がある)か、別の部分集合か」を断定せず、事実(確定した院マスタの数字)と未確認事項
+  (この突合ツールのスコープ)を分けて明記した。憶測で「直営のみ」等の決め打ちはしていない
+- 対応状況: 対応済み。変更したファイル:
+  `.claude/skills/hpb-crm-reconciliation/SKILL.md`、
+  `.claude/skills/hpb-crm-reconciliation/references/background.md`
+  未対応として残っている論点: この突合ツールが実際にどのブランドを対象にしているかの確認
+  (ユーザーまたはローカルセッションでの確認が必要)
+
+### 5. 宙に浮いた未解決事項を`docs/backlog.md`に集約
+
+- 対応: 「2026-09-03 組織全体棚卸し」の記述I(および指示内容)に基づき、以下7件を
+  `docs/backlog.md`に追記した(重複記載済みだった「ブランド専用CLAUDE.md未整備」「スマイルの
+  広告費対象院数不一致」は追加していない):
+  - 情報待ちセクション: アイワ・リクスムの実利用範囲、広告費サマリー行「アイワ」の正体、
+    「グッド・スマイル月次報告」の共有設定見直し要否、HPB利用ブランド範囲の`clinics.json`
+    反映、直営以外のブランドのChatworkルーム追加(`data/chatwork-rooms.json`を実際に確認した
+    ところ、現状「【WEBマーケ】ケイズ×リラックス」1件のみで、直営・サンズミライ・心身堂・
+    スマイル・グッド・LUNAのルームは未登録と判明)
+  - 設定・環境セクション: 既存GCPプロジェクト`smile-story-ga-gsc`・`smile-web-strategy`と
+    `keizgroup-automation`との重複整理
+  - 調査待ち(実機・外部環境の確認が必要)セクション: salonboard-operatorの非交渉ルール2
+    (登録の一括承認≠反映の承認)の実地検証未完了(ローカルのclaude-in-chrome環境が必要)
+- 対応状況: 対応済み。変更したファイル: `docs/backlog.md`
+
+### 全体の対応状況
+
+対応済み(5件とも実施)。コミットは呼び出し元セッションが確認の上まとめて行う想定のため、
+このセッションではgitコマンドを実行していない。
+変更したファイル一覧は本エントリ各項の「変更したファイル」を参照。

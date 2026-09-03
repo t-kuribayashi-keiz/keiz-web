@@ -21,6 +21,15 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `customer-acquisition-consulting` | 集客のデータパイプライン・分析自動化 | analyst |
 | `session-to-skill` | 今の会話の作業手順をSkill化する | cross-functional(型化・再利用の判断) |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
+| `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
+
+`kpi-aggregation`は`.claude/skills/`配下にSkillフォルダを新設せず、既存の
+`functions/kpi-aggregation/CLAUDE.md`(実装は`scripts/kpi_aggregate.py`・
+`scripts/store_matcher.py`・`.github/workflows/kpi-aggregate.yml`・`tests/`)をそのまま
+実体として扱う例外。他のブランド横断の社内機能(`functions/receipt-agency/`、
+`functions/recruiting/`、`functions/ad-spend-tracking/`)がCLAUDE.mdのみでSkill化されて
+いないのと異なり、この機能は既に本番自動化として稼働しコード資産が`functions/`側に
+育っているため、`.claude/skills/`への二重管理を避けてこの表への登録のみで整合を取る。
 
 ## 移設手順(skill-kanriリポジトリの更新をこちらに反映する場合)
 

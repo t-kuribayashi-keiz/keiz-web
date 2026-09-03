@@ -1,11 +1,13 @@
 ---
 name: hpb-crm-reconciliation
-description: Use this skill whenever the user asks to modify, debug, fix, or explain the CRM×HPB data reconciliation Google Apps Script that matches HotPepper Beauty/SalonBoard visit data against the company's CRM (カルテ) records across their ~150 chiropractic salons — e.g. "突合ロジックを直して", "この判定がおかしい", "◯◯様の一致相手が違う", requests to change color-coding/判定色, matching priority order, name/kana matching rules, or add a new judgment case in `集計自動化.gs` / `reconcileData()`. Also trigger on mentions of "突合シート", "突合ロジック", the reconciliation spreadsheet, GAS/Apps Script tied to CRM-HPB matching, or reports that a specific customer's match result looks wrong. Do NOT trigger for SalonBoard website coupon/content edits (that's the separate hpb-salonboard-update skill) — this skill is specifically about the Google Sheets + Apps Script reconciliation tool, not the salonboard.com admin UI.
+description: Use this skill whenever the user asks to modify, debug, fix, or explain the CRM×HPB data reconciliation Google Apps Script that matches HotPepper Beauty/SalonBoard visit data against the company's CRM (カルテ) records across the chiropractic salons this reconciliation spreadsheet covers (scope not yet confirmed — see the note on salon count below) — e.g. "突合ロジックを直して", "この判定がおかしい", "◯◯様の一致相手が違う", requests to change color-coding/判定色, matching priority order, name/kana matching rules, or add a new judgment case in `集計自動化.gs` / `reconcileData()`. Also trigger on mentions of "突合シート", "突合ロジック", the reconciliation spreadsheet, GAS/Apps Script tied to CRM-HPB matching, or reports that a specific customer's match result looks wrong. Do NOT trigger for SalonBoard website coupon/content edits (that's the separate hpb-salonboard-update skill) — this skill is specifically about the Google Sheets + Apps Script reconciliation tool, not the salonboard.com admin UI.
 ---
 
 # HPB × CRM Data Reconciliation (GAS)
 
-Operational playbook for maintaining the Google Apps Script (GAS) that reconciles HotPepper Beauty (HPB/SalonBoard) visit data against the company's CRM (カルテ/patient record) data, across the ~150 chiropractic salons (整骨院/接骨院/整体院) the user's company operates. The script lives in an Apps Script project bound to a specific Google Sheet, and its job is to flag, per customer visit, whether the CRM already has a matching record — and if not, why (name mismatch, different store, phone-only match, likely family member, etc.) — using a priority-ordered set of matching rules and color codes. See `references/reconciliation-logic.md` for the full current algorithm and `references/background.md` for how this came to be and the fixes already made.
+Operational playbook for maintaining the Google Apps Script (GAS) that reconciles HotPepper Beauty (HPB/SalonBoard) visit data against the company's CRM (カルテ/patient record) data, across the chiropractic salons (整骨院/接骨院/整体院) this reconciliation spreadsheet covers. The script lives in an Apps Script project bound to a specific Google Sheet, and its job is to flag, per customer visit, whether the CRM already has a matching record — and if not, why (name mismatch, different store, phone-only match, likely family member, etc.) — using a priority-ordered set of matching rules and color codes. See `references/reconciliation-logic.md` for the full current algorithm and `references/background.md` for how this came to be and the fixes already made.
+
+**On salon count (updated 2026-09-03):** this SKILL.md previously said "~150" as a rough guess. `data/clinics.json` is now a confirmed store master with 204 entries as of 2026-09-03 (直営135・サンズミライ18・心身堂7・スマイル11・グッド7・リラックス25・LUNA1). That is a fact about the company's overall store count, not a fact about this spreadsheet — **whether this particular CRM×HPB reconciliation tool covers all 204, just the seikotsuin-type brands (直営+サンズミライ+心身堂+スマイル+グッド ≈ 178, excluding LUNA which is a pilates studio and リラックス which is a relaxation/massage salon, not 整骨院), or some other subset has not been confirmed.** Don't assume a scope and don't restate "~150" as if it were still the best number — if the exact coverage matters for a task, ask or check which stores actually appear in the CRM/HPB source sheets.
 
 ## Non-negotiable rules
 
@@ -31,7 +33,7 @@ Operational playbook for maintaining the Google Apps Script (GAS) that reconcile
 
 ## Logging
 
-This user tracks work time, token consumption, and plan-quota impact for recurring HPB-related tasks (see the sibling `hpb-salonboard-update` skill's logging convention). This specific reconciliation-script workflow hasn't had that convention set up yet in any observed session, but it's the same overall business process (CRM×HPB matching for the same ~150 salons), so unless the user says otherwise, follow the same pattern: after finishing a fix, append a row to `hpb_work_log.csv` in the working directory (create with header if missing) using columns adapted from the sibling skill —
+This user tracks work time, token consumption, and plan-quota impact for recurring HPB-related tasks (see the sibling `hpb-salonboard-update` skill's logging convention). This specific reconciliation-script workflow hasn't had that convention set up yet in any observed session, but it's the same overall business process (CRM×HPB matching for the same salon group — see the salon-count note above for the current, unconfirmed-scope figure), so unless the user says otherwise, follow the same pattern: after finishing a fix, append a row to `hpb_work_log.csv` in the working directory (create with header if missing) using columns adapted from the sibling skill —
 
 `date,task,rule_changed,items_changed,session_start,session_end,tokens_effective,usage_session_pct_delta,usage_weekly_pct_delta,notes`
 
@@ -42,3 +44,12 @@ using the same task-bounded start/end timestamp method and effective-token compu
 - `references/reconciliation-logic.md` — the full current matching algorithm: input sheets, normalization rules, matching priority order, color codes, output layout. Treat this as the living spec; update it whenever a fix changes the actual rules, so it stays in sync with the deployed code.
 - `references/apps-script-editing.md` — how to read and edit the Apps Script project's source from a browser session (it's not stored in spreadsheet cells), including the extraction and position-based-edit techniques used, and their failure modes.
 - `references/background.md` — narrative of how this workflow and skill came about, and the two fixes made in the session this skill was extracted from.
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`
+(`reconciliation-logic.md`等)を直接編集しない。学習は`learnings/`配下に新規ファイルとして
+置き、Loggingセクションの`hpb_work_log.csv`への追記も同様に`hpb_work_log.d/`配下へ1行1
+ファイルで置く。gitコマンド(`add`/`commit`/ブランチ切り替え)は実行しない。タスク開始前に
+`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。

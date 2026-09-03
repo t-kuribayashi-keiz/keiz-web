@@ -46,3 +46,10 @@ See `references/technical-notes.md` for exact file/folder identifiers observed, 
 - No notification mechanism (email? chat? in-sheet?) for presenting the monthly diff to the user was decided in the source session — don't assume one.
 
 Full narrative of how these constraints were discovered, including the exact back-and-forth with the user, is in `references/background.md`.
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`を
+直接編集しない。学習は`learnings/`配下に新規ファイルとして置き、gitコマンド(`add`/`commit`/
+ブランチ切り替え)は実行しない。タスク開始前に`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。
