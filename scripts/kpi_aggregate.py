@@ -763,11 +763,22 @@ def inspect(service, month_label: str) -> int:
     titles = list_tab_titles(service, SPREADSHEET_ID)
     plan_title = resolve_tab(titles, PLAN_TAB_KEYWORDS, "年間計画・目標")
     plan_rows = read_tab(service, SPREADSHEET_ID, plan_title)
-    row_index = find_month_row(plan_rows, PLAN_COLUMNS["month"], month_label)
-    row = plan_rows[row_index - 1]
-    print(f"タブ: {plan_title!r} / {row_index}行目")
-    for key, column in PLAN_COLUMNS.items():
-        print(f"  {key:22s} {column}{row_index} = {cell(row, column)!r}")
+    wanted = normalize(month_label)
+    candidates = [
+        row_index
+        for row_index, row in enumerate(plan_rows, start=1)
+        if normalize(cell(row, PLAN_COLUMNS["month"])) == wanted
+    ]
+    print(f"タブ: {plan_title!r} / {month_label}の行: {candidates}")
+    for row_index in candidates:
+        row = plan_rows[row_index - 1]
+        print(f"\n  [{row_index}行] ブロック={block_label_at(plan_rows, row_index)!r}")
+        filled = [
+            f"{key}({column})={cell(row, column)!r}"
+            for key, column in PLAN_COLUMNS.items()
+            if str(cell(row, column)).strip()
+        ]
+        print("    " + " | ".join(filled))
     return 0
 
 
