@@ -45,6 +45,10 @@ SOURCE_COLUMNS_PATH = os.path.join(REPO_ROOT, "data", "kpi-source-columns.json")
 AD_SPEND_IGNORE_PATH = os.path.join(REPO_ROOT, "data", "ad-spend-ignore-rows.json")
 
 PLAN_TAB_KEYWORDS = ["年間計画"]
+# 「年間計画・目標」タブには同じ月の行が複数ある(全体数 / 1店舗当たり ほか)。
+# ①②が書き込むのは全体数のブロック。A列の結合セルに入っているブロック名で絞る。
+PLAN_BLOCK_TOTAL = "全体数"
+PLAN_BLOCK_PER_STORE = "1店舗当たり"
 DASHBOARD_TAB_KEYWORDS = ["ダッシュボード"]
 AD_SPEND_TAB_KEYWORDS = ["広告費各詳細"]
 
@@ -208,18 +212,55 @@ def find_total_row(rows: list[list[str]], value_col_index: int) -> int:
     )
 
 
-def find_month_row(rows: list[list[str]], month_col: str, month_label: str) -> int:
-    """「2026年8月」のような月ラベルから対象行を特定する。"""
+def block_label_at(rows: list[list[str]], row_index: int, label_col: str = "A") -> str:
+    """その行が属するブロックの名前。
+
+    「年間計画・目標」タブは同じ月が何度も出てくる(全体数 / 1店舗当たり / ほか)。
+    ブロック名はA列の結合セルなので、値が入っているのは先頭行だけ。上に遡って探す。
+    """
+    for index in range(row_index, 0, -1):
+        value = str(cell(rows[index - 1], label_col)).strip()
+        if value:
+            return value
+    return ""
+
+
+def find_month_row(
+    rows: list[list[str]],
+    month_col: str,
+    month_label: str,
+    block_label: str | None = None,
+) -> int:
+    """「2026年8月」のような月ラベルから対象行を特定する。
+
+    同じ月の行が複数あるので、ブロック名(A列)でも絞る。絞っても1つに決まらなければ
+    停止する — 1店舗当たりの行に全体数を書き込むと、桁が2つ違う値が入る。
+    """
     wanted = normalize(month_label)
     matches = [
         row_index
         for row_index, row in enumerate(rows, start=1)
         if normalize(cell(row, month_col)) == wanted
     ]
+    if block_label:
+        matches = [
+            row_index
+            for row_index in matches
+            if normalize(block_label) in normalize(block_label_at(rows, row_index))
+        ]
+
     if not matches:
-        raise ValueError(f"{month_label} の行が見つかりませんでした。")
+        raise ValueError(
+            f"{month_label}"
+            + (f"(ブロック「{block_label}」)" if block_label else "")
+            + " の行が見つかりませんでした。"
+        )
     if len(matches) > 1:
-        raise ValueError(f"{month_label} の行が複数あります(行: {matches})。")
+        labels = {row_index: block_label_at(rows, row_index) for row_index in matches}
+        raise ValueError(
+            f"{month_label} の行が複数あります({labels})。"
+            "どの行に書くか機械的に決められないため停止します。"
+        )
     return matches[0]
 
 
@@ -299,39 +340,68 @@ def is_ignorable_ad_spend_row(label: str, ignore: dict) -> bool:
     return any(normalize(needle) in text for needle in ignore["ignore_contains"])
 
 
-def find_month_column(rows: list[list[str]], month_label: str, search_rows: int = 12) -> int:
+def find_month_column(rows: list[list[str]], month_label: str, search_rows: int = 15) -> int:
     """ヘッダー行から対象月の列番号(1始まり)を探す。
 
-    「2026年8月」「2026/8」「2026-08」のいずれの書き方でも当たるようにする。
-    候補が0件でも複数でも停止する — 隣の月の列を読むと丸ごと違う数字になるため。
+    広告費シートのヘッダーは「年は1月の列にしか入っていない」形:
+
+        B1='2017年\n1月'  C1='\n２月'  D1='\n３月' ... N1='2018年\n１月'
+
+    つまり「2026年7月」という文字列はシートのどこにも存在しない。年の列を見つけて、
+    そこから(月-1)だけ右に数える。数えっぱなしにはせず、**その列の見出しが本当に
+    「7月」かを確認してから**使う。1列ずれると隣の月の金額を数えることになり、
+    店舗数が丸ごと変わる。しかも金額は入っているのでエラーにはならない。
+
+    月は全角数字(「２月」「１０月」)で書かれているが、normalize()のNFKCで半角に揃う。
     """
     match = re.match(r"(\d{4})年(\d{1,2})月", month_label)
     if not match:
         raise ValueError(f"月ラベル『{month_label}』を解釈できません(例: 2026年8月)。")
     year, month = int(match.group(1)), int(match.group(2))
-    wanted = {
-        normalize(f"{year}年{month}月"),
-        normalize(f"{year}/{month}"),
-        normalize(f"{year}/{month:02d}"),
-        normalize(f"{year}-{month:02d}"),
-    }
 
-    hits = set()
+    january = normalize(f"{year}年1月")
+    direct = normalize(f"{year}年{month}月")
+    january_cols, direct_cols = set(), set()
     for row in rows[:search_rows]:
         for col_index, value in enumerate(row, start=1):
-            if normalize(value) in wanted:
-                hits.add(col_index)
-    if not hits:
+            text = normalize(value)
+            if text == january:
+                january_cols.add(col_index)
+            elif text == direct:
+                direct_cols.add(col_index)
+
+    if direct_cols:
+        candidates = direct_cols
+    elif january_cols:
+        candidates = {col + (month - 1) for col in january_cols}
+    else:
         raise ValueError(
-            f"広告費シートに {month_label} の列が見つかりませんでした。"
-            f"先頭{search_rows}行にヘッダーが無い可能性があります。"
+            f"広告費シートに {year}年 の見出しが見つかりませんでした"
+            f"(先頭{search_rows}行を検索)。ヘッダーの位置か書き方が変わった可能性があります。"
         )
-    if len(hits) > 1:
+
+    if len(candidates) > 1:
         raise ValueError(
-            f"{month_label} の列が複数見つかりました(列: {sorted(hits)})。"
+            f"{month_label} の列が複数見つかりました(列: {sorted(candidates)})。"
             "隣の月を読むと数字が丸ごと変わるため停止します。"
         )
-    return hits.pop()
+    column = candidates.pop()
+
+    # 数えた先が本当に対象月かを見出しで確認する。ずれていても金額は入っているので、
+    # 確認しないと「隣の月の店舗数」が何食わぬ顔でKPIになる。
+    wanted = {normalize(f"{month}月"), direct}
+    seen = [
+        normalize(cell(row, index_to_col(column)))
+        for row in rows[:search_rows]
+        if normalize(cell(row, index_to_col(column)))
+    ]
+    if not any(text in wanted for text in seen):
+        raise ValueError(
+            f"{month_label} の列として {index_to_col(column)}列 を割り出しましたが、"
+            f"その列の見出しが「{month}月」ではありません(見えているのは {seen[:5]})。"
+            "列の数え方が合っていないため停止します。"
+        )
+    return column
 
 
 def count_ad_spend_stores(
@@ -603,7 +673,7 @@ def calibrate(service, month_label: str, extracted: dict[str, float]) -> int:
     titles = list_tab_titles(service, SPREADSHEET_ID)
     plan_title = resolve_tab(titles, PLAN_TAB_KEYWORDS, "年間計画・目標")
     rows = read_tab(service, SPREADSHEET_ID, plan_title)
-    row_index = find_month_row(rows, PLAN_COLUMNS["month"], month_label)
+    row_index = find_month_row(rows, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_TOTAL)
     row = rows[row_index - 1]
 
     print(f"\n照合: {plan_title} の {row_index}行目({month_label})")
@@ -674,7 +744,7 @@ def inspect(service, month_label: str) -> int:
     print(f"\n=== {month_label} の 速報値 / 確定値 の合計値の比較 ===")
     sources = load_source_columns()
     for source_key, source in sources.items():
-        for kind in ("速報値", "確定値"):
+        for kind in ("中間値", "速報値", "確定値"):
             keywords = [month_tab_prefix(month_label)] + [
                 kind if word == "速報値" else word for word in source["tab_keywords"]
             ]
@@ -747,7 +817,7 @@ def main() -> int:
     titles = list_tab_titles(service, SPREADSHEET_ID)
     plan_title = resolve_tab(titles, PLAN_TAB_KEYWORDS, "年間計画・目標")
     rows = read_tab(service, SPREADSHEET_ID, plan_title)
-    row_index = find_month_row(rows, PLAN_COLUMNS["month"], args.month)
+    row_index = find_month_row(rows, PLAN_COLUMNS["month"], args.month, PLAN_BLOCK_TOTAL)
 
     planned = {}
     for key, value in sorted(extracted.items()):

@@ -71,22 +71,75 @@ class TestFindTotalRow(unittest.TestCase):
 
 
 class TestFindMonthColumn(unittest.TestCase):
-    HEADER = [["", "2026年7月", "2026年8月", "2026年9月"]]
+    """広告費シートのヘッダーは、年が1月の列にしか入っていない実際の形で試す。
 
-    def test_finds_the_month(self):
-        self.assertEqual(kpi.find_month_column(self.HEADER, "2026年8月"), 3)
+        B1='2017年\n1月'  C1='\n２月' ... M1='\n１２月'  N1='2018年\n１月'
 
-    def test_accepts_slash_notation(self):
-        self.assertEqual(kpi.find_month_column([["", "2026/7", "2026/8"]], "2026年8月"), 3)
+    「2026年7月」という文字列はシートのどこにも存在しない。
+    """
 
-    def test_missing_month_raises(self):
+    HEADER = [[""] + [f"{2017 + (i // 12)}年\n1月" if i % 12 == 0
+                      else f"\n{'０１２３４５６７８９'[(i % 12) + 1] if (i % 12) < 9 else ''}"
+                           f"{'１０１１１２'[((i % 12) - 9) * 2:((i % 12) - 9) * 2 + 2] if (i % 12) >= 9 else ''}月"
+                      for i in range(12 * 10)]]
+
+    def test_counts_from_the_january_column(self):
+        # 2017年1月がB列(2)なので、2017年7月はH列(8)。
+        self.assertEqual(kpi.find_month_column(self.HEADER, "2017年7月"), 8)
+        # 2018年1月はN列(14)。2018年3月はP列(16)。
+        self.assertEqual(kpi.find_month_column(self.HEADER, "2018年3月"), 16)
+
+    def test_january_itself(self):
+        self.assertEqual(kpi.find_month_column(self.HEADER, "2018年1月"), 14)
+
+    def test_full_width_month_digits_match(self):
+        rows = [["", "2026年\n1月", "\n２月", "\n３月"]]
+        self.assertEqual(kpi.find_month_column(rows, "2026年3月"), 4)
+
+    def test_direct_label_still_works(self):
+        rows = [["", "2026年7月", "2026年8月"]]
+        self.assertEqual(kpi.find_month_column(rows, "2026年8月"), 3)
+
+    def test_missing_year_raises(self):
         with self.assertRaises(ValueError):
-            kpi.find_month_column(self.HEADER, "2027年1月")
+            kpi.find_month_column(self.HEADER, "2099年1月")
+
+    def test_stops_when_the_counted_column_is_not_that_month(self):
+        """年の列から数えた先の見出しが合わなければ止まる。1列ずれたら隣の月を数えてしまう。"""
+        rows = [["", "2026年\n1月", "\n２月"]]   # 3月の列が無い
+        with self.assertRaises(ValueError):
+            kpi.find_month_column(rows, "2026年3月")
 
     def test_duplicate_month_raises_rather_than_reading_a_neighbour(self):
         rows = [["", "2026年8月", "2026年8月"]]
         with self.assertRaises(ValueError):
             kpi.find_month_column(rows, "2026年8月")
+
+
+class TestFindMonthRowBlocks(unittest.TestCase):
+    """「年間計画・目標」タブには同じ月の行が複数ある(全体数 / 1店舗当たり ほか)。"""
+
+    ROWS = [
+        ["タイトル"],
+        ["", "媒体名"],
+        ["全体数", "2026年7月", "2059"],
+        ["", "2026年8月", "2250"],          # A列は結合セルなので空
+        ["1店舗当たり", "2026年7月", "13.7"],
+        ["", "2026年8月", "15.0"],
+    ]
+
+    def test_block_label_walks_up_through_merged_cells(self):
+        self.assertEqual(kpi.block_label_at(self.ROWS, 4), "全体数")
+        self.assertEqual(kpi.block_label_at(self.ROWS, 6), "1店舗当たり")
+
+    def test_block_label_disambiguates(self):
+        self.assertEqual(kpi.find_month_row(self.ROWS, "B", "2026年7月", "全体数"), 3)
+        self.assertEqual(kpi.find_month_row(self.ROWS, "B", "2026年7月", "1店舗当たり"), 5)
+
+    def test_without_a_block_it_refuses_to_guess(self):
+        """全体数の行に1店舗当たりを書くと桁が2つ違う値が入る。推測させない。"""
+        with self.assertRaises(ValueError):
+            kpi.find_month_row(self.ROWS, "B", "2026年7月")
 
 
 class TestAdSpendCounting(unittest.TestCase):
@@ -154,14 +207,14 @@ class TestResolveTab(unittest.TestCase):
 
 
 class TestFindMonthRow(unittest.TestCase):
-    ROWS = [["タイトル"], ["", "媒体名"], ["", "2026年7月"], ["", "2026年8月"]]
+    ROWS = [["タイトル"], ["", "媒体名"], ["全体数", "2026年7月"], ["", "2026年8月"]]
 
     def test_finds_the_row(self):
-        self.assertEqual(kpi.find_month_row(self.ROWS, "B", "2026年8月"), 4)
+        self.assertEqual(kpi.find_month_row(self.ROWS, "B", "2026年8月", "全体数"), 4)
 
     def test_missing_month_raises(self):
         with self.assertRaises(ValueError):
-            kpi.find_month_row(self.ROWS, "B", "2026年9月")
+            kpi.find_month_row(self.ROWS, "B", "2026年9月", "全体数")
 
 
 class TestWriteWhitelist(unittest.TestCase):
