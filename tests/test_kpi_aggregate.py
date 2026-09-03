@@ -489,9 +489,9 @@ class TestTrendsCsv(unittest.TestCase):
 class TestHeaderColumns(unittest.TestCase):
     """列は見出し名で引く。列記号は月によって動く。"""
 
-    JULY = ["", "", "紹介", "紹介（家族）", "看板"]
-    #                                    ↓ 8月に『店頭QR』が1本挿入された想定
-    AUGUST = ["", "", "店頭QR", "紹介", "紹介（家族）", "看板"]
+    JULY = ["", "", "紹介", "紹介（家族）", "ポスター"]
+    #                                    ↓ 列が1本挿入され、末尾の名前も変わった想定
+    AUGUST = ["", "", "店頭QR", "紹介", "紹介（家族）", "店外ポスター"]
 
     def test_the_same_names_follow_an_inserted_column(self):
         names = ["紹介", "紹介（家族）"]
@@ -499,7 +499,11 @@ class TestHeaderColumns(unittest.TestCase):
         self.assertEqual(kpi.header_columns(self.AUGUST, names), ["D", "E"])
 
     def test_letters_would_have_read_the_wrong_columns(self):
-        """これが列記号を捨てた理由。ミライは7月57列・8月58列で実際にずれていた。"""
+        """これが列記号を捨てた理由。
+
+        直営のタブは8月のAPが『ブラックボード』、7月のAPが『ポスター』で、
+        同じ列記号が別のチャネルを指している。
+        """
         july = kpi.header_columns(self.JULY, ["紹介"])
         august = kpi.header_columns(self.AUGUST, ["紹介"])
         self.assertNotEqual(july, august)
