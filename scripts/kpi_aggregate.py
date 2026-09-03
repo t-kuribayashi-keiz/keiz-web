@@ -844,20 +844,30 @@ def inspect(service, month_label: str) -> int:
 # 工程⑤ ダッシュボードへの転記
 # --------------------------------------------------------------------------
 
-def build_dashboard_values(plan_rows_raw: list[list], month_label: str) -> dict[str, float]:
+def build_dashboard_values(
+    plan_rows: list[list],
+    plan_rows_raw: list[list],
+    month_label: str,
+) -> dict[str, float]:
     """1店舗当たりの行からダッシュボードの9項目を組み立て、全体数の行で検算する。
 
     転記元は1店舗当たりの行(栗林さんの工程⑤の指示どおり)。それを鵜呑みにせず、
     全体数の行から別経路で計算した値と突き合わせる。**分母がHPBとEPARKだけ違う**
     (それぞれの掲載店舗数)のが罠で、全部を店舗数Lで割っても桁は合うため、
     間違っていても目視では気づけない。
+
+    行の特定は表示値(`plan_rows`)、値の読み取りは生値(`plan_rows_raw`)と分ける。
+    生値だと月のセルが「2026年8月」という文字列では返らず(日付として保持されている)、
+    月ラベルで行を探せないため。同じタブなので行番号は共通。
     """
-    per_store_row = plan_rows_raw[
-        find_month_row(plan_rows_raw, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_PER_STORE) - 1
-    ]
-    total_row = plan_rows_raw[
-        find_month_row(plan_rows_raw, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_TOTAL) - 1
-    ]
+    per_store_index = find_month_row(
+        plan_rows, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_PER_STORE
+    )
+    total_index = find_month_row(
+        plan_rows, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_TOTAL
+    )
+    per_store_row = plan_rows_raw[per_store_index - 1]
+    total_row = plan_rows_raw[total_index - 1]
 
     totals = {}
     for column in CHECK_COLUMNS:
@@ -977,8 +987,9 @@ def main() -> int:
     # --- 工程⑤ ダッシュボードへの転記 ---
     print("\n⑤ ダッシュボードへの転記(1店舗当たりの行を、全体数の行から検算しながら読む)")
     try:
+        plan_rows_fresh = read_tab(service, SPREADSHEET_ID, plan_title)
         plan_rows_raw = read_tab(service, SPREADSHEET_ID, plan_title, raw=True)
-        dashboard_values = build_dashboard_values(plan_rows_raw, args.month)
+        dashboard_values = build_dashboard_values(plan_rows_fresh, plan_rows_raw, args.month)
     except ValueError as error:
         if args.apply:
             print(f"\n①②は書き込み済みだが、⑤で停止した: {error}", file=sys.stderr)

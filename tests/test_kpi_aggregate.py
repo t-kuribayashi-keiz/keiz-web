@@ -220,8 +220,18 @@ class TestDashboardValues(unittest.TestCase):
             build(per_store if per_store is not None else self.PER_STORE, "1店舗当たり", "2026年8月"),
         ]
 
+    def test_row_lookup_uses_formatted_values_not_raw(self):
+        """生値だと月のセルが文字列で返らない(日付として保持されている)ため、
+        行の特定は表示値、値の読み取りは生値、と分けている。"""
+        formatted = self._rows()
+        raw = [list(row) for row in formatted]
+        for row in raw[2:]:
+            row[1] = 46235          # 生値では日付シリアル値になる
+        values = kpi.build_dashboard_values(formatted, raw, "2026年8月")
+        self.assertAlmostEqual(values["hp"], 14.5, places=6)
+
     def test_reproduces_the_dashboard_row(self):
-        values = kpi.build_dashboard_values(self._rows(), "2026年8月")
+        values = kpi.build_dashboard_values(self._rows(), self._rows(), "2026年8月")
         for key, expected in (
             ("web_total", 35.2), ("hp", 14.5), ("hpb", 19.3), ("epark", 1.4),
             ("seo", 8.3), ("meta", 2.2), ("ppc", 4.0), ("uu_seo", 191.9), ("uu_ppc", 307.0),
@@ -232,19 +242,20 @@ class TestDashboardValues(unittest.TestCase):
         """分母をLに揃えると検算が合わなくなること = 罠が実際に検出できること。"""
         wrong = dict(self.PER_STORE, D=str(2607 / 150), E=str(200 / 150))
         with self.assertRaises(ValueError):
-            kpi.build_dashboard_values(self._rows(per_store=wrong), "2026年8月")
+            kpi.build_dashboard_values(self._rows(per_store=wrong), self._rows(per_store=wrong), "2026年8月")
 
     def test_seo_includes_ai(self):
         """AK = SEO,MEO + AI。AI分(Q列)を落とすと検算に引っかかる。"""
         wrong = dict(self.PER_STORE, Q="0")
         with self.assertRaises(ValueError):
-            kpi.build_dashboard_values(self._rows(per_store=wrong), "2026年8月")
+            kpi.build_dashboard_values(self._rows(per_store=wrong), self._rows(per_store=wrong), "2026年8月")
 
     def test_missing_ai_column_is_treated_as_zero(self):
         """X列(AI集客数)が未入力の月がある。そこで止まらないこと。"""
         total = dict(self.TOTAL, X="")
         per_store = dict(self.PER_STORE, Q="0")
-        values = kpi.build_dashboard_values(self._rows(per_store=per_store, total=total), "2026年8月")
+        rows = self._rows(per_store=per_store, total=total)
+        values = kpi.build_dashboard_values(rows, rows, "2026年8月")
         self.assertAlmostEqual(values["seo"], 8.2, places=6)
 
 
