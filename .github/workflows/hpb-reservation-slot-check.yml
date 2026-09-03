@@ -1,0 +1,65 @@
+name: HPB reservation slot check
+
+# K/L列: HotPepper Beauty公開カレンダーを毎日スクレイピングして○/✕/?を判定
+# (scripts/hpb_slot_check.py, 旧「予約枠」Colabノートブックの移植)
+#
+# ✕になった枠の原因切り分け(M/N列)はここでは自動化しない(2026-09-03、栗林さんの判断)。
+# ルールベースの判定だと精度が不安定になるため、当面は栗林さんが「今週分お願い」と
+# 声をかけたタイミングで、Claudeが実Chrome(SalonBoardの実セッション)を使って目視確認する
+# 運用にする。.claude/skills/hpb-reservation-slot-check/SKILL.md 参照。
+#
+# 認証情報はすべてリポジトリシークレットに置き、Claudeセッションには渡さない。
+# GCP_KPI_WRITER_KEY は functions/kpi-aggregation で使っている書き込み用サービスアカウント
+# (chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com) を流用。
+# 新規に鍵を作る必要はなく、「HPB予約枠確認」スプレッドシートをこのアカウントに
+# 編集者共有するだけでよい。
+
+on:
+  schedule:
+    # 毎日13:00 JST (04:00 UTC)。当日PM〜2日後PMを判定(栗林さん指定、2026-09-03)
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run=書き込まず確認 / apply=本番書き込み"
+        type: choice
+        options:
+          - dry-run
+          - apply
+        default: apply
+
+concurrency:
+  group: hpb-reservation-slot-check
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  slot-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install --quiet gspread google-auth jpholiday playwright
+          playwright install --with-deps chromium
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests -p "test_hpb_slot_check.py" -v
+
+      - name: Run K/L scraper (公開カレンダー)
+        env:
+          GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          if [ "${{ github.event.inputs.mode || 'apply' }}" = "apply" ]; then
+            python3 scripts/hpb_slot_check.py --apply
+          else
+            python3 scripts/hpb_slot_check.py
+          fi
