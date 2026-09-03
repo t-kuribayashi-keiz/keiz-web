@@ -1610,7 +1610,21 @@ def inspect_referral(service) -> int:
             print(f"  [{row_index}行] " + (" | ".join(filled[:26]) if filled else "(空)"))
 
         header_row = rows[source["total_row"] - 2]
-        columns = source_columns(source, header_row)
+        print(f"\n-- {source['total_row'] - 1}行目(見出し)の全列 --")
+        print("  " + " | ".join(
+            f"{index_to_col(i)}={str(value).strip()}"
+            for i, value in enumerate(header_row, start=1)
+            if str(value).strip()
+        ))
+        try:
+            columns = source_columns(source, header_row)
+        except ValueError as error:
+            # 調査モードは止まらない。何が引けなかったのかを見せるのが仕事なので。
+            print(f"  ** 見出しから列を引けませんでした: {error}")
+            summary.append((source["label"], title, {"紹介": float("nan"),
+                            "オフライン合計": float("nan")}, None, None,
+                            "(列を引けず)", str(error), None))
+            continue
         source["_columns"] = columns
 
         if source.get("exclude_pink_stores"):
