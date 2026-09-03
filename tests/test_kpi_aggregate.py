@@ -391,6 +391,14 @@ class TestTrendsCsv(unittest.TestCase):
         csv = self.CSV.replace("2025-01,90,89,35,82,9", "2025-01,90,89,35,82,<1")
         self.assertEqual(kpi.parse_trends_csv(csv, self.KEYWORDS)[(2025, 1)]["骨盤矯正"], 0)
 
+    def test_weekly_csv_is_rejected(self):
+        """期間が短いとGoogleトレンドは週次で返す。週を月に畳んでも月次は再現できない。"""
+        weekly = self.CSV.replace("月,整骨院", "週,整骨院").replace(
+            "2025-01,", "2025-01-05,").replace("2025-02,", "2025-01-12,")
+        with self.assertRaises(ValueError) as caught:
+            kpi.parse_trends_csv(weekly, self.KEYWORDS)
+        self.assertIn("週次", str(caught.exception))
+
     def test_missing_keyword_stops(self):
         csv = self.CSV.replace("骨盤矯正: (日本)", "ぎっくり腰: (日本)")
         with self.assertRaises(ValueError):

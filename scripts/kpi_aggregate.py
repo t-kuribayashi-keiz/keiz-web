@@ -1017,6 +1017,19 @@ def parse_trends_csv(text: str, keywords: list[str]) -> dict[tuple[int, int], di
             )
         column_of[keyword] = hits[0]
 
+    # 週次のCSVを月次として書き込ませない。GoogleトレンドはUIで指定した期間が短いと
+    # 週次で返す(2025/1〜2026/8の20か月では週次だった)。週を月に畳んでも、
+    # トレンド自身の月次出力は再現できない(2026-09-03に検証: 最大誤差10〜13、
+    # 完全一致は25%)。**桁は合うので目視では気づけない。**
+    granularity = str(header[0]).strip()
+    if granularity and not any(word in granularity for word in ("月", "Month")):
+        raise ValueError(
+            f"CSVの粒度が月次ではありません(1列目の見出し: {granularity!r})。"
+            "Googleトレンドは期間が短いと週次で返します。期間を『過去5年』など長めにして、"
+            "1列目が『月』のCSVを取得し直してください。"
+            "週を月に平均しても、トレンド自身の月次出力は再現できません。"
+        )
+
     parsed: dict[tuple[int, int], dict[str, float]] = {}
     for row in rows[header_index + 1:]:
         if not row or not row[0].strip():
