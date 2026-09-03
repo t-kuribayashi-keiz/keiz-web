@@ -774,11 +774,27 @@ def inspect(service, month_label: str) -> int:
         row = plan_rows[row_index - 1]
         print(f"\n  [{row_index}行] ブロック={block_label_at(plan_rows, row_index)!r}")
         filled = [
-            f"{key}({column})={cell(row, column)!r}"
-            for key, column in PLAN_COLUMNS.items()
-            if str(cell(row, column)).strip()
+            f"{index_to_col(i)}={value!r}"
+            for i, value in enumerate(row[:40], start=1)
+            if str(value).strip()
         ]
         print("    " + " | ".join(filled))
+
+    print(f"\n=== ダッシュボードの {month_label} の行 ===")
+    dash_title = resolve_tab(titles, DASHBOARD_TAB_KEYWORDS, "ダッシュボード")
+    dash_rows = read_tab(service, SPREADSHEET_ID, dash_title)
+    print(f"タブ: {dash_title!r} / 行数={len(dash_rows)}")
+    header = next(
+        (r for r in dash_rows[:5] if any("実績" in str(v) for v in r)),
+        dash_rows[0] if dash_rows else [],
+    )
+    for _, column in DASHBOARD_COLUMNS:
+        print(f"  {column}: 見出し={cell(header, column)!r}")
+    for row_index, row in enumerate(dash_rows, start=1):
+        if normalize(cell(row, "A")) == normalize(month_label):
+            print(f"  [{row_index}行] " + " | ".join(
+                f"{column}={cell(row, column)!r}" for _, column in DASHBOARD_COLUMNS
+            ))
     return 0
 
 
