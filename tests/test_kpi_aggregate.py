@@ -486,6 +486,52 @@ class TestTrendsCsv(unittest.TestCase):
 
 
 
+class TestHeaderColumns(unittest.TestCase):
+    """列は見出し名で引く。列記号は月によって動く。"""
+
+    JULY = ["", "", "紹介", "紹介（家族）", "看板"]
+    #                                    ↓ 8月に『店頭QR』が1本挿入された想定
+    AUGUST = ["", "", "店頭QR", "紹介", "紹介（家族）", "看板"]
+
+    def test_the_same_names_follow_an_inserted_column(self):
+        names = ["紹介", "紹介（家族）"]
+        self.assertEqual(kpi.header_columns(self.JULY, names), ["C", "D"])
+        self.assertEqual(kpi.header_columns(self.AUGUST, names), ["D", "E"])
+
+    def test_letters_would_have_read_the_wrong_columns(self):
+        """これが列記号を捨てた理由。ミライは7月57列・8月58列で実際にずれていた。"""
+        july = kpi.header_columns(self.JULY, ["紹介"])
+        august = kpi.header_columns(self.AUGUST, ["紹介"])
+        self.assertNotEqual(july, august)
+
+    def test_full_width_spaces_and_newlines_do_not_block_a_match(self):
+        row = ["電話　予約", "紹介\n予約"]
+        self.assertEqual(kpi.header_columns(row, ["電話 予約", "紹介 予約"]), ["A", "B"])
+
+    def test_a_missing_header_stops(self):
+        with self.assertRaises(ValueError):
+            kpi.header_columns(self.JULY, ["ChatGPT"])
+
+    def test_a_duplicated_header_stops(self):
+        """同じ名前が2列あれば、どちらを足すべきかは決められない。"""
+        with self.assertRaises(ValueError):
+            kpi.header_columns(["紹介", "紹介"], ["紹介"])
+
+    def test_every_configured_header_is_distinct_within_its_source(self):
+        for source in kpi.load_referral_sources():
+            for key in ("referral_headers", "offline_headers", "ai_headers"):
+                names = source.get(key) or []
+                keys = [kpi.header_key(name) for name in names]
+                self.assertEqual(len(keys), len(set(keys)), f"{source['key']}/{key}")
+
+    def test_the_referral_headers_are_a_subset_of_the_offline_ones(self):
+        """紹介はオフラインの内数。栗林さんの範囲指定もそうなっていた。"""
+        for source in kpi.load_referral_sources():
+            referral = {kpi.header_key(n) for n in source["referral_headers"]}
+            offline = {kpi.header_key(n) for n in source["offline_headers"]}
+            self.assertTrue(referral <= offline, source["key"])
+
+
 class TestFormulaRowSpan(unittest.TestCase):
     """店舗行の範囲は、合計行の数式から読む。"""
 
@@ -496,24 +542,24 @@ class TestFormulaRowSpan(unittest.TestCase):
 
     def test_reads_the_span_the_sheet_itself_sums(self):
         row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T22)"})
-        self.assertEqual(kpi.formula_row_span(row, [["S", "T"]]), (6, 22))
+        self.assertEqual(kpi.formula_row_span(row, ["S", "T"]), (6, 22))
 
     def test_a_hand_adjusted_formula_still_gives_its_span(self):
         """サンズのW5は =SUM(W6:W16)-SUM(U6)。手で足し引きされていても範囲は読める。"""
         row = self.row({"W": "=SUM(W6:W16)-SUM(U6)", "X": "=SUM(X6:X16)"})
-        self.assertEqual(kpi.formula_row_span(row, [["W", "X"]]), (6, 16))
+        self.assertEqual(kpi.formula_row_span(row, ["W", "X"]), (6, 16))
 
     def test_columns_disagreeing_on_the_span_stops(self):
         """列ごとに数える行が違えば、まとめて合計してよい理由がない。"""
         row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T30)"})
         with self.assertRaises(ValueError):
-            kpi.formula_row_span(row, [["S", "T"]])
+            kpi.formula_row_span(row, ["S", "T"])
 
     def test_no_formula_stops(self):
         """合計が定数で入っていたら、店舗行がどこかは分からない。"""
         row = self.row({"S": "23", "T": "7"})
         with self.assertRaises(ValueError):
-            kpi.formula_row_span(row, [["S", "T"]])
+            kpi.formula_row_span(row, ["S", "T"])
 
     def test_the_trap_it_exists_for(self):
         """シートの下に別の表があると、合計行より下を全部足す読み方は倍になる。
@@ -533,7 +579,7 @@ class TestFormulaRowSpan(unittest.TestCase):
         )
         self.assertEqual(naive, 20)
 
-        first, last = kpi.formula_row_span(formula_row, [["S", "S"]])
+        first, last = kpi.formula_row_span(formula_row, ["S"])
         within = sum(
             kpi.sum_ranges(row, [["S", "S"]])
             for index, _, row in kpi.store_rows_of(rows, 5)
@@ -594,15 +640,18 @@ class TestReferralExtraction(unittest.TestCase):
         chokuei = next(s for s in kpi.load_referral_sources() if s["key"] == "chokuei")
         self.assertEqual(len(chokuei["exclude_store_names"]), 5)
         self.assertIn("逆井駅前整骨院", chokuei["exclude_store_names"])
-        self.assertEqual(chokuei["ai_ranges"], [["G", "G"], ["H", "H"], ["P", "P"], ["Q", "Q"]])
+        self.assertEqual(
+            chokuei["ai_headers"],
+            ["ホームページ（広告）", "ホームページ（AI）", "ChatGPT", "Gemini"],
+        )
 
     def test_only_chokuei_supplies_ai(self):
         """X列(AI)は直営のみ。サンズ・ミライには無い。"""
         for source in kpi.load_referral_sources():
             if source["key"] == "chokuei":
-                self.assertTrue(source.get("ai_ranges"))
+                self.assertTrue(source.get("ai_headers"))
             else:
-                self.assertFalse(source.get("ai_ranges"))
+                self.assertFalse(source.get("ai_headers"))
 
     def test_every_source_is_addressed_by_tab_name_not_gid(self):
         """gidは月が変わると別物になる。タブ名で解決する。"""

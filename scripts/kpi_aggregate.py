@@ -1245,7 +1245,8 @@ def is_plain_background(rgb: tuple[float, float, float]) -> bool:
     return min(red, green, blue) > 0.92 and (max(rgb) - min(rgb)) < 0.05
 
 
-def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict, rows: list) -> None:
+def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict,
+                          columns: dict) -> None:
     """店舗名に色が付いている行を洗い出し、5行目の合計に含まれているかを確かめる。
 
     栗林さんの指示は「5行目の合計を使う」と「ピンクの店舗は除外する」の両方。
@@ -1260,19 +1261,8 @@ def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict
     ).execute()
     grid = data["sheets"][0]["data"][0].get("rowData", [])
 
-    columns = []
-    for first, last in source["referral_ranges"] + source["offline_ranges"]:
-        columns.extend(range(col_to_index(first), col_to_index(last) + 1))
-    referral_cols = {
-        index
-        for first, last in source["referral_ranges"]
-        for index in range(col_to_index(first), col_to_index(last) + 1)
-    }
-    offline_cols = {
-        index
-        for first, last in source["offline_ranges"]
-        for index in range(col_to_index(first), col_to_index(last) + 1)
-    }
+    referral_cols = {col_to_index(column) for column in columns["referral"]}
+    offline_cols = {col_to_index(column) for column in columns["offline_total"]}
 
     colored, plain = [], []
     sums = {"colored": [0.0, 0.0], "plain": [0.0, 0.0]}
@@ -1322,6 +1312,21 @@ def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict
     source["_colored"] = source.get("_colored", "") + " || " + " || ".join(detail)
 
 
+def sum_columns(row: list, columns: list[str]) -> float:
+    return sum(parse_number(cell(row, column)) or 0.0 for column in columns)
+
+
+def source_columns(source: dict, header_row: list) -> dict[str, list[str]]:
+    """設定の見出し名を、この月のタブでの列記号に直す。"""
+    resolved = {
+        "referral": header_columns(header_row, source["referral_headers"]),
+        "offline_total": header_columns(header_row, source["offline_headers"]),
+    }
+    if source.get("ai_headers"):
+        resolved["ai"] = header_columns(header_row, source["ai_headers"])
+    return resolved
+
+
 def sum_ranges(row: list, ranges: list) -> float:
     total = 0.0
     for first, last in ranges:
@@ -1330,10 +1335,47 @@ def sum_ranges(row: list, ranges: list) -> float:
     return total
 
 
+def header_key(text) -> str:
+    """見出しの照合用。全角/半角と空白の違いだけで取り違えないようにする。
+
+    実際の見出しには『電話　予約』(全角空白)や『紹介\n予約』(改行)が混ざっている。
+    """
+    normalized = unicodedata.normalize("NFKC", str(text))
+    return "".join(normalized.split())
+
+
+def header_columns(header_row: list, names: list[str]) -> list[str]:
+    """見出し名から列記号を引く。1つに定まらなければ例外。
+
+    **列記号を設定に持たない**のは、シートに列が1本挿入されると全部ずれるため。
+    ミライは2026年7月が57列、8月が58列で、実際にずれていた。
+    """
+    index: dict[str, list[str]] = {}
+    for position, value in enumerate(header_row, start=1):
+        key = header_key(value)
+        if key:
+            index.setdefault(key, []).append(index_to_col(position))
+
+    columns = []
+    problems = []
+    for name in names:
+        hits = index.get(header_key(name), [])
+        if len(hits) != 1:
+            problems.append(f"{name!r}: {len(hits)}件{hits if hits else ''}")
+            continue
+        columns.append(hits[0])
+    if problems:
+        raise ValueError(
+            "見出しから列を決められませんでした(" + " / ".join(problems) + ")。"
+            "見出しが変わったか、同じ名前の列が増えています。取り違えるより止めます。"
+        )
+    return columns
+
+
 SUM_SPAN = re.compile(r"SUM\(\s*\$?[A-Z]{1,2}\$?(\d+)\s*:\s*\$?[A-Z]{1,2}\$?(\d+)\s*\)")
 
 
-def formula_row_span(formula_row: list, ranges: list) -> tuple[int, int]:
+def formula_row_span(formula_row: list, columns: list[str]) -> tuple[int, int]:
     """合計行の数式から、店舗行の範囲を読む。
 
     『合計行より下で店舗名が入っている行』を店舗行とみなすと、シートの下のほうに
@@ -1342,13 +1384,11 @@ def formula_row_span(formula_row: list, ranges: list) -> tuple[int, int]:
     範囲がひとつに定まらなければ例外(推測しない)。
     """
     spans: dict[tuple[int, int], list[str]] = {}
-    for first, last in ranges:
-        for index in range(col_to_index(first), col_to_index(last) + 1):
-            column = index_to_col(index)
-            match = SUM_SPAN.search(str(cell(formula_row, column)))
-            if match:
-                span = (int(match.group(1)), int(match.group(2)))
-                spans.setdefault(span, []).append(column)
+    for column in columns:
+        match = SUM_SPAN.search(str(cell(formula_row, column)))
+        if match:
+            span = (int(match.group(1)), int(match.group(2)))
+            spans.setdefault(span, []).append(column)
     if not spans:
         raise ValueError(
             "合計行に SUM(...) の数式が1つもありません。"
@@ -1436,9 +1476,11 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
     )
     formula_row = formulas[0] if formulas else []
 
-    all_ranges = list(source["referral_ranges"]) + list(source["offline_ranges"]) \
-        + list(source.get("ai_ranges") or [])
-    first_row, last_row = formula_row_span(formula_row, all_ranges)
+    header_row = rows[source["total_row"] - 2] if source["total_row"] >= 2 else []
+    columns = source_columns(source, header_row)
+    first_row, last_row = formula_row_span(
+        formula_row, sorted({c for group in columns.values() for c in group})
+    )
     stores = [
         (index, label, row)
         for index, label, row in store_rows_of(rows, source["total_row"])
@@ -1446,28 +1488,26 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
     ]
     excluded = excluded_row_indexes(stores, source.get("exclude_store_names") or [])
 
-    # 合計行の1つ上が見出し行(サンズ・ミライとも4行目)。AIの4列が何のチャネルなのかは
-    # 列記号だけでは分からないので、見出しをそのままログに出す。
-    header_row = rows[source["total_row"] - 2] if source["total_row"] >= 2 else []
+    # AIの4列が何のチャネルなのかは列記号だけでは分からないので、内訳をログに出す。
     result = {"label": source["label"], "tab": title, "stores": len(stores),
               "excluded": len(excluded), "span": (first_row, last_row),
-              "ai_headers": [
-                  f"{index_to_col(i)}={str(cell(header_row, index_to_col(i))).strip()!r}"
-                  for first, last in (source.get("ai_ranges") or [])
-                  for i in range(col_to_index(first), col_to_index(last) + 1)
+              "columns": columns,
+              "ai_breakdown": [
+                  f"{column}={str(cell(header_row, column)).strip()}"
+                  f"={parse_number(cell(total_row, column))}"
+                  for column in columns.get("ai", [])
               ]}
-    for key, ranges in (("referral", source["referral_ranges"]),
-                        ("offline_total", source["offline_ranges"]),
-                        ("ai", source.get("ai_ranges"))):
-        if not ranges:
+    for key in ("referral", "offline_total", "ai"):
+        if key not in columns:
             continue
-        header = sum_ranges(total_row, ranges)
-        all_stores = sum(sum_ranges(row, ranges) for _, _, row in stores)
+        group = columns[key]
+        header = sum_columns(total_row, group)
+        all_stores = sum(sum_columns(row, group) for _, _, row in stores)
         # 栗林さんの指示は「5行目の合計を使う」。除外店舗はそこから引く。
         # 引く相手が5行目の集計範囲に入っている行だけなのは、範囲外の店舗は
         # 5行目に最初から入っておらず、引くと二重に減るため。
         dropped = sum(
-            sum_ranges(row, ranges) for row_index, _, row in stores if row_index in excluded
+            sum_columns(row, group) for row_index, _, row in stores if row_index in excluded
         )
         if abs(header - all_stores) >= 0.5:
             raise ValueError(
@@ -1512,8 +1552,8 @@ def extract_referral(service, month_label: str) -> dict[str, float]:
             if abs(values["kept"] - values["header"]) >= 0.5:
                 mark = f"  ← 5行目そのままなら {values['header']:g}(除外分を含む)"
             print(f"    {key:14s} {values['kept']:g}{mark}")
-            if key == "ai" and result["ai_headers"]:
-                print("      内訳: " + " ".join(result["ai_headers"]))
+            if key == "ai" and result["ai_breakdown"]:
+                print("      内訳: " + "  ".join(result["ai_breakdown"]))
             totals[key] += values["kept"]
     return totals
 
@@ -1569,22 +1609,23 @@ def inspect_referral(service) -> int:
             ]
             print(f"  [{row_index}行] " + (" | ".join(filled[:26]) if filled else "(空)"))
 
+        header_row = rows[source["total_row"] - 2]
+        columns = source_columns(source, header_row)
+        source["_columns"] = columns
+
         if source.get("exclude_pink_stores"):
             print("\n-- 店舗行の背景色(ピンク=別ブランド)と、合計の突き合わせ --")
-            report_colored_stores(service, sid, title, source, rows)
+            report_colored_stores(service, sid, title, source, columns)
 
-        print("\n-- 指定された範囲の5行目の値 --")
+        print("\n-- 見出しから引いた列の、5行目の値 --")
         totals = {}
-        for name, ranges in (("紹介", source["referral_ranges"]),
-                             ("オフライン合計", source["offline_ranges"])):
-            total = 0.0
+        for name, key in (("紹介", "referral"), ("オフライン合計", "offline_total")):
             parts = []
-            for first, last in ranges:
-                for index in range(col_to_index(first), col_to_index(last) + 1):
-                    column = index_to_col(index)
-                    value = parse_number(cell(rows[source["total_row"] - 1], column))
-                    parts.append(f"{column}={value if value is not None else '-'}")
-                    total += value or 0.0
+            total = 0.0
+            for column in columns[key]:
+                value = parse_number(cell(rows[source["total_row"] - 1], column))
+                parts.append(f"{column}={value if value is not None else '-'}")
+                total += value or 0.0
             print(f"  {name}: 合計={total:g}")
             print(f"    {' '.join(parts)}")
             totals[name] = total
@@ -1603,32 +1644,25 @@ def inspect_referral(service) -> int:
             render="FORMULA",
         )
         formula_row = formulas[0] if formulas else []
-        all_ranges = list(source["referral_ranges"]) + list(source["offline_ranges"]) \
-            + list(source.get("ai_ranges") or [])
+        every = sorted({c for group in columns.values() for c in group})
         try:
-            span = "{}〜{}行".format(*formula_row_span(formula_row, all_ranges))
+            span = "{}〜{}行".format(*formula_row_span(formula_row, every))
         except ValueError as error:
             span = f"読めず({error})"
         source["_span"] = span
         source["_formula"] = " ".join(
-            f"{index_to_col(i)}={cell(formula_row, index_to_col(i))!r}"
-            for first, last in source["referral_ranges"]
-            for i in range(col_to_index(first), col_to_index(last) + 1)
+            f"{column}={cell(formula_row, column)!r}" for column in columns["referral"]
         )
-        # 列記号はシートに列が1本挿入されるとずれる。実際ミライは7月57列・8月58列で、
-        # 栗林さんに教わった列記号は8月のもの。見出し名で持ち直すために、いま出しておく。
-        header_row = rows[source["total_row"] - 2]
-        source["_headers"] = {}
-        for name, ranges in (("紹介", source["referral_ranges"]),
-                             ("オフライン合計", source["offline_ranges"]),
-                             ("AI", source.get("ai_ranges") or [])):
-            labels = []
-            for first, last in ranges:
-                for index in range(col_to_index(first), col_to_index(last) + 1):
-                    column = index_to_col(index)
-                    labels.append(f"{column}={str(cell(header_row, column)).strip()!r}")
-            if labels:
-                source["_headers"][name] = labels
+        # 見出し名から引いた列が、実際どこに落ちたかを残す。列記号は月によって動く。
+        source["_headers"] = {
+            name: [
+                f"{column}={str(cell(header_row, column)).strip()!r}"
+                for column in columns[key]
+            ]
+            for name, key in (("紹介", "referral"), ("オフライン合計", "offline_total"),
+                              ("AI", "ai"))
+            if key in columns
+        }
         summary.append((source["label"], title, totals, builtin, source.get("_colored"),
                         source.get("_span"), source.get("_formula"), source.get("_headers")))
 
