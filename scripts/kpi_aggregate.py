@@ -51,6 +51,13 @@ PLAN_BLOCK_TOTAL = "全体数"
 PLAN_BLOCK_PER_STORE = "1店舗当たり"
 # ダッシュボードの年月はA列。
 DASHBOARD_MONTH_COLUMN = "A"
+
+# 工程⑥ Googleトレンド。「年間計画・目標」タブの右端にある2つのブロック。
+# AN=年月 / AO〜AS=整骨院・整体・腰痛・肩こり・骨盤矯正 / AT=5キーワード平均。
+# 下のブロックは「2025/1整骨院で正規化」したもので、上のブロックから機械的に導ける
+# (2025/1と2026/7・8で検算済み)。どこまでが数式でどこからが手入力かは実物を見て決める。
+TRENDS_COLUMNS = ["AN", "AO", "AP", "AQ", "AR", "AS", "AT"]
+TRENDS_KEYWORDS = ["整骨院", "整体", "腰痛", "肩こり", "骨盤矯正"]
 DASHBOARD_TAB_KEYWORDS = ["ダッシュボード"]
 AD_SPEND_TAB_KEYWORDS = ["広告費各詳細"]
 
@@ -554,11 +561,20 @@ def read_cell(service, spreadsheet_id: str, title: str, ref: str) -> str:
     return values[0][0] if values and values[0] else ""
 
 
-def read_tab_range(service, spreadsheet_id: str, sheet_range: str) -> list[list[str]]:
+def read_tab_range(
+    service,
+    spreadsheet_id: str,
+    sheet_range: str,
+    render: str = "FORMATTED_VALUE",
+) -> list[list[str]]:
+    """範囲を読む。render="FORMULA" にすると、数式が入っているセルは数式そのものが返る。
+
+    数式かどうかを見分けられないと、自動計算されるセルを定数で上書きして数式を壊す。
+    """
     result = (
         service.spreadsheets()
         .values()
-        .get(spreadsheetId=spreadsheet_id, range=sheet_range, valueRenderOption="FORMATTED_VALUE")
+        .get(spreadsheetId=spreadsheet_id, range=sheet_range, valueRenderOption=render)
         .execute()
     )
     return result.get("values", [])
@@ -835,6 +851,19 @@ def inspect(service, month_label: str) -> int:
             if str(value).strip()
         ]
         print("    " + " | ".join(filled))
+
+    print("\n=== Googleトレンドのブロック(AN〜AT)。数式か定数かを見る ===")
+    formulas = read_tab_range(
+        service, SPREADSHEET_ID, f"'{plan_title}'!AN1:AT56", render="FORMULA"
+    )
+    for row_index, row in enumerate(formulas, start=1):
+        filled = [
+            f"{TRENDS_COLUMNS[i]}={value!r}"
+            for i, value in enumerate(row[: len(TRENDS_COLUMNS)])
+            if str(value).strip()
+        ]
+        if filled:
+            print(f"  [{row_index}行] " + " | ".join(filled))
 
     print(f"\n=== ダッシュボードの {month_label} の行 ===")
     dash_title = resolve_tab(titles, DASHBOARD_TAB_KEYWORDS, "ダッシュボード")
