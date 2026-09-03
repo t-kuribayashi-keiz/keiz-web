@@ -1446,8 +1446,16 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
     ]
     excluded = excluded_row_indexes(stores, source.get("exclude_store_names") or [])
 
+    # 合計行の1つ上が見出し行(サンズ・ミライとも4行目)。AIの4列が何のチャネルなのかは
+    # 列記号だけでは分からないので、見出しをそのままログに出す。
+    header_row = rows[source["total_row"] - 2] if source["total_row"] >= 2 else []
     result = {"label": source["label"], "tab": title, "stores": len(stores),
-              "excluded": len(excluded), "span": (first_row, last_row)}
+              "excluded": len(excluded), "span": (first_row, last_row),
+              "ai_headers": [
+                  f"{index_to_col(i)}={str(cell(header_row, index_to_col(i))).strip()!r}"
+                  for first, last in (source.get("ai_ranges") or [])
+                  for i in range(col_to_index(first), col_to_index(last) + 1)
+              ]}
     for key, ranges in (("referral", source["referral_ranges"]),
                         ("offline_total", source["offline_ranges"]),
                         ("ai", source.get("ai_ranges"))):
@@ -1504,6 +1512,8 @@ def extract_referral(service, month_label: str) -> dict[str, float]:
             if abs(values["kept"] - values["header"]) >= 0.5:
                 mark = f"  ← 5行目そのままなら {values['header']:g}(除外分を含む)"
             print(f"    {key:14s} {values['kept']:g}{mark}")
+            if key == "ai" and result["ai_headers"]:
+                print("      内訳: " + " ".join(result["ai_headers"]))
             totals[key] += values["kept"]
     return totals
 
