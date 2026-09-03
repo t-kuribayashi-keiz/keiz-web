@@ -1221,19 +1221,6 @@ def load_referral_sources() -> list[dict]:
         return json.load(handle)["sources"]
 
 
-def tab_title_for_gid(service, spreadsheet_id: str, gid: int) -> str:
-    """gidからタブ名を引く。**タブ名ではなくgidで指定する**のは、名前は変わりうるが
-    gidはタブを作り直さない限り変わらないため。"""
-    meta = service.spreadsheets().get(
-        spreadsheetId=spreadsheet_id, fields="sheets.properties(sheetId,title,gridProperties)"
-    ).execute()
-    for sheet in meta.get("sheets", []):
-        if sheet["properties"]["sheetId"] == gid:
-            return sheet["properties"]["title"]
-    titles = [s["properties"]["title"] for s in meta.get("sheets", [])]
-    raise ValueError(f"gid={gid} のタブが見つかりません(あるタブ: {titles})。")
-
-
 def cell_background(value: dict) -> tuple[float, float, float]:
     color = (value.get("effectiveFormat") or {}).get("backgroundColor") or {}
     return (color.get("red", 1.0), color.get("green", 1.0), color.get("blue", 1.0))
@@ -1446,26 +1433,33 @@ def excluded_row_indexes(
     return found
 
 
-def read_referral_source(service, source: dict, month_label: str) -> dict:
-    """1ブランド分の 紹介 / オフライン合計 / AI を読む。"""
+def resolve_referral_tab(service, source: dict, month_label: str) -> str:
+    """その月のタブ名を決める。**完全一致で選ぶ。**
+
+    同じ月に『2026年8月(0810)』のような途中経過のタブが並んでおり、部分一致だと
+    締め切り前の数字を拾う。値としては自然に見えるので気づけない。
+    """
     match = re.match(r"(\d{4})年(\d{1,2})月", month_label)
     year, month = int(match.group(1)), int(match.group(2))
     wanted = source["tab_name_pattern"].format(year=year, month=month)
 
-    sid = source["spreadsheet_id"]
     meta = service.spreadsheets().get(
-        spreadsheetId=sid, fields="sheets.properties(sheetId,title)"
+        spreadsheetId=source["spreadsheet_id"], fields="sheets.properties(sheetId,title)"
     ).execute()
     titles = [sheet["properties"]["title"] for sheet in meta.get("sheets", [])]
-    # **完全一致で選ぶ。** 同じ月に『2026年8月(0810)』のような途中経過のタブが並んでおり、
-    # 部分一致だと締め切り前の数字を拾う。値としては自然に見えるので気づけない。
     exact = [title for title in titles if title.strip() == wanted]
     if len(exact) != 1:
         raise ValueError(
             f"{source['label']}: タブ『{wanted}』が{len(exact)}件見つかりました"
             f"(あるタブ: {titles})。1件でなければ、どれが締め後の確定版か決められないため停止します。"
         )
-    title = exact[0]
+    return exact[0]
+
+
+def read_referral_source(service, source: dict, month_label: str) -> dict:
+    """1ブランド分の 紹介 / オフライン合計 / AI を読む。"""
+    sid = source["spreadsheet_id"]
+    title = resolve_referral_tab(service, source, month_label)
     rows = read_tab(service, sid, title)
     total_row = rows[source["total_row"] - 1]
 
@@ -1575,7 +1569,7 @@ def find_offline_total_cell(rows: list[list]) -> tuple[str, float] | None:
     return None
 
 
-def inspect_referral(service) -> int:
+def inspect_referral(service, month_label: str) -> int:
     """紹介・オフライン合計の3シートの構造を出すだけ。書き込みはしない。"""
     summary = []
     for source in load_referral_sources():
@@ -1598,7 +1592,8 @@ def inspect_referral(service) -> int:
             print(f"  gid={props['sheetId']:<12} {props['title']!r} "
                   f"({grid.get('rowCount')}行×{grid.get('columnCount')}列){mark}")
 
-        title = tab_title_for_gid(service, sid, gid)
+        # **月から引く。gidは月が変わると別物**なので、調べたい月のタブは名前で選ぶ。
+        title = resolve_referral_tab(service, source, month_label)
         rows = read_tab_range(service, sid, f"'{title}'!A1:AZ12", render="FORMATTED_VALUE")
         print(f"\n-- {title!r} の1〜12行 --")
         for row_index, row in enumerate(rows, start=1):
@@ -1732,7 +1727,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.inspect_referral:
-        return inspect_referral(build_service())
+        return inspect_referral(build_service(), args.month)
 
     if args.inspect:
         return inspect(build_service(), args.month)
