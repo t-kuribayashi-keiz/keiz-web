@@ -1615,10 +1615,21 @@ def inspect_referral(service, month_label: str) -> int:
             columns = source_columns(source, header_row)
         except ValueError as error:
             # 調査モードは止まらない。何が引けなかったのかを見せるのが仕事なので。
+            # 設定に無い見出しも並べる。改名なら、消えた名前の近くに新しい名前があるはず。
+            configured = {
+                header_key(name)
+                for key in ("referral_headers", "offline_headers", "ai_headers")
+                for name in (source.get(key) or [])
+            }
+            extra = [
+                f"{index_to_col(i)}={str(value).strip()!r}"
+                for i, value in enumerate(header_row, start=1)
+                if str(value).strip() and header_key(value) not in configured
+            ]
             print(f"  ** 見出しから列を引けませんでした: {error}")
             summary.append((source["label"], title, {"紹介": float("nan"),
                             "オフライン合計": float("nan")}, None, None,
-                            "(列を引けず)", str(error), None))
+                            "(列を引けず)", str(error), {"設定に無い見出し": extra}))
             continue
         source["_columns"] = columns
 
