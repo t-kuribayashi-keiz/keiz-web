@@ -6,32 +6,76 @@
       "key": "chokuei",
       "label": "直営",
       "spreadsheet_id": "1Er7UAqJ7BhZitxBMA1ZPNMLkhdlhBOlS8GzdgOI-cD4",
-      "gid": 761072408,
       "total_row": 5,
-      "referral_ranges": [["AF", "AI"]],
-      "offline_ranges": [["AE", "AP"], ["AR", "AX"]],
+      "referral_ranges": [
+        [
+          "AF",
+          "AI"
+        ]
+      ],
+      "offline_ranges": [
+        [
+          "AE",
+          "AP"
+        ],
+        [
+          "AR",
+          "AX"
+        ]
+      ],
       "exclude_pink_stores": true,
-      "notes": "店舗名がピンク着色の店舗(逆井・酒々井など)は別ブランドなので合計から除外する。5行目の合計にはそれらも含まれているとみられるため、5行目をそのまま使えるかは要確認。"
+      "notes": "店舗名がピンク着色の店舗(逆井・酒々井など)は別ブランドなので除外する。**色ではなく店舗名の一覧(exclude_store_names)で除外する方針**。色は誰かが塗り替えたり別の色味を使ったりすると自動化が黙って変わるが、名前なら設定ファイルの差分として見える。検算として『全店舗の合計＝5行目』が成り立つことを毎回確かめ、除外後の値を書き込む。",
+      "tab_name_pattern": "{year}年{month}月",
+      "_gid_2026_08": 761072408,
+      "exclude_store_names": []
     },
     {
       "key": "sans",
       "label": "サンズ",
       "spreadsheet_id": "1FM1AvLvBkXYfIfK78VQEMEgiH0RMzEGNr-Rm1NHmwyE",
-      "gid": 1870566803,
       "total_row": 5,
-      "referral_ranges": [["AD", "AE"]],
-      "offline_ranges": [["W", "AG"]],
-      "exclude_pink_stores": false
+      "referral_ranges": [
+        [
+          "AD",
+          "AE"
+        ]
+      ],
+      "offline_ranges": [
+        [
+          "W",
+          "AG"
+        ]
+      ],
+      "exclude_pink_stores": false,
+      "tab_name_pattern": "{year}年{month}月",
+      "_gid_2026_08": 1870566803
     },
     {
       "key": "mirai",
       "label": "ミライ",
       "spreadsheet_id": "1V2fX5t5vM64ltiUjn53DrpXAHweYsdThJCbbUfHky3k",
-      "gid": 1435250651,
       "total_row": 5,
-      "referral_ranges": [["S", "V"]],
-      "offline_ranges": [["R", "V"], ["X", "AF"]],
-      "exclude_pink_stores": false
+      "referral_ranges": [
+        [
+          "S",
+          "V"
+        ]
+      ],
+      "offline_ranges": [
+        [
+          "R",
+          "V"
+        ],
+        [
+          "X",
+          "AF"
+        ]
+      ],
+      "exclude_pink_stores": false,
+      "tab_name_pattern": "{year}年{month}月",
+      "_gid_2026_08": 1435250651
     }
-  ]
+  ],
+  "_tab_comment": "タブは月ごとに新しく作られる。**gidは月が変わると別物になるので使えない**(当初gidで指定していたが誤り)。タブ名『2026年8月』の完全一致で解決する。同じ月に『2026年8月(0810)』『2026年8月(0817)』という途中経過のスナップショットも並んでいるため、部分一致だと締め切り前の数字を拾う。",
+  "_validation_comment": "サンズとミライはシート自身が2行目の見出し『オフライン合計』の真下に値を持っている(2026年8月: サンズW3=54 / ミライR3=62)。範囲指定の合計がこの値と一致することを毎回確かめる。指示どおりに実装できているかを、シート自身の計算で裏取りできる。"
 }
