@@ -432,12 +432,34 @@ class TestTrendsCsv(unittest.TestCase):
             month_rows.append(row)
 
         parsed = kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
-        planned = kpi.build_trends_writes("年間計画・目標", header, month_rows, parsed)
+        planned = kpi.build_trends_writes(
+            "年間計画・目標", header, month_rows, parsed, (2026, 8)
+        )
 
         # 4か月 × 5キーワード。2026/9 はCSVに無いので空のまま残す。
         self.assertEqual(len(planned), 20)
         self.assertEqual(planned["trends_2025-01_整骨院"][1], "AO3")
         self.assertEqual(planned["trends_2026-08_骨盤矯正"][1], "AS6")
+        self.assertNotIn("trends_2026-09_整骨院", planned)
+
+    def test_the_running_month_is_not_written(self):
+        """CSVには実行日を含む当月の行も入っている。数日分の値を月次として並べない。"""
+        csv = self.CSV + "2026-09,71,70,54,25,5\n"
+        header = [""] * 45
+        for column, keyword in zip(kpi.TRENDS_VALUE_COLUMNS, self.KEYWORDS):
+            header[kpi.col_to_index(column) - 1] = keyword
+        month_rows = []
+        for label in ("2025/1", "2025/2", "2026/7", "2026/8", "2026/9"):
+            row = [""] * 45
+            row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = label
+            month_rows.append(row)
+
+        parsed = kpi.parse_trends_csv(csv, self.KEYWORDS)
+        self.assertIn((2026, 9), parsed)          # CSVには入っている
+        planned = kpi.build_trends_writes(
+            "年間計画・目標", header, month_rows, parsed, (2026, 8)
+        )
+        self.assertEqual(len(planned), 20)        # が、書かれない
         self.assertNotIn("trends_2026-09_整骨院", planned)
 
     def test_the_formula_columns_are_never_written(self):
@@ -448,7 +470,8 @@ class TestTrendsCsv(unittest.TestCase):
         row = [""] * 45
         row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = "2025/1"
         planned = kpi.build_trends_writes(
-            "年間計画・目標", header, [row], kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+            "年間計画・目標", header, [row],
+            kpi.parse_trends_csv(self.CSV, self.KEYWORDS), (2026, 8),
         )
         for _, ref, _ in planned.values():
             column = re.match(r"[A-Z]+", ref).group(0)

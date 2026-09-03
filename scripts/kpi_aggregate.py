@@ -1084,6 +1084,7 @@ def build_trends_writes(
     header_row: list,
     month_rows: list[list],
     parsed: dict[tuple[int, int], dict[str, float]],
+    through_month: tuple[int, int],
 ) -> dict[str, tuple[str, str, object]]:
     """シートの各行の年月に、CSVの値を割り当てる。
 
@@ -1102,6 +1103,11 @@ def build_trends_writes(
         month = parse_month_key(cell(row, TRENDS_MONTH_COLUMN))
         if month is None or month not in parsed:
             continue          # まだ来ていない月。空のまま残す
+        if month > through_month:
+            # **締まっていない月を書かない。** CSVには実行日を含む当月の行も入っており、
+            # 数日分だけの値が月次として並ぶ。他の月と比較できないのに、値の大きさは
+            # それらしく見えるので気づけない。対象月までに絞る。
+            continue
         for keyword, column in zip(keywords, TRENDS_VALUE_COLUMNS):
             if keyword not in parsed[month]:
                 raise ValueError(f"CSVに『{keyword}』の列がありません。")
@@ -1118,9 +1124,10 @@ def build_trends_writes(
     return planned
 
 
-def transfer_trends(service, csv_path: str, apply: bool) -> int:
-    """工程⑥。CSVからAO3:AS26を書き換える。"""
+def transfer_trends(service, csv_path: str, month_label: str, apply: bool) -> int:
+    """工程⑥。CSVからAO3:AS26を書き換える。対象月より後の月は書かない。"""
     print(f"GoogleトレンドCSV: {csv_path}")
+    print(f"対象月(この月まで書く): {month_label}")
     print(f"モード: {'本番書き込み' if apply else 'ドライラン(書き込まない)'}\n")
 
     titles = list_tab_titles(service, SPREADSHEET_ID)
@@ -1136,7 +1143,10 @@ def transfer_trends(service, csv_path: str, apply: bool) -> int:
     try:
         parsed = parse_trends_csv(text, keywords)
         check_joint_normalization(parsed)
-        planned = build_trends_writes(plan_title, header_row, month_rows, parsed)
+        through = parse_month_key(month_label)
+        if through is None:
+            raise ValueError(f"月ラベル『{month_label}』を解釈できません(例: 2026年8月)。")
+        planned = build_trends_writes(plan_title, header_row, month_rows, parsed, through)
     except ValueError as error:
         fail(str(error))
         return 1
@@ -1206,7 +1216,7 @@ def main() -> int:
         return inspect(build_service(), args.month)
 
     if args.trends:
-        return transfer_trends(build_service(), args.trends, args.apply)
+        return transfer_trends(build_service(), args.trends, args.month, args.apply)
 
     if args.calibrate and args.apply:
         fail("--calibrate と --apply は同時に指定できません。答え合わせと書き込みは分ける。")
