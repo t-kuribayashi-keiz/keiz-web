@@ -29,6 +29,7 @@ import os
 import re
 import sys
 import unicodedata
+from decimal import Decimal, ROUND_HALF_UP
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -739,6 +740,22 @@ def read_cells(service, refs: list[tuple[str, str]], raw: bool = False) -> list[
             rows = value_range.get("values", [])
             values.append(rows[0][0] if rows and rows[0] else "")
     return values
+
+
+# 書き込む値は小数第1位まで(2026-09-03 栗林さんの指示)。
+# 丸めるのは書き込む直前だけ。検算(1店舗当たりの行 vs 全体数の行からの計算)は
+# 丸める前の値で行う — 丸めた値どうしを比べると、小数第1位に隠れるずれを見逃す。
+WRITE_DECIMALS = 1
+
+
+def round_for_write(value: float) -> float:
+    """書き込む値を小数第1位に丸める。
+
+    Pythonの round() は偶数丸めなので 8.55 → 8.5 になる。人が手で四捨五入した数字と
+    合わなくなるため、明示的に ROUND_HALF_UP を使う。
+    """
+    quantum = Decimal(1).scaleb(-WRITE_DECIMALS)
+    return float(Decimal(str(float(value))).quantize(quantum, rounding=ROUND_HALF_UP))
 
 
 def snapshot(service, cells: dict[str, str]) -> dict[str, str]:
@@ -1814,7 +1831,7 @@ def main() -> int:
                 print(f"  skip {key}(書き込み対象外)")
             continue
         ref = f"{PLAN_COLUMNS[key]}{row_index}"
-        planned[key] = (plan_title, ref, value)
+        planned[key] = (plan_title, ref, round_for_write(value))
 
     print(f"\n① ② の書き込み先: {plan_title} の {row_index}行目")
     before = snapshot(service, {key: (title, ref) for key, (title, ref, _) in planned.items()})
@@ -1851,7 +1868,8 @@ def main() -> int:
     dash_row_index = find_month_row(dash_rows, DASHBOARD_MONTH_COLUMN, args.month)
 
     dash_planned = {
-        f"dash_{key}": (dash_title, f"{column}{dash_row_index}", dashboard_values[key])
+        f"dash_{key}": (dash_title, f"{column}{dash_row_index}",
+                        round_for_write(dashboard_values[key]))
         for key, column, _, _ in DASHBOARD_COLUMNS
     }
     print(f"\n⑤ の書き込み先: {dash_title} の {dash_row_index}行目")

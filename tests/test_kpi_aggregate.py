@@ -260,6 +260,34 @@ class TestDashboardValues(unittest.TestCase):
         self.assertAlmostEqual(values["seo"], 8.2, places=6)
 
 
+class TestRoundForWrite(unittest.TestCase):
+    """書き込む値は小数第1位まで(2026-09-03 栗林さんの指示)。"""
+
+    def test_the_august_dashboard_values(self):
+        self.assertEqual(kpi.round_for_write(35.20498866213152), 35.2)
+        self.assertEqual(kpi.round_for_write(14.533333333333333), 14.5)
+        self.assertEqual(kpi.round_for_write(19.31111111111111), 19.3)
+        self.assertEqual(kpi.round_for_write(1.3605442176870748), 1.4)
+        self.assertEqual(kpi.round_for_write(8.506666666666668), 8.5)
+        self.assertEqual(kpi.round_for_write(1.96), 2.0)
+        self.assertEqual(kpi.round_for_write(4.066666666666666), 4.1)
+        self.assertEqual(kpi.round_for_write(191.94666666666666), 191.9)
+
+    def test_halfway_rounds_up_like_a_person_would(self):
+        """Pythonの round() は偶数丸めで 8.55 → 8.5。手集計と食い違うので使わない。"""
+        self.assertEqual(kpi.round_for_write(8.55), 8.6)
+        self.assertEqual(kpi.round_for_write(2.25), 2.3)
+        self.assertEqual(kpi.round_for_write(0.05), 0.1)
+
+    def test_counts_are_untouched(self):
+        """①②は整数なので丸めても変わらない。"""
+        for value in (2180, 2607, 200, 131, 8, 6, 21, 46050):
+            self.assertEqual(kpi.round_for_write(value), float(value))
+
+    def test_negatives_round_away_from_zero(self):
+        self.assertEqual(kpi.round_for_write(-1.35), -1.4)
+
+
 class TestValuesMatch(unittest.TestCase):
     """書き込み後の読み返しの照合。
 
