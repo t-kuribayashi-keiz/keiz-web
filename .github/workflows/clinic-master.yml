@@ -13,15 +13,17 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "inspect=タブ名と見出し行を見るだけ(読み取りのみ)"
+        description: "inspect=構造と照合率を見るだけ / apply=clinics.jsonに書き込む"
         required: true
         type: choice
         options:
           - inspect
+          - apply
         default: inspect
 
+# applyでもスプレッドシートには書かない。書き換えるのはリポジトリの data/clinics.json だけ。
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   read:
@@ -36,8 +38,26 @@ jobs:
       - name: Install dependencies
         run: pip install --quiet google-auth google-api-python-client
 
-      - name: Inspect the clinic master
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Read the clinic master
         env:
           GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
           TZ: Asia/Tokyo
         run: python3 scripts/clinic_master.py --${{ inputs.mode }}
+
+      - name: Commit the imported hours
+        if: inputs.mode == 'apply'
+        run: |
+          if git diff --quiet -- data/clinics.json; then
+            echo "clinics.json に変化なし。コミットしません。"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/clinics.json
+          git commit -m "Import 診療時間 and 定休 from the clinic master
+
+Filled in by .github/workflows/clinic-master.yml (mode: apply)."
+          git push origin HEAD:${{ github.ref_name }}
