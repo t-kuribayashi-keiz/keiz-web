@@ -102,9 +102,16 @@ PLAN_COLUMNS = {
 # ③(PPC/META)は自動化保留、④は転記方法が未確定なので、いまは対象外。
 # L列(店舗数)は栗林さんの判断で当面手動運用(2026-09-03)。出どころが未確定なまま
 # 書き込むより、人が入れた値をそのまま残すほうが安全なため、ここには入れない。
+# ④のうちF(紹介)とJ(オフライン合計)は保留。指示どおりに計算すると564/1660になるが、
+# 栗林さんが手で集計した速報値は551/1492で、差の理由がまだ分かっていない(2026-09-03)。
+# 数字が合う引き方は見つかっているものの、そうすべき理由は確かめられていないので、
+# 人が入れた値を上書きしない。差は毎回ログに出す(下の skip の行)。
+# X(AI)は除外: 見出しの訂正後、手集計の21と完全に一致したので書き込む。
+HELD_PLAN_KEYS = {"referral", "offline_total"}
+
 WRITABLE_PLAN_KEYS = {
     "hp", "hpb", "epark",
-    "referral", "offline_total", "ai",          # ④
+    "ai",                                       # ④(F・JはHELD_PLAN_KEYSで保留)
     "stores_hpb_chokuei", "stores_hpb_sans", "stores_hpb_mirai",
     "stores_epark_chokuei", "stores_epark_sans", "stores_epark_mirai",
     "uu_seo", "uu_meo", "uu_ppc",
@@ -1783,7 +1790,13 @@ def main() -> int:
     planned = {}
     for key, value in sorted(extracted.items()):
         if key not in WRITABLE_PLAN_KEYS:
-            print(f"  skip {key}(書き込み対象外)")
+            if key in HELD_PLAN_KEYS:
+                current = parse_number(cell(rows[row_index - 1], PLAN_COLUMNS[key]))
+                print(f"  hold {key:20s} {PLAN_COLUMNS[key]}{row_index}  "
+                      f"手集計={current} / 抽出={value:g}  差={value - (current or 0):+g}"
+                      "(理由が未確定のため書き込まない)")
+            else:
+                print(f"  skip {key}(書き込み対象外)")
             continue
         ref = f"{PLAN_COLUMNS[key]}{row_index}"
         planned[key] = (plan_title, ref, value)

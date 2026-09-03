@@ -350,10 +350,19 @@ class TestWriteWhitelist(unittest.TestCase):
         for key in ("ppc", "meta"):
             self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
 
-    def test_step_four_columns_are_writable(self):
-        """④は2026-09-03に転記元が確定したので書き込み対象。"""
-        for key in ("referral", "offline_total", "ai"):
-            self.assertIn(key, kpi.WRITABLE_PLAN_KEYS, key)
+    def test_only_ai_of_step_four_is_writable(self):
+        """④のうち書き込むのはX(AI)だけ。見出し訂正後、手集計の21と完全一致した。"""
+        self.assertIn("ai", kpi.WRITABLE_PLAN_KEYS)
+
+    def test_referral_and_offline_are_held_back(self):
+        """F・Jは手集計(551/1492)と合わない理由が未確定。人の値を上書きしない。"""
+        for key in ("referral", "offline_total"):
+            self.assertIn(key, kpi.HELD_PLAN_KEYS, key)
+            self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
+
+    def test_a_held_key_is_never_also_writable(self):
+        """保留と書き込み可を同時に満たす列があってはいけない。"""
+        self.assertEqual(kpi.HELD_PLAN_KEYS & kpi.WRITABLE_PLAN_KEYS, set())
 
     def test_every_writable_key_has_a_column(self):
         for key in kpi.WRITABLE_PLAN_KEYS:
