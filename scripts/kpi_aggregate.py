@@ -1615,11 +1615,25 @@ def inspect_referral(service) -> int:
             for first, last in source["referral_ranges"]
             for i in range(col_to_index(first), col_to_index(last) + 1)
         )
+        # 列記号はシートに列が1本挿入されるとずれる。実際ミライは7月57列・8月58列で、
+        # 栗林さんに教わった列記号は8月のもの。見出し名で持ち直すために、いま出しておく。
+        header_row = rows[source["total_row"] - 2]
+        source["_headers"] = {}
+        for name, ranges in (("紹介", source["referral_ranges"]),
+                             ("オフライン合計", source["offline_ranges"]),
+                             ("AI", source.get("ai_ranges") or [])):
+            labels = []
+            for first, last in ranges:
+                for index in range(col_to_index(first), col_to_index(last) + 1):
+                    column = index_to_col(index)
+                    labels.append(f"{column}={str(cell(header_row, column)).strip()!r}")
+            if labels:
+                source["_headers"][name] = labels
         summary.append((source["label"], title, totals, builtin, source.get("_colored"),
-                        source.get("_span"), source.get("_formula")))
+                        source.get("_span"), source.get("_formula"), source.get("_headers")))
 
     print("\n\n=== まとめ ===")
-    for label, title, totals, builtin, colored, span, formula in summary:
+    for label, title, totals, builtin, colored, span, formula, headers in summary:
         line = (f"{label:4s} タブ={title!r} 紹介={totals['紹介']:g} "
                 f"オフライン合計={totals['オフライン合計']:g}")
         if builtin:
@@ -1628,6 +1642,8 @@ def inspect_referral(service) -> int:
             line += f" 色付き店舗={colored}"
         print("  " + line)
         print(f"       合計行が数えている範囲={span}  紹介の数式: {formula}")
+        for name, labels in (headers or {}).items():
+            print(f"       {name}の見出し: " + " ".join(labels))
     return 0
 
 
