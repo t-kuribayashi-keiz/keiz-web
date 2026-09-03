@@ -1532,6 +1532,26 @@ def inspect_referral(service) -> int:
             ref, value = builtin
             mark = "一致" if abs(value - totals["オフライン合計"]) < 0.5 else "**不一致**"
             print(f"  シート自身のオフライン合計 {ref}={value:g} → こちらの計算と{mark}")
+
+        # 5行目が何を計算しているのかを数式で見る。直営は5行目の紹介が全店舗の合計の
+        # ちょうど半分で、その差がオフライン合計の差とも一致する。理由を推測せずに確かめる。
+        print(f"\n-- {source['total_row']}行目の数式 --")
+        formulas = read_tab_range(
+            service, sid,
+            f"'{title}'!A{source['total_row']}:BB{source['total_row']}",
+            render="FORMULA",
+        )
+        formula_row = formulas[0] if formulas else []
+        for name, ranges in (("紹介", source["referral_ranges"]),
+                             ("オフライン合計", source["offline_ranges"]),
+                             ("AI", source.get("ai_ranges") or [])):
+            shown = []
+            for first, last in ranges:
+                for index in range(col_to_index(first), col_to_index(last) + 1):
+                    column = index_to_col(index)
+                    shown.append(f"{column}={cell(formula_row, column)!r}")
+            if shown:
+                print(f"  {name}: " + " ".join(shown[:24]))
         summary.append((source["label"], title, totals, builtin, source.get("_colored")))
 
     print("\n\n=== まとめ ===")
