@@ -15,6 +15,7 @@
 | 効果計測担当 | [measurer.md](.claude/agents/measurer.md) | 実装後のKPI変化を `/data/kpi-history/` に記録し、分析担当へフィードバック |
 | SalonBoard操作担当 | [salonboard-operator.md](.claude/agents/salonboard-operator.md) | HotPepper Beauty SalonBoard(salonboard.com)の定型更新・反映作業(ブランド非依存、要ローカル実行環境) |
 | スマイル マーケティング参謀 | [smile-marketing-strategist.md](.claude/agents/smile-marketing-strategist.md) | スマイルブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドで同様の役割が必要になれば同じ型で追加する) |
+| グッド マーケティング参謀 | [good-marketing-strategist.md](.claude/agents/good-marketing-strategist.md) | グッドブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。スマイルと同型だが、店舗ステータス区分・広告実額等のグッド固有ファクトは未確認のまま複製していない) |
 | コンテンツライター | [content-writer.md](.claude/agents/content-writer.md) | 承認済みの執筆指示書を、ブログ・広告文・口コミ返信等の完成コンテンツに仕上げる(ブランド非依存) |
 | 横断オーケストレーター | [cross-functional.md](.claude/agents/cross-functional.md) | 複数業務・複数院にまたがる重複/共通パターンを検出し、棚卸しを行う |
 
@@ -33,6 +34,20 @@ Skillとして実装します。1業務=1Skillを原則とし、疎結合に保�
 ブランドの追加が設定1行で済み、コードの分岐が増えません(例:
 [functions/chatwork-integration/CLAUDE.md](functions/chatwork-integration/CLAUDE.md) と
 [data/chatwork-rooms.json](data/chatwork-rooms.json))。
+
+### ブランド専属マーケティング参謀エージェントの追加方針
+
+ブランドごとに集客戦略・状況は異なるため、**ブランドごとに専属のマーケティング参謀
+エージェントを持つのが望ましい**という方針が2026-09-03に確認された(栗林さん発言:
+「スマイルと別なので、別で参謀エージェントが欲しいです。というか、ブランドごとに集客戦略や
+状況は異なるので、それぞれである方がいいですね。」)。
+
+ただし、**実際の運用ファクト(店舗ステータス区分、広告運用実績、SEO文字数ルール等の詳細な
+業務知識)が`brands/<ブランド名>/CLAUDE.md`に集まってから新設する**。空の骨組みだけを
+先行して量産すると、参照する事実が無いまま質の低いエージェントになるため。2026-09-03
+時点でこの型が存在するのはスマイル・グッドの2ブランドのみで、直営・サンズミライ・
+心身堂・リラックスの4ブランドは実データが揃うまで意図的に見送っている
+(`docs/backlog.md`の「設定・環境」セクションに未対応項目として記録)。
 
 ## 業務フロー(横串の刺し方)
 
