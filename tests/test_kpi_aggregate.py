@@ -188,6 +188,88 @@ class TestAdSpendCounting(unittest.TestCase):
         self.assertEqual(len(unmatched), 1)
 
 
+class TestDashboardValues(unittest.TestCase):
+    """2026年8月の実データで、1店舗当たりの行→ダッシュボードの対応を確かめる。
+
+    表示値は小数第1位までなので、全体数の行からの計算とはわずかにずれる。そのずれが
+    許容幅に収まることと、**対応表が正しいこと**の両方をここで見る。
+    分母がHPBとEPARKだけ違う(それぞれの掲載店舗数)のが罠で、全部をLで割っても
+    桁は合うため目視では気づけない。
+    """
+
+    # 「年間計画・目標」タブから2026-09-03に読み取った実際の値。
+    PER_STORE = {"C": "14.5", "D": "19.3", "E": "1.4", "F": "3.9", "H": "6.3", "J": "10.3",
+                 "L": "8.2", "M": "4.4", "N": "2.4", "O": "4.0", "P": "2.2", "Q": "0.1",
+                 "R": "151.2", "S": "151.2", "T": "40.8", "U": "191.9", "V": "307.0"}
+    TOTAL = {"C": "2180", "D": "2607", "E": "200", "L": "150", "P": "135", "T": "147",
+             "U": "1229", "V": "604", "W": "326", "X": "21", "AD": "28792", "AE": "46050"}
+
+    def _rows(self, per_store=None, total=None):
+        def build(mapping, label, month):
+            width = max(kpi.col_to_index(c) for c in mapping) if mapping else 2
+            row = [""] * max(width, 2)
+            row[0] = label
+            row[1] = month
+            for column, value in mapping.items():
+                row[kpi.col_to_index(column) - 1] = value
+            return row
+
+        return [
+            ["タイトル"], ["", "媒体名"],
+            build(total if total is not None else self.TOTAL, "全体数", "2026年8月"),
+            build(per_store if per_store is not None else self.PER_STORE, "1店舗当たり", "2026年8月"),
+        ]
+
+    def test_reproduces_the_dashboard_row(self):
+        values = kpi.build_dashboard_values(self._rows(), "2026年8月")
+        for key, expected in (
+            ("web_total", 35.2), ("hp", 14.5), ("hpb", 19.3), ("epark", 1.4),
+            ("seo", 8.3), ("meta", 2.2), ("ppc", 4.0), ("uu_seo", 191.9), ("uu_ppc", 307.0),
+        ):
+            self.assertAlmostEqual(values[key], expected, places=6, msg=key)
+
+    def test_hpb_and_epark_use_their_own_store_counts(self):
+        """分母をLに揃えると検算が合わなくなること = 罠が実際に検出できること。"""
+        wrong = dict(self.PER_STORE, D=str(2607 / 150), E=str(200 / 150))
+        with self.assertRaises(ValueError):
+            kpi.build_dashboard_values(self._rows(per_store=wrong), "2026年8月")
+
+    def test_seo_includes_ai(self):
+        """AK = SEO,MEO + AI。AI分(Q列)を落とすと検算に引っかかる。"""
+        wrong = dict(self.PER_STORE, Q="0")
+        with self.assertRaises(ValueError):
+            kpi.build_dashboard_values(self._rows(per_store=wrong), "2026年8月")
+
+    def test_missing_ai_column_is_treated_as_zero(self):
+        """X列(AI集客数)が未入力の月がある。そこで止まらないこと。"""
+        total = dict(self.TOTAL, X="")
+        per_store = dict(self.PER_STORE, Q="0")
+        values = kpi.build_dashboard_values(self._rows(per_store=per_store, total=total), "2026年8月")
+        self.assertAlmostEqual(values["seo"], 8.2, places=6)
+
+
+class TestBackupTabs(unittest.TestCase):
+    """複製・バックアップのタブは実データと同じ形なので、読めてしまう。中身は古い。"""
+
+    TITLES = [
+        "2026年Web集客KPI管理ダッシュボード",
+        "2026年Web集客KPI管理ダッシュボード のコピー",
+        "2026年Web集客KPI管理ダッシュボード BK0604",
+    ]
+
+    def test_backups_are_excluded(self):
+        self.assertEqual(
+            kpi.resolve_tab(self.TITLES, ["ダッシュボード"], "x"),
+            "2026年Web集客KPI管理ダッシュボード",
+        )
+
+    def test_is_backup_tab(self):
+        self.assertFalse(kpi.is_backup_tab("年間計画・目標"))
+        self.assertFalse(kpi.is_backup_tab("8月HP(速報値)"))
+        for title in ("シート のコピー", "計画 BK0604", "旧データ", "backup_2025"):
+            self.assertTrue(kpi.is_backup_tab(title), title)
+
+
 class TestResolveTab(unittest.TestCase):
     TITLES = ["8月HP(速報値)", "8月HPB （速報値）", "8月Epark(速報値)", "7月HP(速報値)", "年間計画・目標"]
 

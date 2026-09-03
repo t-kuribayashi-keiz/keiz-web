@@ -49,6 +49,8 @@ PLAN_TAB_KEYWORDS = ["年間計画"]
 # ①②が書き込むのは全体数のブロック。A列の結合セルに入っているブロック名で絞る。
 PLAN_BLOCK_TOTAL = "全体数"
 PLAN_BLOCK_PER_STORE = "1店舗当たり"
+# ダッシュボードの年月はA列。
+DASHBOARD_MONTH_COLUMN = "A"
 DASHBOARD_TAB_KEYWORDS = ["ダッシュボード"]
 AD_SPEND_TAB_KEYWORDS = ["広告費各詳細"]
 
@@ -94,17 +96,28 @@ WRITABLE_PLAN_KEYS = {
 # ⑤ ダッシュボードのAG〜AO列。2026年8月の実測値9項目すべてが下記の算出式と一致して確定。
 # 値そのものは「年間計画・目標」タブの1店舗当たり行から転記するのが本筋で、この式は
 # 転記結果が妥当かを機械的に確かめるための照合用。
+# 転記元は「年間計画・目標」タブの1店舗当たりブロックの行。ただしこのブロックは
+# 全体数ブロックと列の意味が違う(店舗数の列を別の指標に使い回している)ので、
+# 独自の対応表が要る。2026年8月の実データで1列ずつ確認した(2026-09-03)。
+#   (ダッシュボードの列, 1店舗当たり行の列たち, 全体数の行から検算する式)
 DASHBOARD_COLUMNS = [
-    ("web_total", "AG"),   # = hp + hpb + epark(いずれも1店舗当たり)
-    ("hp", "AH"),          # = C / L
-    ("hpb", "AI"),         # = D / P
-    ("epark", "AJ"),       # = E / T
-    ("seo", "AK"),         # = (U + X) / L   ← SEO,MEO + AI
-    ("meta", "AL"),        # = W / L
-    ("ppc", "AM"),         # = V / L
-    ("uu_seo", "AN"),      # = AD / L        ← 自然検索UU(SEO UU + MEO UU)
-    ("uu_ppc", "AO"),      # = AE / L
+    ("web_total", "AG", ["C", "D", "E"], lambda t: t["C"] / t["L"] + t["D"] / t["P"] + t["E"] / t["T"]),
+    ("hp",        "AH", ["C"],           lambda t: t["C"] / t["L"]),
+    ("hpb",       "AI", ["D"],           lambda t: t["D"] / t["P"]),
+    ("epark",     "AJ", ["E"],           lambda t: t["E"] / t["T"]),
+    ("seo",       "AK", ["L", "Q"],      lambda t: (t["U"] + t["X"]) / t["L"]),   # SEO,MEO + AI
+    ("meta",      "AL", ["P"],           lambda t: t["W"] / t["L"]),
+    ("ppc",       "AM", ["O"],           lambda t: t["V"] / t["L"]),
+    ("uu_seo",    "AN", ["U"],           lambda t: t["AD"] / t["L"]),             # 自然検索UU
+    ("uu_ppc",    "AO", ["V"],           lambda t: t["AE"] / t["L"]),
 ]
+
+# 検算に使う全体数ブロックの列。X(AI集客数)だけは未入力の月があるので0として扱う。
+CHECK_COLUMNS = ("C", "D", "E", "L", "P", "T", "U", "V", "W", "X", "AD", "AE")
+CHECK_OPTIONAL = ("X",)
+# 転記元と検算値のずれの許容幅。両者が別経路で同じ数字に行き着くことを確かめるのが目的で、
+# 小数第1位までしか表示されない値も混ざるため、ぴったり一致は求めない。
+DASHBOARD_TOLERANCE = 0.05
 
 # 合計行を探すときに、その行が本当に合計行かを確かめるためのラベル。
 TOTAL_LABELS = ("合計", "総計", "計")
@@ -487,6 +500,16 @@ def _keyword_matches(title: str, keyword: str) -> bool:
     return re.search(pattern, title) is not None
 
 
+# バックアップ・複製のタブ。実データと同じ形なので読めてしまい、しかも中身は古い。
+# 「2026年Web集客KPI管理ダッシュボード のコピー」「〜 BK0604」が実在する(2026-09-03)。
+TAB_EXCLUDE_KEYWORDS = ("コピー", "copy", "バックアップ", "backup", "bk", "旧", "old", "退避")
+
+
+def is_backup_tab(title: str) -> bool:
+    text = normalize(title).casefold()
+    return any(word in text for word in TAB_EXCLUDE_KEYWORDS)
+
+
 def resolve_tab(titles: list[str], keywords: list[str], label: str) -> str:
     """キーワードをすべて含むタブ名を1つに決める。0件でも複数でも停止する。
 
@@ -498,6 +521,7 @@ def resolve_tab(titles: list[str], keywords: list[str], label: str) -> str:
         title
         for title in titles
         if all(_keyword_matches(normalize(title), normalize(word)) for word in keywords)
+        and not is_backup_tab(title)
     ]
     if not hits:
         raise ValueError(f"{label} のタブが見つかりません(キーワード: {keywords})。")
@@ -506,14 +530,19 @@ def resolve_tab(titles: list[str], keywords: list[str], label: str) -> str:
     return hits[0]
 
 
-def read_tab(service, spreadsheet_id: str, title: str) -> list[list[str]]:
+def read_tab(service, spreadsheet_id: str, title: str, raw: bool = False) -> list[list[str]]:
+    """タブ全体を読む。
+
+    raw=True は書式を通さない生の値。ダッシュボードへの転記元は小数第1位までしか
+    表示されないため、表示値をそのまま書くと精度が落ちる(14.533... が 14.5 になる)。
+    """
     result = (
         service.spreadsheets()
         .values()
         .get(
             spreadsheetId=spreadsheet_id,
             range=f"'{title}'",
-            valueRenderOption="FORMATTED_VALUE",
+            valueRenderOption="UNFORMATTED_VALUE" if raw else "FORMATTED_VALUE",
         )
         .execute()
     )
@@ -652,6 +681,19 @@ def snapshot(service, cells: dict[str, str]) -> dict[str, str]:
         label: read_cell(service, SPREADSHEET_ID, title, ref)
         for label, (title, ref) in cells.items()
     }
+
+
+def write_cells(service, planned: dict[str, tuple[str, str, object]]) -> None:
+    service.spreadsheets().values().batchUpdate(
+        spreadsheetId=SPREADSHEET_ID,
+        body={
+            "valueInputOption": "USER_ENTERED",
+            "data": [
+                {"range": f"'{title}'!{ref}", "values": [[value]]}
+                for _, (title, ref, value) in sorted(planned.items())
+            ],
+        },
+    ).execute()
 
 
 def verify(service, planned: dict[str, tuple[str, str, object]]) -> list[str]:
@@ -798,6 +840,67 @@ def inspect(service, month_label: str) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------
+# 工程⑤ ダッシュボードへの転記
+# --------------------------------------------------------------------------
+
+def build_dashboard_values(plan_rows_raw: list[list], month_label: str) -> dict[str, float]:
+    """1店舗当たりの行からダッシュボードの9項目を組み立て、全体数の行で検算する。
+
+    転記元は1店舗当たりの行(栗林さんの工程⑤の指示どおり)。それを鵜呑みにせず、
+    全体数の行から別経路で計算した値と突き合わせる。**分母がHPBとEPARKだけ違う**
+    (それぞれの掲載店舗数)のが罠で、全部を店舗数Lで割っても桁は合うため、
+    間違っていても目視では気づけない。
+    """
+    per_store_row = plan_rows_raw[
+        find_month_row(plan_rows_raw, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_PER_STORE) - 1
+    ]
+    total_row = plan_rows_raw[
+        find_month_row(plan_rows_raw, PLAN_COLUMNS["month"], month_label, PLAN_BLOCK_TOTAL) - 1
+    ]
+
+    totals = {}
+    for column in CHECK_COLUMNS:
+        number = parse_number(cell(total_row, column))
+        if number is None:
+            if column in CHECK_OPTIONAL:
+                number = 0.0
+            else:
+                raise ValueError(
+                    f"全体数の行の {column}列 が数値ではありません(値: {cell(total_row, column)!r})。"
+                    "検算できないため停止します。"
+                )
+        totals[column] = number
+
+    values, mismatches = {}, []
+    for key, dashboard_col, source_cols, check in DASHBOARD_COLUMNS:
+        parts = []
+        for column in source_cols:
+            number = parse_number(cell(per_store_row, column))
+            if number is None:
+                raise ValueError(
+                    f"1店舗当たりの行の {column}列 が数値ではありません"
+                    f"(値: {cell(per_store_row, column)!r})。{key} を転記できないため停止します。"
+                )
+            parts.append(number)
+        transcribed = sum(parts)
+        expected = check(totals)
+        mark = "OK " if abs(transcribed - expected) <= DASHBOARD_TOLERANCE else "NG "
+        print(f"  {mark}{key:10s} → {dashboard_col}  転記元={transcribed:.4g}  検算={expected:.4g}")
+        if mark == "NG ":
+            mismatches.append(
+                f"{key} ({dashboard_col}): 1店舗当たりの行={transcribed} / 全体数から計算={expected}"
+            )
+        values[key] = transcribed
+
+    if mismatches:
+        raise ValueError(
+            "1店舗当たりの行と、全体数の行からの計算が一致しませんでした。"
+            "どちらかの列の対応が想定と違うため停止します。\n  - " + "\n  - ".join(mismatches)
+        )
+    return values
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--month", required=True, help="対象月ラベル(例: 2026年8月)")
@@ -854,27 +957,58 @@ def main() -> int:
         ref = f"{PLAN_COLUMNS[key]}{row_index}"
         planned[key] = (plan_title, ref, value)
 
-    print(f"\n書き込み先: {plan_title} の {row_index}行目")
+    print(f"\n① ② の書き込み先: {plan_title} の {row_index}行目")
     before = snapshot(service, {key: (title, ref) for key, (title, ref, _) in planned.items()})
     for key, (title, ref, value) in sorted(planned.items()):
         print(f"  {key:24s} {ref}  現在={before[key]!r} → {value:g}")
+
+    if args.apply:
+        # ⑤は①②の結果から自動計算される行を読むので、先に①②を書いて計算させる。
+        write_cells(service, planned)
+        mismatches = verify(service, planned)
+        if mismatches:
+            print("\n①② の書き込み後の読み返しが一致しませんでした:", file=sys.stderr)
+            for line in mismatches:
+                print(f"  - {line}", file=sys.stderr)
+            print(f"\n書き込み前の値: {before}", file=sys.stderr)
+            return 1
+        print("  ①② 書き込み後の読み返し: 一致")
+
+    # --- 工程⑤ ダッシュボードへの転記 ---
+    print("\n⑤ ダッシュボードへの転記(1店舗当たりの行を、全体数の行から検算しながら読む)")
+    try:
+        plan_rows_raw = read_tab(service, SPREADSHEET_ID, plan_title, raw=True)
+        dashboard_values = build_dashboard_values(plan_rows_raw, args.month)
+    except ValueError as error:
+        if args.apply:
+            print(f"\n①②は書き込み済みだが、⑤で停止した: {error}", file=sys.stderr)
+            print(f"①②の書き込み前の値(巻き戻し用): {before}", file=sys.stderr)
+        fail(str(error))
+        return 1
+
+    dash_title = resolve_tab(titles, DASHBOARD_TAB_KEYWORDS, "ダッシュボード")
+    dash_rows = read_tab(service, SPREADSHEET_ID, dash_title)
+    dash_row_index = find_month_row(dash_rows, DASHBOARD_MONTH_COLUMN, args.month)
+
+    dash_planned = {
+        f"dash_{key}": (dash_title, f"{column}{dash_row_index}", dashboard_values[key])
+        for key, column, _, _ in DASHBOARD_COLUMNS
+    }
+    print(f"\n⑤ の書き込み先: {dash_title} の {dash_row_index}行目")
+    dash_before = snapshot(
+        service, {key: (title, ref) for key, (title, ref, _) in dash_planned.items()}
+    )
+    for key, (title, ref, value) in sorted(dash_planned.items()):
+        print(f"  {key:24s} {ref}  現在={dash_before[key]!r} → {value:.4g}")
 
     if not args.apply:
         print("\nドライランのため書き込みませんでした。--apply で実行します。")
         return 0
 
-    service.spreadsheets().values().batchUpdate(
-        spreadsheetId=SPREADSHEET_ID,
-        body={
-            "valueInputOption": "USER_ENTERED",
-            "data": [
-                {"range": f"'{title}'!{ref}", "values": [[value]]}
-                for _, (title, ref, value) in sorted(planned.items())
-            ],
-        },
-    ).execute()
-
-    mismatches = verify(service, planned)
+    write_cells(service, dash_planned)
+    before = {**before, **dash_before}
+    planned = {**planned, **dash_planned}
+    mismatches = verify(service, dash_planned)
     if mismatches:
         print("\n書き込み後の読み返しが一致しませんでした:", file=sys.stderr)
         for line in mismatches:
@@ -882,7 +1016,7 @@ def main() -> int:
         print(f"\n書き込み前の値: {before}", file=sys.stderr)
         return 1
 
-    print("\n書き込み後の読み返しも一致しました。")
+    print("\n⑤ 書き込み後の読み返しも一致しました。")
     print(f"書き込み前の値(巻き戻し用): {before}")
     return 0
 
