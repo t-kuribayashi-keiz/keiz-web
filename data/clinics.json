@@ -1,5 +1,5 @@
 {
-  "_comment": "院マスタ。id は kpi-history/ や proposals/ から参照するキーとして使う。ブランド別の詳細コンテキストは brands/<ブランド名>/CLAUDE.md を参照。",
+  "_comment": "院マスタ。id は kpi-history/ や proposals/ から参照するキーとして使う。ブランド別の詳細コンテキストは brands/<ブランド名>/CLAUDE.md を参照。**診療時間と定休日はここには入っていない。** 取り込み元のスプレッドシートのファイル名が「診療時間」(ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)なので取り込んだつもりになりやすいが、取ったのは院名・住所・電話・URL・メールだけ。時間や定休日が要るときはマスタ側を見る(同スプレッドシートの「AIチェック用」シートに定休日列がある)。2026-09-03、salonboard-operatorが定休日を見つけられなかった原因。",
   "clinics": [
     {
       "id": "luna-togoshiginza",

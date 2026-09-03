@@ -260,6 +260,34 @@ class TestDashboardValues(unittest.TestCase):
         self.assertAlmostEqual(values["seo"], 8.2, places=6)
 
 
+class TestRoundForWrite(unittest.TestCase):
+    """書き込む値は小数第1位まで(2026-09-03 栗林さんの指示)。"""
+
+    def test_the_august_dashboard_values(self):
+        self.assertEqual(kpi.round_for_write(35.20498866213152), 35.2)
+        self.assertEqual(kpi.round_for_write(14.533333333333333), 14.5)
+        self.assertEqual(kpi.round_for_write(19.31111111111111), 19.3)
+        self.assertEqual(kpi.round_for_write(1.3605442176870748), 1.4)
+        self.assertEqual(kpi.round_for_write(8.506666666666668), 8.5)
+        self.assertEqual(kpi.round_for_write(1.96), 2.0)
+        self.assertEqual(kpi.round_for_write(4.066666666666666), 4.1)
+        self.assertEqual(kpi.round_for_write(191.94666666666666), 191.9)
+
+    def test_halfway_rounds_up_like_a_person_would(self):
+        """Pythonの round() は偶数丸めで 8.55 → 8.5。手集計と食い違うので使わない。"""
+        self.assertEqual(kpi.round_for_write(8.55), 8.6)
+        self.assertEqual(kpi.round_for_write(2.25), 2.3)
+        self.assertEqual(kpi.round_for_write(0.05), 0.1)
+
+    def test_counts_are_untouched(self):
+        """①②は整数なので丸めても変わらない。"""
+        for value in (2180, 2607, 200, 131, 8, 6, 21, 46050):
+            self.assertEqual(kpi.round_for_write(value), float(value))
+
+    def test_negatives_round_away_from_zero(self):
+        self.assertEqual(kpi.round_for_write(-1.35), -1.4)
+
+
 class TestValuesMatch(unittest.TestCase):
     """書き込み後の読み返しの照合。
 
@@ -282,6 +310,40 @@ class TestValuesMatch(unittest.TestCase):
         self.assertFalse(kpi.values_match("191.9", 191.94666666666666))
         self.assertFalse(kpi.values_match("", 14.5))
         self.assertFalse(kpi.values_match("エラー", 14.5))
+
+    def test_the_display_rounded_read_back_is_a_mismatch(self):
+        """表示用の値を読み返すと、正しく書けたセルが落ちる。
+
+        2026-09-03、ダッシュボードの行が小数1桁表示になり、実際に起きた。書けた値は
+        正しいのにこのチェックが落ちる。だから読み返しは UNFORMATTED_VALUE で読む
+        (read_cells(raw=True))。この照合を緩めて通すのは逆方向で、
+        桁を落として書いた本物の誤りまで見逃す。
+        """
+        for shown, written in (("1.4", 1.3605442176870748),
+                               ("8.5", 8.506666666666668),
+                               ("2.0", 1.96),
+                               ("4.1", 4.066666666666666),
+                               ("19.3", 19.31111111111111)):
+            self.assertFalse(kpi.values_match(shown, written), shown)
+
+    def test_the_read_back_asks_for_the_stored_value(self):
+        """verify は表示用ではなく実際の値を読む。"""
+        calls = []
+
+        def fake_read_cells(service, refs, raw=False):
+            calls.append(raw)
+            return ["1.3605442176870748"]
+
+        original = kpi.read_cells
+        kpi.read_cells = fake_read_cells
+        try:
+            mismatches = kpi.verify(
+                None, {"dash_epark": ("ダッシュボード", "AJ30", 1.3605442176870748)}
+            )
+        finally:
+            kpi.read_cells = original
+        self.assertEqual(calls, [True])
+        self.assertEqual(mismatches, [])
 
 
 class TestBackupTabs(unittest.TestCase):
@@ -346,9 +408,23 @@ class TestWriteWhitelist(unittest.TestCase):
             self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
 
     def test_manual_columns_are_never_writable(self):
-        """③PPC/META は自動化保留、④紹介/オフライン合計/AI は転記方法が未確定。"""
-        for key in ("ppc", "meta", "referral", "offline_total", "ai"):
+        """③PPC/META は自動化保留(2026-09-02の判断)。手入力のまま。"""
+        for key in ("ppc", "meta"):
             self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
+
+    def test_only_ai_of_step_four_is_writable(self):
+        """④のうち書き込むのはX(AI)だけ。見出し訂正後、手集計の21と完全一致した。"""
+        self.assertIn("ai", kpi.WRITABLE_PLAN_KEYS)
+
+    def test_referral_and_offline_are_held_back(self):
+        """F・Jは手集計(551/1492)と合わない理由が未確定。人の値を上書きしない。"""
+        for key in ("referral", "offline_total"):
+            self.assertIn(key, kpi.HELD_PLAN_KEYS, key)
+            self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
+
+    def test_a_held_key_is_never_also_writable(self):
+        """保留と書き込み可を同時に満たす列があってはいけない。"""
+        self.assertEqual(kpi.HELD_PLAN_KEYS & kpi.WRITABLE_PLAN_KEYS, set())
 
     def test_every_writable_key_has_a_column(self):
         for key in kpi.WRITABLE_PLAN_KEYS:
@@ -391,6 +467,14 @@ class TestTrendsCsv(unittest.TestCase):
         csv = self.CSV.replace("2025-01,90,89,35,82,9", "2025-01,90,89,35,82,<1")
         self.assertEqual(kpi.parse_trends_csv(csv, self.KEYWORDS)[(2025, 1)]["骨盤矯正"], 0)
 
+    def test_weekly_csv_is_rejected(self):
+        """期間が短いとGoogleトレンドは週次で返す。週を月に畳んでも月次は再現できない。"""
+        weekly = self.CSV.replace("月,整骨院", "週,整骨院").replace(
+            "2025-01,", "2025-01-05,").replace("2025-02,", "2025-01-12,")
+        with self.assertRaises(ValueError) as caught:
+            kpi.parse_trends_csv(weekly, self.KEYWORDS)
+        self.assertIn("週次", str(caught.exception))
+
     def test_missing_keyword_stops(self):
         csv = self.CSV.replace("骨盤矯正: (日本)", "ぎっくり腰: (日本)")
         with self.assertRaises(ValueError):
@@ -424,12 +508,34 @@ class TestTrendsCsv(unittest.TestCase):
             month_rows.append(row)
 
         parsed = kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
-        planned = kpi.build_trends_writes("年間計画・目標", header, month_rows, parsed)
+        planned = kpi.build_trends_writes(
+            "年間計画・目標", header, month_rows, parsed, (2026, 8)
+        )
 
         # 4か月 × 5キーワード。2026/9 はCSVに無いので空のまま残す。
         self.assertEqual(len(planned), 20)
         self.assertEqual(planned["trends_2025-01_整骨院"][1], "AO3")
         self.assertEqual(planned["trends_2026-08_骨盤矯正"][1], "AS6")
+        self.assertNotIn("trends_2026-09_整骨院", planned)
+
+    def test_the_running_month_is_not_written(self):
+        """CSVには実行日を含む当月の行も入っている。数日分の値を月次として並べない。"""
+        csv = self.CSV + "2026-09,71,70,54,25,5\n"
+        header = [""] * 45
+        for column, keyword in zip(kpi.TRENDS_VALUE_COLUMNS, self.KEYWORDS):
+            header[kpi.col_to_index(column) - 1] = keyword
+        month_rows = []
+        for label in ("2025/1", "2025/2", "2026/7", "2026/8", "2026/9"):
+            row = [""] * 45
+            row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = label
+            month_rows.append(row)
+
+        parsed = kpi.parse_trends_csv(csv, self.KEYWORDS)
+        self.assertIn((2026, 9), parsed)          # CSVには入っている
+        planned = kpi.build_trends_writes(
+            "年間計画・目標", header, month_rows, parsed, (2026, 8)
+        )
+        self.assertEqual(len(planned), 20)        # が、書かれない
         self.assertNotIn("trends_2026-09_整骨院", planned)
 
     def test_the_formula_columns_are_never_written(self):
@@ -440,10 +546,211 @@ class TestTrendsCsv(unittest.TestCase):
         row = [""] * 45
         row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = "2025/1"
         planned = kpi.build_trends_writes(
-            "年間計画・目標", header, [row], kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+            "年間計画・目標", header, [row],
+            kpi.parse_trends_csv(self.CSV, self.KEYWORDS), (2026, 8),
         )
         for _, ref, _ in planned.values():
             column = re.match(r"[A-Z]+", ref).group(0)
             row_number = int(re.search(r"\d+", ref).group(0))
             self.assertIn(column, kpi.TRENDS_VALUE_COLUMNS)
             self.assertLessEqual(row_number, kpi.TRENDS_LAST_ROW)
+
+
+
+class TestHeaderColumns(unittest.TestCase):
+    """列は見出し名で引く。列記号は月によって動く。"""
+
+    JULY = ["", "", "紹介", "紹介（家族）", "ポスター"]
+    #                                    ↓ 列が1本挿入され、末尾の名前も変わった想定
+    AUGUST = ["", "", "店頭QR", "紹介", "紹介（家族）", "店外ポスター"]
+
+    def test_the_same_names_follow_an_inserted_column(self):
+        names = ["紹介", "紹介（家族）"]
+        self.assertEqual(kpi.header_columns(self.JULY, names), ["C", "D"])
+        self.assertEqual(kpi.header_columns(self.AUGUST, names), ["D", "E"])
+
+    def test_letters_would_have_read_the_wrong_columns(self):
+        """これが列記号を捨てた理由。
+
+        直営のタブは8月のAPが『ブラックボード』、7月のAPが『ポスター』で、
+        同じ列記号が別のチャネルを指している。
+        """
+        july = kpi.header_columns(self.JULY, ["紹介"])
+        august = kpi.header_columns(self.AUGUST, ["紹介"])
+        self.assertNotEqual(july, august)
+
+    def test_full_width_spaces_and_newlines_do_not_block_a_match(self):
+        row = ["電話　予約", "紹介\n予約"]
+        self.assertEqual(kpi.header_columns(row, ["電話 予約", "紹介 予約"]), ["A", "B"])
+
+    def test_a_missing_header_stops(self):
+        with self.assertRaises(ValueError):
+            kpi.header_columns(self.JULY, ["ChatGPT"])
+
+    def test_a_duplicated_header_stops(self):
+        """同じ名前が2列あれば、どちらを足すべきかは決められない。"""
+        with self.assertRaises(ValueError):
+            kpi.header_columns(["紹介", "紹介"], ["紹介"])
+
+    def test_every_configured_header_is_distinct_within_its_source(self):
+        for source in kpi.load_referral_sources():
+            for key in ("referral_headers", "offline_headers", "ai_headers"):
+                names = source.get(key) or []
+                keys = [kpi.header_key(name) for name in names]
+                self.assertEqual(len(keys), len(set(keys)), f"{source['key']}/{key}")
+
+    def test_the_referral_headers_are_a_subset_of_the_offline_ones(self):
+        """紹介はオフラインの内数。栗林さんの範囲指定もそうなっていた。"""
+        for source in kpi.load_referral_sources():
+            referral = {kpi.header_key(n) for n in source["referral_headers"]}
+            offline = {kpi.header_key(n) for n in source["offline_headers"]}
+            self.assertTrue(referral <= offline, source["key"])
+
+
+class TestFormulaRowSpan(unittest.TestCase):
+    """店舗行の範囲は、合計行の数式から読む。"""
+
+    @staticmethod
+    def row(mapping):
+        width = max(kpi.col_to_index(column) for column in mapping)
+        return [mapping.get(kpi.index_to_col(i), "") for i in range(1, width + 1)]
+
+    def test_reads_the_span_the_sheet_itself_sums(self):
+        row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T22)"})
+        self.assertEqual(kpi.formula_row_span(row, ["S", "T"]), (6, 22))
+
+    def test_a_hand_adjusted_formula_still_gives_its_span(self):
+        """サンズのW5は =SUM(W6:W16)-SUM(U6)。手で足し引きされていても範囲は読める。"""
+        row = self.row({"W": "=SUM(W6:W16)-SUM(U6)", "X": "=SUM(X6:X16)"})
+        self.assertEqual(kpi.formula_row_span(row, ["W", "X"]), (6, 16))
+
+    def test_columns_disagreeing_on_the_span_stops(self):
+        """列ごとに数える行が違えば、まとめて合計してよい理由がない。"""
+        row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T30)"})
+        with self.assertRaises(ValueError):
+            kpi.formula_row_span(row, ["S", "T"])
+
+    def test_no_formula_stops(self):
+        """合計が定数で入っていたら、店舗行がどこかは分からない。"""
+        row = self.row({"S": "23", "T": "7"})
+        with self.assertRaises(ValueError):
+            kpi.formula_row_span(row, ["S", "T"])
+
+    def test_the_trap_it_exists_for(self):
+        """シートの下に別の表があると、合計行より下を全部足す読み方は倍になる。
+
+        直営の2026年8月がまさにこれで、紹介が510に対して1020だった。
+        """
+        rows = [[] for _ in range(4)]
+        rows.append(self.row({"A": "合計", "S": "10"}))          # 5行目
+        rows.append(self.row({"A": "店舗1", "S": "6"}))          # 6行目
+        rows.append(self.row({"A": "店舗2", "S": "4"}))          # 7行目
+        rows.append(self.row({"A": "別表", "S": "10"}))          # 8行目(合計行の範囲外)
+        formula_row = self.row({"A": "合計", "S": "=SUM(S6:S7)"})
+
+        naive = sum(
+            kpi.sum_ranges(row, [["S", "S"]])
+            for _, _, row in kpi.store_rows_of(rows, 5)
+        )
+        self.assertEqual(naive, 20)
+
+        first, last = kpi.formula_row_span(formula_row, ["S"])
+        within = sum(
+            kpi.sum_ranges(row, [["S", "S"]])
+            for index, _, row in kpi.store_rows_of(rows, 5)
+            if first <= index <= last
+        )
+        self.assertEqual(within, 10)
+
+
+class TestReferralExtraction(unittest.TestCase):
+    """工程④。3ブランドの別シートから 紹介 / オフライン合計 / AI を読む。"""
+
+    def _sheet(self, stores):
+        """1行目タイトル / 5行目に合計 / 6行目以降が店舗。列C〜Eを使う簡易版。"""
+        width = 10
+        rows = [[""] * width for _ in range(5)]
+        rows[0][0] = "8月集患媒体"
+        rows[4][0] = "合計"
+        body = []
+        for name, values in stores:
+            row = [""] * width
+            row[0] = name
+            for offset, value in enumerate(values):
+                row[kpi.col_to_index("C") - 1 + offset] = str(value)
+            body.append(row)
+        for offset in range(3):
+            rows[4][kpi.col_to_index("C") - 1 + offset] = str(
+                sum(v[offset] for _, v in stores)
+            )
+        return rows + body
+
+    def test_store_rows_start_below_the_total_row(self):
+        rows = self._sheet([("A院", [1, 2, 3]), ("B院", [4, 5, 6])])
+        stores = kpi.store_rows_of(rows, 5)
+        self.assertEqual([(index, label) for index, label, _ in stores],
+                         [(6, "A院"), (7, "B院")])
+
+    def test_sum_ranges_skips_the_gap(self):
+        """直営はAQを、ミライはWを飛ばす。飛びは意図的な除外なので埋めない。"""
+        row = [""] * 10
+        for column, value in (("C", 1), ("D", 2), ("E", 4)):
+            row[kpi.col_to_index(column) - 1] = str(value)
+        self.assertEqual(kpi.sum_ranges(row, [["C", "C"], ["E", "E"]]), 5)
+
+    def test_excluded_stores_are_found_by_normalised_name(self):
+        """整骨院/接骨院の違いなどを吸収して照合する。"""
+        rows = self._sheet([("逆井駅前整体院", [1, 1, 1]), ("本八幡駅前整骨院", [2, 2, 2])])
+        stores = kpi.store_rows_of(rows, 5)
+        self.assertEqual(kpi.excluded_row_indexes(stores, ["逆井駅前整骨院"]), {6})
+
+    def test_a_renamed_excluded_store_stops_the_run(self):
+        """名前が変わって見つからなくなったら止める。黙って合計に混ぜない。"""
+        rows = self._sheet([("本八幡駅前整骨院", [2, 2, 2])])
+        stores = kpi.store_rows_of(rows, 5)
+        with self.assertRaises(ValueError):
+            kpi.excluded_row_indexes(stores, ["逆井駅前整骨院"])
+
+    def test_the_config_carries_the_five_excluded_stores(self):
+        chokuei = next(s for s in kpi.load_referral_sources() if s["key"] == "chokuei")
+        self.assertEqual(len(chokuei["exclude_store_names"]), 5)
+        self.assertIn("逆井駅前整骨院", chokuei["exclude_store_names"])
+        self.assertEqual(
+            chokuei["ai_headers"],
+            # G列『ホームページ（広告）』は2026-09-03に栗林さんが訂正して外れた。
+            # 広告経由の流入であってAIではない。
+            ["ホームページ（AI）", "ChatGPT", "Gemini"],
+        )
+
+    def test_only_chokuei_supplies_ai(self):
+        """X列(AI)は直営のみ。サンズ・ミライには無い。"""
+        for source in kpi.load_referral_sources():
+            if source["key"] == "chokuei":
+                self.assertTrue(source.get("ai_headers"))
+            else:
+                self.assertFalse(source.get("ai_headers"))
+
+    def test_every_source_is_addressed_by_tab_name_not_gid(self):
+        """gidは月が変わると別物になる。タブ名で解決する。"""
+        expected = {
+            "chokuei": "{year}年{month}月柔整",  # 同じ月に『2026年8月交通事故』も並ぶ
+            "sans": "{year}年{month}月",
+            "mirai": "{year}年{month}月",
+        }
+        for source in kpi.load_referral_sources():
+            self.assertEqual(source["tab_name_pattern"], expected[source["key"]])
+
+    def test_the_chokuei_pattern_does_not_match_the_traffic_accident_tab(self):
+        """直営の柔整タブと交通事故タブは1文字も重ならない名前で選ぶ。
+
+        部分一致にすると『2026年8月交通事故』や締め切り前のスナップショットを
+        拾いうる。どちらも数字としては自然に見えるので、気づけない。
+        """
+        pattern = dict(
+            (source["key"], source["tab_name_pattern"])
+            for source in kpi.load_referral_sources()
+        )["chokuei"]
+        wanted = pattern.format(year=2026, month=8)
+        self.assertEqual(wanted, "2026年8月柔整")
+        for other in ("2026年8月交通事故", "2026年8月柔整(0817)", "カルテ一覧8月"):
+            self.assertNotEqual(wanted, other)
