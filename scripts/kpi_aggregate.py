@@ -78,9 +78,10 @@ PLAN_COLUMNS = {
 
 # ①②で書き込んでよい列だけを列挙する。ここに無い列には絶対に書かない。
 # ③(PPC/META)は自動化保留、④は転記方法が未確定なので、いまは対象外。
+# L列(店舗数)は栗林さんの判断で当面手動運用(2026-09-03)。出どころが未確定なまま
+# 書き込むより、人が入れた値をそのまま残すほうが安全なため、ここには入れない。
 WRITABLE_PLAN_KEYS = {
     "hp", "hpb", "epark",
-    "stores_hp",
     "stores_hpb_chokuei", "stores_hpb_sans", "stores_hpb_mirai",
     "stores_epark_chokuei", "stores_epark_sans", "stores_epark_mirai",
     "uu_seo", "uu_meo", "uu_ppc",
@@ -148,39 +149,63 @@ def cell(row: list, column: str):
     return row[index - 1] if len(row) >= index else ""
 
 
+def column_sum_above(rows: list[list[str]], column: str, row_index: int) -> float:
+    """指定行より上にある数値の合計。合計行かどうかの裏取りに使う。"""
+    total = 0.0
+    for row in rows[: row_index - 1]:
+        number = parse_number(cell(row, column))
+        if number is not None:
+            total += number
+    return total
+
+
 def find_total_row(rows: list[list[str]], value_col_index: int) -> int:
     """合計行の行番号(1始まり)を返す。見つからない/怪しい場合は例外。
 
     行番号を固定で持たない理由: 店舗が増減すると合計行がずれる。ずれたまま読むと
     合計ではない1店舗分の値をKPIとして書き込んでしまい、しかもエラーが出ない。
+    栗林さんからも各タブのセル位置と併せて「店舗数が変わるとこの位置も変わる」と
+    明示されている。
 
     判定は2段構え:
-      1. どこかのセルに「合計」等のラベルがある行を探す
-      2. その行の対象列に数値が入っていることを確かめる
-    候補が複数あるときは、どれを使うべきか機械的に決められないので失敗させる。
+      1. どこかのセルに「合計」等のラベルがある行を探し、対象列が数値であることを確かめる
+      2. ラベルで決まらなければ、対象列の値が「その行より上の数値の合計」と一致する行を探す
+    どちらの段でも候補が1つに絞れなければ停止する。推測して読むと、合計ではない値が
+    そのままKPIになる。
     """
-    candidates = []
-    for row_index, row in enumerate(rows, start=1):
-        has_label = any(
-            any(label in str(value) for label in TOTAL_LABELS) for value in row
-        )
-        if not has_label:
-            continue
-        if parse_number(cell(row, index_to_col(value_col_index))) is None:
-            continue
-        candidates.append(row_index)
+    column = index_to_col(value_col_index)
 
-    if not candidates:
+    labelled = [
+        row_index
+        for row_index, row in enumerate(rows, start=1)
+        if any(any(label in str(value) for label in TOTAL_LABELS) for value in row)
+        and parse_number(cell(row, column)) is not None
+    ]
+    if len(labelled) == 1:
+        return labelled[0]
+
+    # ラベルで決まらなかったので、値そのもので合計行を探す。
+    summed = []
+    for row_index, row in enumerate(rows, start=1):
+        value = parse_number(cell(row, column))
+        if value is None or value == 0:
+            continue
+        if abs(value - column_sum_above(rows, column, row_index)) < 0.5:
+            summed.append(row_index)
+
+    if len(summed) == 1:
+        return summed[0]
+    if not labelled and not summed:
         raise ValueError(
-            "合計行が見つかりませんでした。シートの構造が変わった可能性があります。"
-            "行番号を推測して書き込むのは危険なため、ここで停止します。"
+            f"{column}列の合計行が見つかりませんでした。「合計」等のラベルも無く、"
+            "上の行の合計と一致する行もありません。シートの構造が変わった可能性があります。"
+            "行番号を推測して読むのは危険なため停止します。"
         )
-    if len(candidates) > 1:
-        raise ValueError(
-            f"合計行の候補が複数見つかりました(行: {candidates})。"
-            "どれを使うか機械的に判断できないため停止します。"
-        )
-    return candidates[0]
+    raise ValueError(
+        f"{column}列の合計行を1つに絞れませんでした"
+        f"(ラベル一致: {labelled} / 合計一致: {summed})。"
+        "どれを使うか機械的に判断できないため停止します。"
+    )
 
 
 def find_month_row(rows: list[list[str]], month_col: str, month_label: str) -> int:
@@ -477,7 +502,12 @@ def extract_from_soku_tab(service, month_label: str, source_key: str) -> dict[st
     first_column = next(iter(columns.values()))
     total_row_index = find_total_row(rows, col_to_index(first_column))
     total_row = rows[total_row_index - 1]
-    print(f"  {title}: 合計行 = {total_row_index}行目")
+    checksum = column_sum_above(rows, first_column, total_row_index)
+    total_value = parse_number(cell(total_row, first_column))
+    print(f"  {title}: 合計行 = {total_row_index}行目 "
+          f"({first_column}={total_value} / 上の行の合計={checksum:g})")
+    if total_value is not None and abs(total_value - checksum) >= 0.5:
+        print("    ※ 合計行の値が上の行の合計と一致しません。合計行の判定を疑うこと。")
 
     values = {}
     for key, column in columns.items():

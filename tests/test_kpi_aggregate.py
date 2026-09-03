@@ -22,10 +22,19 @@ class TestColumnHelpers(unittest.TestCase):
             self.assertEqual(kpi.col_to_index(letters), index, letters)
             self.assertEqual(kpi.index_to_col(index), letters, letters)
 
-    def test_hp_source_columns_are_the_ones_specified(self):
-        """栗林さん指定: N=集客数 / AU=SEO UU / BB=MEO UU / BL=PPC UU。"""
-        columns = kpi.load_source_columns()["hp"]["columns"]
-        self.assertEqual(columns, {"hp": "N", "uu_seo": "AU", "uu_meo": "BB", "uu_ppc": "BL"})
+    def test_source_columns_are_the_ones_specified(self):
+        """栗林さん指定(2026-09-03): HPはN/AU/BB/BL、HPBはN、EparkはM。"""
+        sources = kpi.load_source_columns()
+        self.assertEqual(
+            sources["hp"]["columns"], {"hp": "N", "uu_seo": "AU", "uu_meo": "BB", "uu_ppc": "BL"}
+        )
+        self.assertEqual(sources["hpb"]["columns"], {"hpb": "N"})
+        self.assertEqual(sources["epark"]["columns"], {"epark": "M"})
+
+    def test_no_source_column_is_left_unresolved(self):
+        for key, source in kpi.load_source_columns().items():
+            for name, column in source["columns"].items():
+                self.assertIsNotNone(column, f"{key}.{name}")
 
 
 class TestFindTotalRow(unittest.TestCase):
@@ -45,6 +54,14 @@ class TestFindTotalRow(unittest.TestCase):
         rows = [["店舗名"], ["店舗A"] + [""] * 12 + ["10"]]
         with self.assertRaises(ValueError):
             kpi.find_total_row(rows, 14)
+
+    def test_falls_back_to_the_sum_when_there_is_no_label(self):
+        """「合計」というラベルが無いタブでも、値が上の行の合計と一致する行で特定できる。"""
+        rows = [["店舗名"] + [""] * 12 + ["集客数"]]
+        for i in range(5):
+            rows.append([f"店舗{i}"] + [""] * 12 + [str(10 + i)])
+        rows.append([""] * 13 + [str(sum(10 + i for i in range(5)))])
+        self.assertEqual(kpi.find_total_row(rows, 14), 7)
 
     def test_multiple_total_rows_raise_instead_of_picking_one(self):
         rows = self._sheet(3)
@@ -148,6 +165,10 @@ class TestFindMonthRow(unittest.TestCase):
 
 
 class TestWriteWhitelist(unittest.TestCase):
+    def test_store_count_l_is_left_manual(self):
+        """L列(店舗数)は栗林さんの判断で当面手動(2026-09-03)。書き込まない。"""
+        self.assertNotIn("stores_hp", kpi.WRITABLE_PLAN_KEYS)
+
     def test_formula_columns_are_never_writable(self):
         """I・K・P・T・U・AD は数式。上書きすると数式が消える。"""
         for key in ("seo_meo", "stores_hpb_total", "stores_epark_total", "uu_natural"):
