@@ -259,6 +259,30 @@ class TestDashboardValues(unittest.TestCase):
         self.assertAlmostEqual(values["seo"], 8.2, places=6)
 
 
+class TestValuesMatch(unittest.TestCase):
+    """書き込み後の読み返しの照合。
+
+    読み返しは表示用の値で有効数字10桁程度に丸められるため、完全一致は使えない。
+    かといって緩めると、書き込み位置を間違えたときに気づけなくなる。
+    """
+
+    def test_rounding_from_the_read_back_is_accepted(self):
+        # 実際に起きた値: 14.533333333333333 と書いて 14.53333333 が返る。
+        self.assertTrue(kpi.values_match("14.53333333", 14.533333333333333))
+        self.assertTrue(kpi.values_match("35.20498866", 35.20498866213152))
+        self.assertTrue(kpi.values_match("1.360544218", 1.3605442176870748))
+
+    def test_integers_still_compare_exactly_enough(self):
+        self.assertTrue(kpi.values_match("2,180", 2180))
+        self.assertFalse(kpi.values_match("2,181", 2180))
+
+    def test_a_real_difference_is_still_caught(self):
+        self.assertFalse(kpi.values_match("14.5", 14.533333333333333))
+        self.assertFalse(kpi.values_match("191.9", 191.94666666666666))
+        self.assertFalse(kpi.values_match("", 14.5))
+        self.assertFalse(kpi.values_match("エラー", 14.5))
+
+
 class TestBackupTabs(unittest.TestCase):
     """複製・バックアップのタブは実データと同じ形なので、読めてしまう。中身は古い。"""
 

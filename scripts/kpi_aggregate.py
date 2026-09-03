@@ -683,6 +683,20 @@ def snapshot(service, cells: dict[str, str]) -> dict[str, str]:
     }
 
 
+def values_match(actual, expected) -> bool:
+    """読み返した値が、書いた値と同じとみなせるか。
+
+    完全一致にできない理由: 読み返しは表示用の値で、有効数字10桁程度に丸められる
+    (14.533333333333333 と書いて 14.53333333 が返る)。整数の転記では完全一致するが、
+    ⑤の1店舗当たりの数字は割り算の結果なので必ずずれる。
+    丸め以上のずれは見逃したくないので、許容幅は丸め幅ぎりぎりに絞る。
+    """
+    got, want = parse_number(actual), parse_number(expected)
+    if got is None or want is None:
+        return False
+    return abs(got - want) <= max(1e-7, abs(want) * 1e-7)
+
+
 def write_cells(service, planned: dict[str, tuple[str, str, object]]) -> None:
     service.spreadsheets().values().batchUpdate(
         spreadsheetId=SPREADSHEET_ID,
@@ -701,7 +715,7 @@ def verify(service, planned: dict[str, tuple[str, str, object]]) -> list[str]:
     mismatches = []
     for label, (title, ref, expected) in planned.items():
         actual = read_cell(service, SPREADSHEET_ID, title, ref)
-        if parse_number(actual) != parse_number(expected):
+        if not values_match(actual, expected):
             mismatches.append(f"{label} ({title}!{ref}): 期待={expected} / 実際={actual}")
     return mismatches
 
