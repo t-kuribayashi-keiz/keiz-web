@@ -1330,6 +1330,39 @@ def sum_ranges(row: list, ranges: list) -> float:
     return total
 
 
+SUM_SPAN = re.compile(r"SUM\(\s*\$?[A-Z]{1,2}\$?(\d+)\s*:\s*\$?[A-Z]{1,2}\$?(\d+)\s*\)")
+
+
+def formula_row_span(formula_row: list, ranges: list) -> tuple[int, int]:
+    """合計行の数式から、店舗行の範囲を読む。
+
+    『合計行より下で店舗名が入っている行』を店舗行とみなすと、シートの下のほうに
+    別の表や作業用の行があったときに黙って混ざる。直営はそれで紹介がちょうど2倍に
+    なっていた。5行目自身が =SUM(S6:S22) と範囲を書いているので、そちらを使う。
+    範囲がひとつに定まらなければ例外(推測しない)。
+    """
+    spans: dict[tuple[int, int], list[str]] = {}
+    for first, last in ranges:
+        for index in range(col_to_index(first), col_to_index(last) + 1):
+            column = index_to_col(index)
+            match = SUM_SPAN.search(str(cell(formula_row, column)))
+            if match:
+                span = (int(match.group(1)), int(match.group(2)))
+                spans.setdefault(span, []).append(column)
+    if not spans:
+        raise ValueError(
+            "合計行に SUM(...) の数式が1つもありません。"
+            "どの行が店舗行なのかをシートから読めないため停止します。"
+        )
+    if len(spans) > 1:
+        detail = " / ".join(f"{start}〜{end}行: {cols}" for (start, end), cols in spans.items())
+        raise ValueError(
+            f"合計行の数式が複数の範囲を指しています({detail})。"
+            "列ごとに数える行が違うため、まとめて合計できません。停止します。"
+        )
+    return next(iter(spans))
+
+
 def store_rows_of(rows: list[list], total_row: int) -> list[tuple[int, str, list]]:
     """合計行より下の、店舗名(A列またはB列)が入っている行。"""
     found = []
@@ -1396,11 +1429,25 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
     rows = read_tab(service, sid, title)
     total_row = rows[source["total_row"] - 1]
 
-    stores = store_rows_of(rows, source["total_row"])
+    formulas = read_tab_range(
+        service, sid,
+        f"'{title}'!A{source['total_row']}:BB{source['total_row']}",
+        render="FORMULA",
+    )
+    formula_row = formulas[0] if formulas else []
+
+    all_ranges = list(source["referral_ranges"]) + list(source["offline_ranges"]) \
+        + list(source.get("ai_ranges") or [])
+    first_row, last_row = formula_row_span(formula_row, all_ranges)
+    stores = [
+        (index, label, row)
+        for index, label, row in store_rows_of(rows, source["total_row"])
+        if first_row <= index <= last_row
+    ]
     excluded = excluded_row_indexes(stores, source.get("exclude_store_names") or [])
 
     result = {"label": source["label"], "tab": title, "stores": len(stores),
-              "excluded": len(excluded)}
+              "excluded": len(excluded), "span": (first_row, last_row)}
     for key, ranges in (("referral", source["referral_ranges"]),
                         ("offline_total", source["offline_ranges"]),
                         ("ai", source.get("ai_ranges"))):
@@ -1408,15 +1455,19 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
             continue
         header = sum_ranges(total_row, ranges)
         all_stores = sum(sum_ranges(row, ranges) for _, _, row in stores)
-        kept = sum(
-            sum_ranges(row, ranges) for row_index, _, row in stores if row_index not in excluded
+        # 栗林さんの指示は「5行目の合計を使う」。除外店舗はそこから引く。
+        # 引く相手が5行目の集計範囲に入っている行だけなのは、範囲外の店舗は
+        # 5行目に最初から入っておらず、引くと二重に減るため。
+        dropped = sum(
+            sum_ranges(row, ranges) for row_index, _, row in stores if row_index in excluded
         )
         if abs(header - all_stores) >= 0.5:
             raise ValueError(
                 f"{source['label']} の{key}: {source['total_row']}行目={header:g} が"
-                f"全店舗の合計={all_stores:g} と一致しません。店舗行の読み取りが想定と違うため停止します。"
+                f"{first_row}〜{last_row}行の合計={all_stores:g} と一致しません。"
+                "店舗行の読み取りが想定と違うため停止します。"
             )
-        result[key] = {"header": header, "all": all_stores, "kept": kept}
+        result[key] = {"header": header, "all": all_stores, "kept": header - dropped}
 
     builtin = find_offline_total_cell(rows)
     if builtin and "offline_total" in result:
@@ -1436,7 +1487,8 @@ def extract_referral(service, month_label: str) -> dict[str, float]:
     totals = {"referral": 0.0, "offline_total": 0.0, "ai": 0.0}
     for source in load_referral_sources():
         result = read_referral_source(service, source, month_label)
-        note = f"({result['stores']}店舗"
+        first_row, last_row = result["span"]
+        note = f"({first_row}〜{last_row}行の{result['stores']}店舗"
         if result["excluded"]:
             note += f" / うち除外{result['excluded']}店舗"
         note += ")"
@@ -1533,29 +1585,31 @@ def inspect_referral(service) -> int:
             mark = "一致" if abs(value - totals["オフライン合計"]) < 0.5 else "**不一致**"
             print(f"  シート自身のオフライン合計 {ref}={value:g} → こちらの計算と{mark}")
 
-        # 5行目が何を計算しているのかを数式で見る。直営は5行目の紹介が全店舗の合計の
-        # ちょうど半分で、その差がオフライン合計の差とも一致する。理由を推測せずに確かめる。
-        print(f"\n-- {source['total_row']}行目の数式 --")
+        # 5行目が何を計算しているのかを数式で見る。直営は5行目の紹介が
+        # 「合計行より下の店舗名がある行」の合計のちょうど半分だった。理由を推測せずに確かめる。
         formulas = read_tab_range(
             service, sid,
             f"'{title}'!A{source['total_row']}:BB{source['total_row']}",
             render="FORMULA",
         )
         formula_row = formulas[0] if formulas else []
-        for name, ranges in (("紹介", source["referral_ranges"]),
-                             ("オフライン合計", source["offline_ranges"]),
-                             ("AI", source.get("ai_ranges") or [])):
-            shown = []
-            for first, last in ranges:
-                for index in range(col_to_index(first), col_to_index(last) + 1):
-                    column = index_to_col(index)
-                    shown.append(f"{column}={cell(formula_row, column)!r}")
-            if shown:
-                print(f"  {name}: " + " ".join(shown[:24]))
-        summary.append((source["label"], title, totals, builtin, source.get("_colored")))
+        all_ranges = list(source["referral_ranges"]) + list(source["offline_ranges"]) \
+            + list(source.get("ai_ranges") or [])
+        try:
+            span = "{}〜{}行".format(*formula_row_span(formula_row, all_ranges))
+        except ValueError as error:
+            span = f"読めず({error})"
+        source["_span"] = span
+        source["_formula"] = " ".join(
+            f"{index_to_col(i)}={cell(formula_row, index_to_col(i))!r}"
+            for first, last in source["referral_ranges"]
+            for i in range(col_to_index(first), col_to_index(last) + 1)
+        )
+        summary.append((source["label"], title, totals, builtin, source.get("_colored"),
+                        source.get("_span"), source.get("_formula")))
 
     print("\n\n=== まとめ ===")
-    for label, title, totals, builtin, colored in summary:
+    for label, title, totals, builtin, colored, span, formula in summary:
         line = (f"{label:4s} タブ={title!r} 紹介={totals['紹介']:g} "
                 f"オフライン合計={totals['オフライン合計']:g}")
         if builtin:
@@ -1563,6 +1617,7 @@ def inspect_referral(service) -> int:
         if colored:
             line += f" 色付き店舗={colored}"
         print("  " + line)
+        print(f"       合計行が数えている範囲={span}  紹介の数式: {formula}")
     return 0
 
 

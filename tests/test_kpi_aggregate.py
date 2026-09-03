@@ -486,6 +486,62 @@ class TestTrendsCsv(unittest.TestCase):
 
 
 
+class TestFormulaRowSpan(unittest.TestCase):
+    """店舗行の範囲は、合計行の数式から読む。"""
+
+    @staticmethod
+    def row(mapping):
+        width = max(kpi.col_to_index(column) for column in mapping)
+        return [mapping.get(kpi.index_to_col(i), "") for i in range(1, width + 1)]
+
+    def test_reads_the_span_the_sheet_itself_sums(self):
+        row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T22)"})
+        self.assertEqual(kpi.formula_row_span(row, [["S", "T"]]), (6, 22))
+
+    def test_a_hand_adjusted_formula_still_gives_its_span(self):
+        """サンズのW5は =SUM(W6:W16)-SUM(U6)。手で足し引きされていても範囲は読める。"""
+        row = self.row({"W": "=SUM(W6:W16)-SUM(U6)", "X": "=SUM(X6:X16)"})
+        self.assertEqual(kpi.formula_row_span(row, [["W", "X"]]), (6, 16))
+
+    def test_columns_disagreeing_on_the_span_stops(self):
+        """列ごとに数える行が違えば、まとめて合計してよい理由がない。"""
+        row = self.row({"S": "=SUM(S6:S22)", "T": "=SUM(T6:T30)"})
+        with self.assertRaises(ValueError):
+            kpi.formula_row_span(row, [["S", "T"]])
+
+    def test_no_formula_stops(self):
+        """合計が定数で入っていたら、店舗行がどこかは分からない。"""
+        row = self.row({"S": "23", "T": "7"})
+        with self.assertRaises(ValueError):
+            kpi.formula_row_span(row, [["S", "T"]])
+
+    def test_the_trap_it_exists_for(self):
+        """シートの下に別の表があると、合計行より下を全部足す読み方は倍になる。
+
+        直営の2026年8月がまさにこれで、紹介が510に対して1020だった。
+        """
+        rows = [[] for _ in range(4)]
+        rows.append(self.row({"A": "合計", "S": "10"}))          # 5行目
+        rows.append(self.row({"A": "店舗1", "S": "6"}))          # 6行目
+        rows.append(self.row({"A": "店舗2", "S": "4"}))          # 7行目
+        rows.append(self.row({"A": "別表", "S": "10"}))          # 8行目(合計行の範囲外)
+        formula_row = self.row({"A": "合計", "S": "=SUM(S6:S7)"})
+
+        naive = sum(
+            kpi.sum_ranges(row, [["S", "S"]])
+            for _, _, row in kpi.store_rows_of(rows, 5)
+        )
+        self.assertEqual(naive, 20)
+
+        first, last = kpi.formula_row_span(formula_row, [["S", "S"]])
+        within = sum(
+            kpi.sum_ranges(row, [["S", "S"]])
+            for index, _, row in kpi.store_rows_of(rows, 5)
+            if first <= index <= last
+        )
+        self.assertEqual(within, 10)
+
+
 class TestReferralExtraction(unittest.TestCase):
     """工程④。3ブランドの別シートから 紹介 / オフライン合計 / AI を読む。"""
 
