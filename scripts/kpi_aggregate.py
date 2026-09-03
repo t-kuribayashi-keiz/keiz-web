@@ -699,12 +699,37 @@ def extract(service, month_label: str) -> dict[str, float]:
 # 書き込みと検証
 # --------------------------------------------------------------------------
 
+# Sheets APIの読み取りは「1分あたり60回」で頭打ちになる。⑥は100セルを触るので、
+# 1セル1リクエストだと確実に超える(実際に429で止まった)。まとめて読む。
+BATCH_READ_CHUNK = 50
+
+
+def read_cells(service, refs: list[tuple[str, str]]) -> list[str]:
+    """(タブ名, セル)のリストをまとめて読む。並び順は入力どおり。"""
+    values: list[str] = []
+    for start in range(0, len(refs), BATCH_READ_CHUNK):
+        chunk = refs[start:start + BATCH_READ_CHUNK]
+        result = (
+            service.spreadsheets()
+            .values()
+            .batchGet(
+                spreadsheetId=SPREADSHEET_ID,
+                ranges=[f"'{title}'!{ref}" for title, ref in chunk],
+                valueRenderOption="FORMATTED_VALUE",
+            )
+            .execute()
+        )
+        for value_range in result.get("valueRanges", []):
+            rows = value_range.get("values", [])
+            values.append(rows[0][0] if rows and rows[0] else "")
+    return values
+
+
 def snapshot(service, cells: dict[str, str]) -> dict[str, str]:
     """書き込み前の現在値を読んで返す。巻き戻しの手掛かりとしてログに残す。"""
-    return {
-        label: read_cell(service, SPREADSHEET_ID, title, ref)
-        for label, (title, ref) in cells.items()
-    }
+    labels = list(cells)
+    values = read_cells(service, [cells[label] for label in labels])
+    return dict(zip(labels, values))
 
 
 def values_match(actual, expected) -> bool:
@@ -736,9 +761,11 @@ def write_cells(service, planned: dict[str, tuple[str, str, object]]) -> None:
 
 def verify(service, planned: dict[str, tuple[str, str, object]]) -> list[str]:
     """書き込み後に読み返し、一致しないものを返す。"""
+    labels = list(planned)
+    actuals = read_cells(service, [(planned[label][0], planned[label][1]) for label in labels])
     mismatches = []
-    for label, (title, ref, expected) in planned.items():
-        actual = read_cell(service, SPREADSHEET_ID, title, ref)
+    for label, actual in zip(labels, actuals):
+        title, ref, expected = planned[label]
         if not values_match(actual, expected):
             mismatches.append(f"{label} ({title}!{ref}): 期待={expected} / 実際={actual}")
     return mismatches
