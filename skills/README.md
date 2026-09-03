@@ -20,6 +20,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `org-structure-table` | 組織体制表(役割×法人のマトリクス表)の作成/更新 | cross-functional |
 | `customer-acquisition-consulting` | 集客のデータパイプライン・分析自動化 | analyst |
 | `session-to-skill` | 今の会話の作業手順をSkill化する | cross-functional(型化・再利用の判断) |
+| `hpb-ribbon-kpi` | HPBリボンデータ(店舗別PDF)の復号・KPI抽出 → HPB_145店舗KPI Masterへ反映 | implementer(抽出・転記) / measurer(月次KPI更新)。設計は `functions/hpb-ribbon-kpi/` |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
 
 ## 移設手順(skill-kanriリポジトリの更新をこちらに反映する場合)

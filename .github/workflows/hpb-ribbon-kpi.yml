@@ -1,0 +1,76 @@
+name: HPB ribbon KPI to Master
+
+# HPBリボンデータから抽出したKPI(data/hpb-ribbon/<yyyy-mm>.csv)を
+# 「HPB_145店舗_KPI一括集計結果」のMasterへ転記する。
+# 手順・設計は functions/hpb-ribbon-kpi/CLAUDE.md。
+#
+# 役割分担:
+#   - PDFの復号とKPI抽出は「ローカル」で行う(PDFは数百MBでメール受領、Actionsには置けない)。
+#     ローカルで scripts/hpb_ribbon_extract.py を回し、出力CSVをこのリポジトリにコミットする。
+#   - このワークフローは「書き込みだけ」を行う。サービスアカウントでMasterへ書き、読み返して照合する。
+#
+# 意図的に手動のみ(cron無し)。本番の業務シートに書くうえ、月号のCSVが揃わないと走らせる意味が
+# 無いため、無人で走らせて安全な日が無い。対象月は必ず明示する。
+#
+# サービスアカウント鍵は GCP_KPI_WRITER_KEY(リポジトリSecret)にだけあり、リポジトリにも
+# Claudeのセッションにも入らない。※PDFパスワードはローカル専用でSecretsに入れない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "対象年月号(例: 2026年08月号)"
+        required: true
+        type: string
+      csv:
+        description: "抽出CSVのパス(例: data/hpb-ribbon/2026-08.csv)。ローカルで作りコミットしておく"
+        required: true
+        type: string
+      mode:
+        description: "inspect=結合の確認 / calibrate=過去月で答え合わせ / dry-run=書く内容の確認 / apply=本番書き込み"
+        required: true
+        type: choice
+        options:
+          - inspect
+          - calibrate
+          - dry-run
+          - apply
+        default: dry-run
+
+concurrency:
+  group: hpb-ribbon-kpi
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Transfer to Master
+        env:
+          GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          case "${{ inputs.mode }}" in
+            inspect)   flag="--mode inspect" ;;
+            calibrate) flag="--mode calibrate" ;;
+            apply)     flag="--mode apply" ;;
+            *)         flag="--mode dry-run" ;;
+          esac
+          python3 scripts/hpb_master_writer.py \
+            --extract-csv "${{ inputs.csv }}" \
+            --month "${{ inputs.month }}" $flag

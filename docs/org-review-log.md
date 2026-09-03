@@ -1336,3 +1336,34 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   検算になるという良い例
 - 対応状況: 工程①②⑤⑥が本番稼働。テスト70件。残りは③(自動化保留の判断済み)と
   ④(紹介・オフライン合計・AIの転記方法のヒアリング待ち)
+
+---
+
+## 2026-09-03 HPBリボンデータ → 店舗別KPI Master の function化
+
+- 背景: 栗林さんが毎月手作業していた「HPBのリボンデータ(店舗別PDF)を復号し、KPIを抜いて
+  『HPB_145店舗_KPI一括集計結果』のMasterへ反映する」一連を定例化・組織化したいという依頼。
+  今回1回分(2026年8月号)を手作業で完了したうえで、その手順をfunction/skillに落とした。
+- 追加物:
+  - `functions/hpb-ribbon-kpi/CLAUDE.md`(対象シート・列・手順・検証方針)
+  - `scripts/hpb_ribbon_extract.py`(ZIP展開済みPDFの一括復号 + KPI抽出。ネットワーク不要)
+  - `scripts/hpb_master_writer.py`(集客数結合 + Master転記 + 読み返し検証。サービスアカウント)
+  - `data/hpb-ribbon-config.json` / `data/hpb-ribbon/README.md`
+  - `.github/workflows/hpb-ribbon-kpi.yml`(inspect/calibrate/dry-run/apply。手動のみ)
+  - `.claude/skills/hpb-ribbon-kpi/`(運用playbook + references/pipeline.md)
+  - `tests/test_hpb_ribbon_extract.py`(抽出・結合の純粋ロジック14件)
+- 既存資産の再利用: 店舗名の名寄せは `scripts/store_matcher.py`(冠文字除去・針灸→鍼灸・
+  院種別語の潰し)をそのまま使う。書き込みは kpi-aggregation と同じサービスアカウント方式・
+  読み返し検証の型に合わせた。**GASではなくAPI**にしたのも同じ理由(実行結果を検証できる)。
+- 設計上の判断:
+  - リボンPDFは数百MB・メール受領のためActionsに持ち込めない。**抽出はローカル、書き込みは
+    Actions**に分離。PDFパスワードはローカル専用の環境変数で、Secretsには入れない。
+  - Masterの集客数は、リボンの予約数ではなく**集客数シート『◯月HPB(速報値)』の店舗別当月値**を
+    使う(栗林さん指定)。院名は集客数シート側とも突き合わせる。
+  - **鍼灸併設リスティングの二重計上**を防ぐ按分(本体に値・併設は空欄)をwriterに実装。
+    2026年8月号では6件該当。
+- 2026年8月号の実績(手作業): 173店抽出/既存・名寄せ済み140店に反映/集客数132店入力・8店空欄
+  (鍼灸併設6 + 名称差の要確認2)。完全新規33店(リラックス系等)は反映保留。
+- 後工程(Master更新後の集計GAS)のAPI移植は保留(栗林さん「後で考える」)。
+- 対応状況: コード・テスト・ワークフロー・skillを追加(PR)。本番稼働にはオーナー作業2件が未了
+  ——(1)HPB_145シートを書き込み用SAへ編集者共有、(2)PDFパスワードをローカルに設定。

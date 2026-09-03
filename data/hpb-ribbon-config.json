@@ -1,0 +1,46 @@
+{
+  "_comment": "HPBリボンデータ(店舗別23ページ超のHPB分析PDF)から「HPB_145店舗_KPI一括集計結果」シートのMasterへ転記するための設定。行番号・パスワードはここに書かない(前者は毎回動的特定、後者はSecrets)。",
+
+  "master_sheet": {
+    "_comment": "転記先。所有者 t-kuribayashi@keizgroup.jp。Masterタブは月号ごとに全店舗を縦積みする長い表で、1行目タイトル/2行目ヘッダー/3行目からデータ。年月号はB列相当(下記columnsのindex)。",
+    "id": "1ciiSxy_RFUMgTBZznD_fetcPPuldOslub1Natvgh1Jw",
+    "tab_keyword": "Master",
+    "columns": [
+      "No.", "HPB店舗名", "店舗名", "年月号",
+      "自社PV", "エリア平均PV", "自社CVR", "エリア平均CVR", "自社ACR", "エリア平均ACR",
+      "新規予約数実績", "女性率",
+      "20代未満比率", "20代比率", "30代比率", "40代比率", "50代以上比率",
+      "集客数", "予約枠〇"
+    ],
+    "_columns_note": "この順序はMasterの実列と一致(2026-09-03 確認)。No.は各月ブロックの位置番号(1,15,29…=1+14*i)で再採番。予約枠〇は手入力運用のため書き込まない(空欄)。"
+  },
+
+  "shukyaku_sheet": {
+    "_comment": "集客数の出どころ。所有者 mar-yoshida@keizgroup.jp。月ごとに『◯月HPB (速報値)』タブがあり、院名(L相当)と当月(N相当)の各行が店舗別のHPB集客数。合計行は店舗数で動くので毎回探す。値はこの当月列(店舗行)を使う——タブ全体の合計(kpi-aggregationが読むN合計)とは別。",
+    "id": "1Ali0uUUTnoWVv00GBYcp88-JfiPFP01Ttu5gqJ9D_Bg",
+    "tab_keywords": ["HPB", "速報値"],
+    "columns": {
+      "store_name_header_contains": "院名",
+      "count_header_exact": "当月"
+    },
+    "_stage_note": "同じ月の数字は 中間値→速報値→確定値 と同じセルが上書きされる(functions/kpi-aggregation/CLAUDE.md 参照)。Masterへ入れるのは『速報値』段階。月初に速報値へ更新するのがこの作業。"
+  },
+
+  "decrypt": {
+    "_comment": "PDFは店舗ごとに開くパスワードが掛かっており、ダウンロードバッチ(SL…ID)単位で共通。パスワードはここに書かず、環境変数 HPB_RIBBON_PASSWORDS(JSON: バッチID部分文字列→パスワード)で渡す。GitHub Actionsでは Secrets。",
+    "password_env": "HPB_RIBBON_PASSWORDS",
+    "batch_id_pattern": "SL\\d+"
+  },
+
+  "extraction": {
+    "_comment": "抽出の要点。PV/CVR/ACRは『サマリ』ページ(自サロンTOP PV等)から取り、これが最新の完了月(=DL前月号)を表す。予約数・女性率・年代はP1時系列の完了月列を取る。時系列は末尾が当月号(進行中・低値)なので、完了月は末尾から2列目(index -2)。空データ月は『- %』で入るため欠損列として数える。",
+    "summary_page_markers": ["自サロンTOP PV", "自サロンCVR", "自サロンACR"],
+    "series_completed_month_index": -2,
+    "age_sum_tolerance": [90, 110]
+  },
+
+  "verification": {
+    "_comment": "書き込み前の答え合わせ。既に速報値を入れ終えた過去の月号でcalibrateし、抽出だけでその月号のMaster行を再現できるか照合する。書き込み後は必ず読み返して一致を確認。合致しなければ止める。",
+    "calibrate_hint": "既にMasterに入っている直近の完了月号で --calibrate"
+  }
+}
