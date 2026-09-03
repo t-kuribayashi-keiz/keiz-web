@@ -646,7 +646,9 @@ class TestReferralExtraction(unittest.TestCase):
         self.assertIn("逆井駅前整骨院", chokuei["exclude_store_names"])
         self.assertEqual(
             chokuei["ai_headers"],
-            ["ホームページ（広告）", "ホームページ（AI）", "ChatGPT", "Gemini"],
+            # G列『ホームページ（広告）』は2026-09-03に栗林さんが訂正して外れた。
+            # 広告経由の流入であってAIではない。
+            ["ホームページ（AI）", "ChatGPT", "Gemini"],
         )
 
     def test_only_chokuei_supplies_ai(self):

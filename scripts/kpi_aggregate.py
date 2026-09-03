@@ -1285,7 +1285,11 @@ def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict
     for row_index, label, rgb in colored[:25]:
         print(f"    [{row_index}行] {label!r} rgb=({rgb[0]:.2f},{rgb[1]:.2f},{rgb[2]:.2f})")
 
-    total_row_values = rows[source["total_row"] - 1]
+    total_row_values = [
+        value.get("formattedValue") or ""
+        for value in (grid[source["total_row"] - 1].get("values", []) if
+                      len(grid) >= source["total_row"] else [])
+    ]
     detail = []
     for name, cols, index in (("紹介", referral_cols, 0), ("オフライン合計", offline_cols, 1)):
         header_total = sum(
@@ -1511,6 +1515,11 @@ def read_referral_source(service, source: dict, month_label: str) -> dict:
             )
         result[key] = {"header": header, "all": all_stores, "kept": header - dropped}
 
+    result["excluded_detail"] = [
+        (label, {key: sum_columns(row, columns[key]) for key in columns})
+        for row_index, label, row in stores if row_index in excluded
+    ]
+
     builtin = find_offline_total_cell(rows)
     if builtin and "offline_total" in result:
         ref, value = builtin
@@ -1549,6 +1558,9 @@ def extract_referral(service, month_label: str) -> dict[str, float]:
             if key == "ai" and result["ai_breakdown"]:
                 print("      内訳: " + "  ".join(result["ai_breakdown"]))
             totals[key] += values["kept"]
+        for label, amounts in result.get("excluded_detail", []):
+            print("    除外 " + label + ": "
+                  + " ".join(f"{key}={value:g}" for key, value in sorted(amounts.items())))
     return totals
 
 
