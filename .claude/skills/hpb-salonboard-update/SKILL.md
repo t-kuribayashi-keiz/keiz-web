@@ -80,14 +80,20 @@ The rule above isn't limited to brand-new sections. **At the end of every task u
 
 Small, incremental notes are fine — don't wait for something dramatic. The point is that the next task (yours or another session's) starts from what this one learned instead of rediscovering it from scratch. `references/coupon-editing.md` is the working example of this — keep extending it the same way.
 
+**If any other session might be running this skill right now, do not edit `SKILL.md` or `references/*.md` at all.** Editing a shared file is read → modify → write, so a concurrent write between your read and your write silently drops one side's note. Instead drop a new file into `learnings/` — different paths cannot collide, whatever the timing — and let a later single-writer pass merge it. The user routinely runs several of these at once, so treat this as the default rather than the exception. See `references/concurrent-sessions.md` for the file naming and the merge procedure.
+
+**Read `learnings/` before starting a task.** Unmerged notes are already valid knowledge; the folder is part of this skill, not a staging area to skip.
+
 ## Logging
 
-The user wants work time, token consumption, and plan-quota impact tracked for every task, for 工数 (labor-hours/cost) visibility. After finishing (or meaningfully progressing on) any task under this skill, append one row to `hpb_work_log.csv` in the current working directory (create it with a header row if it doesn't exist yet) with columns:
+The user wants work time, token consumption, and plan-quota impact tracked for every task, for 工数 (labor-hours/cost) visibility. After finishing (or meaningfully progressing on) any task under this skill, record one row with the columns below. **If any other session might be running this skill, write the row as its own file under `hpb_work_log.d/` instead of appending to `hpb_work_log.csv`** (one data row, no header — see `references/concurrent-sessions.md`); two sessions appending to one CSV can drop a row. Only when you are certain you are the only session running, append directly to `hpb_work_log.csv` in the current working directory (create it with a header row if it doesn't exist yet). Columns:
 
 `date,salon_name,salon_id,task,items_changed,published,session_start,session_end,tokens_effective,usage_session_pct_delta,usage_weekly_pct_delta,notes`
 
 - **Time**: use the actual start/end timestamps of *this task* (the user's kick-off message → your completion report), not the whole session's `createdAt`/`lastActivityAt` — a session can span multiple tasks or long gaps where the user stepped away, which inflates whole-session figures badly (confirmed: one gap was over 11 hours). See `references/token-usage-logging.md` for how to find these bounds from the transcript.
 - **Tokens**: `tokens_effective` — this task's own effective-token total, computed only from assistant turns whose timestamp falls inside that same start/end window (plus any subagent transcripts spawned for the task, in full). See `references/token-usage-logging.md` for the exact method (weights cache reads/writes/output differently — same approach the `explain-usage` skill uses).
 - **Plan quota**: `usage_session_pct_delta` / `usage_weekly_pct_delta` — from the before/after usage screenshots (Standard workflow steps 0 and 6). See `references/usage-quota-tracking.md` for what to read and how to compute the delta, including the caveats about concurrent tasks and reset timing.
+
+Also: a session running alongside others **must not run git commands** — no `add`, no `commit`, no branch switching. Sessions in one clone share an index and a working tree, so `git add -A` from one sweeps in another's half-finished edits, and a branch switch pulls the tree out from under everyone. Create files; let the consolidation pass commit them together.
 
 Do this proactively, without being asked each time — the user wants all of these figures computed and logged as a standard part of finishing any task here. The one exception is a purely read-only task — see **Read-only tasks** above.
