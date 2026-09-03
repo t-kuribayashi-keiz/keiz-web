@@ -1485,15 +1485,18 @@ def inspect_referral(service) -> int:
         ).execute()
         print(f"タイトル: {meta['properties']['title']}")
         sheets = meta.get("sheets", [])
+        gid = source["_gid_2026_08"]
         print(f"タブ数: {len(sheets)}")
-        for sheet in sheets[:40]:
+        # **全部出す。** 直営は月ごとに『柔整』『交通事故』とその途中経過スナップショットが
+        # 並んでおり、打ち切ると肝心のタブが見えないまま名前を推測することになる。
+        for sheet in sheets:
             props = sheet["properties"]
-            mark = " ←指定のgid" if props["sheetId"] == source["gid"] else ""
+            mark = " ←栗林さんに教わったURLのgid" if props["sheetId"] == gid else ""
             grid = props.get("gridProperties", {})
             print(f"  gid={props['sheetId']:<12} {props['title']!r} "
                   f"({grid.get('rowCount')}行×{grid.get('columnCount')}列){mark}")
 
-        title = tab_title_for_gid(service, sid, source["gid"])
+        title = tab_title_for_gid(service, sid, gid)
         rows = read_tab_range(service, sid, f"'{title}'!A1:AZ12", render="FORMATTED_VALUE")
         print(f"\n-- {title!r} の1〜12行 --")
         for row_index, row in enumerate(rows, start=1):
