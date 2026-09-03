@@ -629,6 +629,78 @@ def calibrate(service, month_label: str, extracted: dict[str, float]) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------
+# 構造調査(読み取りのみ)
+# --------------------------------------------------------------------------
+
+def inspect(service, month_label: str) -> int:
+    """シートの構造を出すだけのモード。書き込みは一切しない。
+
+    推測でコードを直すより、実際の並びを1回見るほうが速くて確実。
+    タブ名の表記ゆれ(「7月HPB (速報値) 」の末尾空白、「7月Epark（速報値)」の全角括弧など)は
+    実物を見ないと分からない。
+    """
+    match = re.match(r"(\d{4})年(\d{1,2})月", month_label)
+    year, month = int(match.group(1)), int(match.group(2))
+
+    print("=== 広告費シート「広告費各詳細」の先頭15行 ===")
+    titles = list_tab_titles(service, AD_SPEND_SPREADSHEET_ID)
+    title = resolve_tab(titles, AD_SPEND_TAB_KEYWORDS, "広告費各詳細")
+    rows = read_tab(service, AD_SPEND_SPREADSHEET_ID, title)
+    print(f"タブ: {title!r} / 行数={len(rows)}")
+    for row_index, row in enumerate(rows[:15], start=1):
+        cells = [
+            f"{index_to_col(i)}{row_index}={value!r}"
+            for i, value in enumerate(row[:14], start=1)
+            if str(value).strip()
+        ]
+        print(f"  [{row_index}行] " + (" | ".join(cells) if cells else "(空)"))
+
+    print(f"\n=== 先頭15行のうち {year} を含むセル(最大30件) ===")
+    hits = 0
+    for row_index, row in enumerate(rows[:15], start=1):
+        for col_index, value in enumerate(row, start=1):
+            if str(year) in str(value) and hits < 30:
+                print(f"  {index_to_col(col_index)}{row_index} = {value!r}")
+                hits += 1
+    if not hits:
+        print("  (該当なし。年月ヘッダーが16行目以降にあるか、別の書き方をしている)")
+
+    print(f"\n=== KPIシートの「{month}月」を含むタブ ===")
+    for name in list_tab_titles(service, SPREADSHEET_ID):
+        if f"{month}月" in normalize(name):
+            print(f"  {name!r}")
+
+    print(f"\n=== {month_label} の 速報値 / 確定値 の合計値の比較 ===")
+    sources = load_source_columns()
+    for source_key, source in sources.items():
+        for kind in ("速報値", "確定値"):
+            keywords = [month_tab_prefix(month_label)] + [
+                kind if word == "速報値" else word for word in source["tab_keywords"]
+            ]
+            try:
+                titles = list_tab_titles(service, SPREADSHEET_ID)
+                tab = resolve_tab(titles, keywords, f"{source_key} {kind}")
+                tab_rows = read_tab(service, SPREADSHEET_ID, tab)
+                column = next(iter(source["columns"].values()))
+                total_row = find_total_row(tab_rows, col_to_index(column))
+                value = parse_number(cell(tab_rows[total_row - 1], column))
+                print(f"  {source_key:6s} {kind}: {tab!r} {column}{total_row} = {value}")
+            except ValueError as error:
+                print(f"  {source_key:6s} {kind}: 読めず — {error}")
+
+    print(f"\n=== 「年間計画・目標」の {month_label} の行 ===")
+    titles = list_tab_titles(service, SPREADSHEET_ID)
+    plan_title = resolve_tab(titles, PLAN_TAB_KEYWORDS, "年間計画・目標")
+    plan_rows = read_tab(service, SPREADSHEET_ID, plan_title)
+    row_index = find_month_row(plan_rows, PLAN_COLUMNS["month"], month_label)
+    row = plan_rows[row_index - 1]
+    print(f"タブ: {plan_title!r} / {row_index}行目")
+    for key, column in PLAN_COLUMNS.items():
+        print(f"  {key:22s} {column}{row_index} = {cell(row, column)!r}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--month", required=True, help="対象月ラベル(例: 2026年8月)")
@@ -645,7 +717,15 @@ def main() -> int:
             "全項目一致してはじめて本番で使ってよい"
         ),
     )
+    parser.add_argument(
+        "--inspect",
+        action="store_true",
+        help="書き込まず、シートの構造(タブ名・ヘッダー行・合計値)を出すだけ",
+    )
     args = parser.parse_args()
+
+    if args.inspect:
+        return inspect(build_service(), args.month)
 
     if args.calibrate and args.apply:
         fail("--calibrate と --apply は同時に指定できません。答え合わせと書き込みは分ける。")

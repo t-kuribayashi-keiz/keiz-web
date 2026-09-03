@@ -18,10 +18,11 @@ on:
         required: true
         type: string
       mode:
-        description: "calibrate=既に速報値が入っている月で答え合わせ / dry-run=書き込む内容の確認 / apply=本番書き込み"
+        description: "inspect=構造を見るだけ / calibrate=答え合わせ / dry-run=書き込む内容の確認 / apply=本番書き込み"
         required: true
         type: choice
         options:
+          - inspect
           - calibrate
           - dry-run
           - apply
@@ -57,6 +58,7 @@ jobs:
           TZ: Asia/Tokyo
         run: |
           case "${{ inputs.mode }}" in
+            inspect)   flag="--inspect" ;;
             calibrate) flag="--calibrate" ;;
             apply)     flag="--apply" ;;
             *)         flag="" ;;
