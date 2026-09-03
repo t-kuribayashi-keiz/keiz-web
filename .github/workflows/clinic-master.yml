@@ -1,0 +1,43 @@
+name: Clinic master
+
+# 院マスタ(Googleスプレッドシート「診療時間」)から診療時間・定休日を data/clinics.json へ
+# 取り込むためのワークフロー。いまは構造を見る --inspect だけ。
+#
+# data/clinics.json には院名・住所・電話・URL しか入っておらず、時間と定休日は
+# 入っていない(2026-09-03に判明)。取り込み元のファイル名が「診療時間」なので
+# 取り込んだつもりになりやすい。
+#
+# 読み取りのみ。スプレッドシートには何も書かない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "inspect=タブ名と見出し行を見るだけ(読み取りのみ)"
+        required: true
+        type: choice
+        options:
+          - inspect
+        default: inspect
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client
+
+      - name: Inspect the clinic master
+        env:
+          GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          TZ: Asia/Tokyo
+        run: python3 scripts/clinic_master.py --${{ inputs.mode }}
