@@ -550,5 +550,25 @@ class TestReferralExtraction(unittest.TestCase):
 
     def test_every_source_is_addressed_by_tab_name_not_gid(self):
         """gidは月が変わると別物になる。タブ名で解決する。"""
+        expected = {
+            "chokuei": "{year}年{month}月柔整",  # 同じ月に『2026年8月交通事故』も並ぶ
+            "sans": "{year}年{month}月",
+            "mirai": "{year}年{month}月",
+        }
         for source in kpi.load_referral_sources():
-            self.assertEqual(source["tab_name_pattern"], "{year}年{month}月")
+            self.assertEqual(source["tab_name_pattern"], expected[source["key"]])
+
+    def test_the_chokuei_pattern_does_not_match_the_traffic_accident_tab(self):
+        """直営の柔整タブと交通事故タブは1文字も重ならない名前で選ぶ。
+
+        部分一致にすると『2026年8月交通事故』や締め切り前のスナップショットを
+        拾いうる。どちらも数字としては自然に見えるので、気づけない。
+        """
+        pattern = dict(
+            (source["key"], source["tab_name_pattern"])
+            for source in kpi.load_referral_sources()
+        )["chokuei"]
+        wanted = pattern.format(year=2026, month=8)
+        self.assertEqual(wanted, "2026年8月柔整")
+        for other in ("2026年8月交通事故", "2026年8月柔整(0817)", "カルテ一覧8月"):
+            self.assertNotEqual(wanted, other)
