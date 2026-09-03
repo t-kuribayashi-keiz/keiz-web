@@ -150,6 +150,29 @@ class TestShukyakuJoin(unittest.TestCase):
         self.assertEqual(joined[0]["集客数"], "")
         self.assertTrue(any(k == "未マッチ" for k, _ in notes))
 
+    def test_lone_acupuncture_listing_gets_value(self):
+        # Masterにその拠点の鍼灸リスティングしか無い場合は、按分せずその行に値を入れる
+        # (本体行がMasterに無いので二重計上の心配がない)。2026年8月号の郡山若葉町・豊四季北口。
+        shu = {wr.normalize_store_name("郡山若葉町接骨院"): ("郡山若葉町接骨院", "15")}
+        rows = [{"店舗名": "郡山若葉町鍼灸接骨院"}]
+        joined, _ = wr.join_shukyaku(rows, shu)
+        self.assertEqual(joined[0]["集客数"], "15")
+
+    def test_branch_match_when_suffix_differs(self):
+        # 「おかだ〇御殿山」(Master) と 「おかだ〇枚方御殿山」(集客数) を屋号+支店名で繋ぐ
+        # (別名表に頼らず、御殿山 ⊂ 枚方御殿山 で一致)
+        shu = {wr.normalize_store_name("おかだ鍼灸整骨院 枚方御殿山院"): ("おかだ鍼灸整骨院 枚方御殿山院", "9")}
+        rows = [{"店舗名": "おかだ鍼灸整骨院（御殿山）"}]
+        joined, notes = wr.join_shukyaku(rows, shu)
+        self.assertEqual(joined[0]["集客数"], "9")
+        self.assertFalse(any(k == "未マッチ" for k, _ in notes))
+
+    def test_alias_bridges_name_difference(self):
+        # 堺市美原区骨盤整体×salon(Master) と 堺市美原区整骨院(集客数) を別名表で繋ぐ
+        self.assertEqual(
+            wr.normalize_store_name("堺市美原区骨盤整体×salon"),
+            wr.normalize_store_name("堺市美原区整骨院"))
+
 
 class TestPositionalNo(unittest.TestCase):
     def test_step14(self):

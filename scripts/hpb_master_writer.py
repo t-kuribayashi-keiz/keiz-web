@@ -110,11 +110,53 @@ def build_shukyaku_map(values, name_contains="院名", count_exact="当月"):
     return raw
 
 
+_TYPE_TOKEN = "〇"
+_BRANCH_TAIL_THRESHOLD = 0.6
+
+
+def _split_head_tail(normalized):
+    """「おかだ〇枚方御殿山」→ ("おかだ","枚方御殿山")。屋号(〇の前)と支店名に分ける。"""
+    if _TYPE_TOKEN not in normalized:
+        return None
+    head, _, tail = normalized.partition(_TYPE_TOKEN)
+    return (head, tail) if head else None
+
+
+def _branch_match(key, shukyaku_map, used):
+    """正規化の完全一致で当たらないとき、屋号+支店名で1つに絞る(store_matcherと同じ考え方)。
+
+    支店名の書き方の差(「（御殿山）」と「枚方御殿山院」)で完全一致を割るケースを拾う。
+    候補が1つに絞れなければ Noneを返す(黙って別店に寄せない)。
+    """
+    sp = _split_head_tail(key)
+    if not sp:
+        return None
+    head, tail = sp
+    cands = []
+    for sk in shukyaku_map:
+        if sk in used:
+            continue
+        osp = _split_head_tail(sk)
+        if not osp or osp[0] != head:
+            continue
+        otail = osp[1]
+        if tail and otail:
+            contained = tail in otail or otail in tail
+            ratio = difflib.SequenceMatcher(None, tail, otail).ratio()
+            if not contained and ratio < _BRANCH_TAIL_THRESHOLD:
+                continue
+        cands.append(sk)
+    return cands[0] if len(cands) == 1 else None
+
+
 def join_shukyaku(rows, shukyaku_map):
     """抽出行(店舗名=院名)に集客数を結合する。鍼灸併設の二重計上を避ける。
 
     rows: 各行 dict に少なくとも '店舗名'(=院名) を持つ。'集客数' を書き込んで返す。
     戻り値: (rows, notes)。notes は未マッチ・按分など人が見るべき事項。
+
+    結合は2段構え。(1)正規化の完全一致、(2)当たらなければ屋号+支店名の緩い一致
+    (store_matcherと同じ)。集客数エントリは1回だけ使う(usedで消費済みを追う)。
     """
     # 正規化キーごとに、そのキーに落ちる抽出行を集める
     buckets = {}
@@ -122,20 +164,34 @@ def join_shukyaku(rows, shukyaku_map):
         key = normalize_store_name(r.get("店舗名") or r.get("院名") or "")
         buckets.setdefault(key, []).append(r)
 
+    used = set()
+    resolved = {}   # bucket_key -> shukyaku_key
+    for key in buckets:                       # (1) 完全一致を先に確定
+        if key in shukyaku_map:
+            resolved[key] = key
+            used.add(key)
+    for key in buckets:                       # (2) 残りを屋号+支店名で
+        if key in resolved:
+            continue
+        sk = _branch_match(key, shukyaku_map, used)
+        if sk is not None:
+            resolved[key] = sk
+            used.add(sk)
+
     notes = []
     for key, group in buckets.items():
-        entry = shukyaku_map.get(key)
-        if entry is None:
+        sk = resolved.get(key)
+        if sk is None:
             for r in group:
                 r["集客数"] = ""
             notes.append(("未マッチ", [r.get("店舗名") for r in group]))
             continue
-        raw_name, count = entry
+        raw_name, count = shukyaku_map[sk]
         if len(group) == 1:
             group[0]["集客数"] = count
             continue
         # 複数の抽出行が同じ集客数エントリに落ちる = 鍼灸併設等。
-        # 生の名前が集客数側に一番近い1行(本体)に入れ、他は空欄。
+        # 生の名前が集客数側に一番近い1行(本体)に入れ、他は空欄(二重計上を防ぐ)。
         primary = max(group, key=lambda r: difflib.SequenceMatcher(
             None, (r.get("店舗名") or ""), raw_name).ratio())
         for r in group:
