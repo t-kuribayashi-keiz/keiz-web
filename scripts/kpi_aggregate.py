@@ -24,7 +24,34 @@ import os
 import sys
 
 SPREADSHEET_ID = "1Ali0uUUTnoWVv00GBYcp88-JfiPFP01Ttu5gqJ9D_Bg"
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+EPARK_SPREADSHEET_ID = "1TNuyQL0Wi96jdVdpiT9ZDGjw9JlncT5eaKUeiVQ9KPs"
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.readonly",
+]
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EPARK_CORPORATIONS_PATH = os.path.join(REPO_ROOT, "data", "epark-corporations.json")
+
+# 栗林さんが手作業で入れた2026年8月の値。抽出ロジックの答え合わせに使う(--calibrate)。
+# 人が入れた1か月分を再現できるかどうかが、この自動化を信用してよいかの唯一の判定基準。
+CALIBRATION = {
+    "2026年8月": {
+        "hp": 2250,
+        "hpb": 2701,
+        "epark": 180,
+        "stores_hp": 150,
+        "stores_hpb_chokuei": 121,
+        "stores_hpb_sans": 6,
+        "stores_hpb_mirai": 8,
+        "stores_epark_chokuei": 131,
+        "stores_epark_sans": 8,
+        "stores_epark_mirai": 8,
+        "uu_seo": 22212,
+        "uu_meo": 6246,
+        "uu_ppc": 44697,
+    }
+}
 
 # 「年間計画・目標」タブの列。2026-09-02に確定(functions/kpi-aggregation/CLAUDE.md 参照)。
 # 数式が入っている列(I, K, P, T, AD など)には**書き込まない**。上書きすると数式が消える。
@@ -42,7 +69,7 @@ PLAN_COLUMNS = {
     "stores_epark_chokuei": "Q",
     "stores_epark_sans": "R",
     "stores_epark_mirai": "S",
-    "seo_meo": "U",
+    "seo_meo": "U",   # 数式(C-V-W-X)。書き込み禁止
     "ppc": "V",               # ③ 手入力のまま
     "meta": "W",              # ③ 手入力のまま
     "ai": "X",                # ④
@@ -216,6 +243,59 @@ def verify(service, planned: dict[str, tuple[str, object]]) -> list[str]:
     return mismatches
 
 
+def load_epark_groups() -> dict:
+    """EPARK法人名 → 直営/サンズ/ミライ の対応表を読む。
+
+    法人名をコードに直書きしない理由: 法人が増減したときに、設定ファイル1行の変更で
+    済ませたい(ルートCLAUDE.mdの「ブランド固有の情報はdata/に切り出す」方針)。
+    """
+    with open(EPARK_CORPORATIONS_PATH, encoding="utf-8") as handle:
+        return json.load(handle)["groups"]
+
+
+def classify_epark_corporation(name: str, groups: dict) -> str:
+    """契約法人名から所属グループのキーを返す。判定できなければ ValueError。
+
+    完全一致にしないのは「株式会社 エフアール」のように空白入りの表記ゆれがあるため。
+    未知の法人名を直営に寄せない: 黙って直営が1件増えても誰も気づかず、店舗数がずれる。
+    """
+    text = str(name).replace(" ", "").replace("\u3000", "")
+    matched = [
+        key
+        for key, group in groups.items()
+        if any(needle.replace(" ", "") in text for needle in group["match"])
+    ]
+    if not matched:
+        raise ValueError(
+            f"EPARKの契約法人名『{name}』が data/epark-corporations.json のどのグループにも"
+            "該当しません。直営として数えると店舗数が静かにずれるため停止します。"
+            "法人が増えたのであれば対応表に追記してください。"
+        )
+    if len(matched) > 1:
+        raise ValueError(
+            f"EPARKの契約法人名『{name}』が複数のグループに該当しました({matched})。"
+            "対応表のmatch文字列が重複しています。"
+        )
+    return matched[0]
+
+
+def count_epark_stores(rows: list[list[str]]) -> dict[str, int]:
+    """EPARK掲載店舗リストの1タブ分から、直営/サンズ/ミライの店舗数を数える。
+
+    列は A=gp / B=契約法人名 / C=施設名。ヘッダー行(B列が『契約法人名』)は飛ばす。
+    """
+    groups = load_epark_groups()
+    counts = {key: 0 for key in groups}
+    for row in rows:
+        if len(row) < 2:
+            continue
+        corporation = str(row[1]).strip()
+        if not corporation or corporation == "契約法人名":
+            continue
+        counts[classify_epark_corporation(corporation, groups)] += 1
+    return counts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--month", required=True, help="対象月ラベル(例: 2026年8月)")
@@ -223,6 +303,14 @@ def main() -> int:
         "--apply",
         action="store_true",
         help="実際に書き込む。指定しなければドライラン(書き込む内容をログに出すだけ)",
+    )
+    parser.add_argument(
+        "--calibrate",
+        action="store_true",
+        help=(
+            "書き込まず、抽出結果を人が入れた既知の月(CALIBRATION)と照合するだけ。"
+            "全項目一致してはじめて、この自動化を本番で使ってよいとみなす"
+        ),
     )
     args = parser.parse_args()
 
@@ -235,9 +323,11 @@ def main() -> int:
     # ここは意図的に未実装のままにしてある(functions/kpi-aggregation/CLAUDE.md の未確定事項)。
     fail(
         "転記元の抽出ロジックが未実装です。\n"
-        "  未確定: 速報値タブのどの列が集客数/SEO UU/MEO UU/PPC UUか、U列(SEO,MEO)の出どころ、\n"
-        "  広告費・EPARKシートでの直営/サンズ/ミライの判別方法。\n"
-        "  サービスアカウントで該当タブを読んでから実装する。"
+        "  残りの未確定事項(functions/kpi-aggregation/CLAUDE.md 参照):\n"
+        "  1. 「◯月HP(速報値)」タブのどの列が 集客数 / SEO UU / MEO UU / PPC UU か\n"
+        "  2. 広告費シートでの 直営 / サンズ / ミライ の判別方法\n"
+        "  解決済み: EPARKの法人名判別(count_epark_stores)、U列は数式のため書き込まない。\n"
+        "  サービスアカウントで該当タブを読み、--calibrate が2026年8月を再現してから実装を確定させる。"
     )
     return 0
 
