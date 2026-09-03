@@ -32,7 +32,7 @@ import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from store_matcher import StoreMatcher, group_of  # noqa: E402
+from store_matcher import StoreMatcher, group_of, normalize_store_name  # noqa: E402
 
 SPREADSHEET_ID = "1Ali0uUUTnoWVv00GBYcp88-JfiPFP01Ttu5gqJ9D_Bg"
 EPARK_SPREADSHEET_ID = "1TNuyQL0Wi96jdVdpiT9ZDGjw9JlncT5eaKUeiVQ9KPs"
@@ -104,6 +104,7 @@ PLAN_COLUMNS = {
 # 書き込むより、人が入れた値をそのまま残すほうが安全なため、ここには入れない。
 WRITABLE_PLAN_KEYS = {
     "hp", "hpb", "epark",
+    "referral", "offline_total", "ai",          # ④
     "stores_hpb_chokuei", "stores_hpb_sans", "stores_hpb_mirai",
     "stores_epark_chokuei", "stores_epark_sans", "stores_epark_mirai",
     "uu_seo", "uu_meo", "uu_ppc",
@@ -691,6 +692,8 @@ def extract(service, month_label: str) -> dict[str, float]:
     values.update(extract_from_soku_tab(service, month_label, "epark"))
     print("② 店舗数を数える")
     values.update(extract_store_counts(service, month_label, matcher))
+    print("④ 紹介・オフライン合計・AI を3ブランドから読む")
+    values.update(extract_referral(service, month_label))
     # L列(店舗数)はHP速報値タブの店舗行数。速報値タブの構造が未確認なので、
     # 確認できるまでは書き込み対象から外す(未確定のまま書くと誰も気づかずに狂う)。
     return values
@@ -1317,6 +1320,140 @@ def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict
         print("  " + line)
         detail.append(line)
     source["_colored"] = source.get("_colored", "") + " || " + " || ".join(detail)
+
+
+def sum_ranges(row: list, ranges: list) -> float:
+    total = 0.0
+    for first, last in ranges:
+        for index in range(col_to_index(first), col_to_index(last) + 1):
+            total += parse_number(cell(row, index_to_col(index))) or 0.0
+    return total
+
+
+def store_rows_of(rows: list[list], total_row: int) -> list[tuple[int, str, list]]:
+    """合計行より下の、店舗名(A列またはB列)が入っている行。"""
+    found = []
+    for row_index, row in enumerate(rows, start=1):
+        if row_index <= total_row:
+            continue
+        label = (str(cell(row, "A")).strip() or str(cell(row, "B")).strip())
+        if label:
+            found.append((row_index, label, row))
+    return found
+
+
+def excluded_row_indexes(
+    store_rows: list[tuple[int, str, list]],
+    exclude_names: list[str],
+) -> set[int]:
+    """除外する店舗の行番号。設定の名前が1つでも見つからなければ例外。
+
+    見つからないまま進むと、別ブランドの店舗が黙って合計に混ざる。店舗名が変わったときに
+    気づける唯一の場所なので、ここで止める。
+    """
+    matcher_keys = {}
+    for row_index, label, row in store_rows:
+        for text in (str(cell(row, "A")).strip(), str(cell(row, "B")).strip(), label):
+            if text:
+                matcher_keys.setdefault(normalize_store_name(text), set()).add(row_index)
+
+    found: set[int] = set()
+    missing = []
+    for name in exclude_names:
+        hits = matcher_keys.get(normalize_store_name(name))
+        if not hits:
+            missing.append(name)
+            continue
+        found |= hits
+    if missing:
+        raise ValueError(
+            f"除外対象の店舗 {missing} がシートに見つかりませんでした。"
+            "店舗名が変わった可能性があります。黙って合計に混ぜないため停止します。"
+        )
+    return found
+
+
+def read_referral_source(service, source: dict, month_label: str) -> dict:
+    """1ブランド分の 紹介 / オフライン合計 / AI を読む。"""
+    match = re.match(r"(\d{4})年(\d{1,2})月", month_label)
+    year, month = int(match.group(1)), int(match.group(2))
+    wanted = source["tab_name_pattern"].format(year=year, month=month)
+
+    sid = source["spreadsheet_id"]
+    meta = service.spreadsheets().get(
+        spreadsheetId=sid, fields="sheets.properties(sheetId,title)"
+    ).execute()
+    titles = [sheet["properties"]["title"] for sheet in meta.get("sheets", [])]
+    # **完全一致で選ぶ。** 同じ月に『2026年8月(0810)』のような途中経過のタブが並んでおり、
+    # 部分一致だと締め切り前の数字を拾う。値としては自然に見えるので気づけない。
+    exact = [title for title in titles if title.strip() == wanted]
+    if len(exact) != 1:
+        raise ValueError(
+            f"{source['label']}: タブ『{wanted}』が{len(exact)}件見つかりました"
+            f"(あるタブ: {titles})。1件でなければ、どれが締め後の確定版か決められないため停止します。"
+        )
+    title = exact[0]
+    rows = read_tab(service, sid, title)
+    total_row = rows[source["total_row"] - 1]
+
+    stores = store_rows_of(rows, source["total_row"])
+    excluded = excluded_row_indexes(stores, source.get("exclude_store_names") or [])
+
+    result = {"label": source["label"], "tab": title, "stores": len(stores),
+              "excluded": len(excluded)}
+    for key, ranges in (("referral", source["referral_ranges"]),
+                        ("offline_total", source["offline_ranges"]),
+                        ("ai", source.get("ai_ranges"))):
+        if not ranges:
+            continue
+        header = sum_ranges(total_row, ranges)
+        all_stores = sum(sum_ranges(row, ranges) for _, _, row in stores)
+        kept = sum(
+            sum_ranges(row, ranges) for row_index, _, row in stores if row_index not in excluded
+        )
+        if abs(header - all_stores) >= 0.5:
+            raise ValueError(
+                f"{source['label']} の{key}: {source['total_row']}行目={header:g} が"
+                f"全店舗の合計={all_stores:g} と一致しません。店舗行の読み取りが想定と違うため停止します。"
+            )
+        result[key] = {"header": header, "all": all_stores, "kept": kept}
+
+    builtin = find_offline_total_cell(rows)
+    if builtin and "offline_total" in result:
+        ref, value = builtin
+        result["builtin_offline"] = (ref, value)
+        if abs(value - result["offline_total"]["header"]) >= 0.5:
+            raise ValueError(
+                f"{source['label']}: シート自身のオフライン合計 {ref}={value:g} が"
+                f"範囲指定の合計={result['offline_total']['header']:g} と一致しません。"
+                "範囲の指定が想定と違うため停止します。"
+            )
+    return result
+
+
+def extract_referral(service, month_label: str) -> dict[str, float]:
+    """工程④。3ブランドを合算して F(紹介) / J(オフライン合計) / X(AI) を作る。"""
+    totals = {"referral": 0.0, "offline_total": 0.0, "ai": 0.0}
+    for source in load_referral_sources():
+        result = read_referral_source(service, source, month_label)
+        note = f"({result['stores']}店舗"
+        if result["excluded"]:
+            note += f" / うち除外{result['excluded']}店舗"
+        note += ")"
+        print(f"  {result['label']:4s} タブ={result['tab']!r} {note}")
+        if "builtin_offline" in result:
+            ref, value = result["builtin_offline"]
+            print(f"    シート自身のオフライン合計 {ref}={value:g} と一致")
+        for key in ("referral", "offline_total", "ai"):
+            if key not in result:
+                continue
+            values = result[key]
+            mark = ""
+            if abs(values["kept"] - values["header"]) >= 0.5:
+                mark = f"  ← 5行目そのままなら {values['header']:g}(除外分を含む)"
+            print(f"    {key:14s} {values['kept']:g}{mark}")
+            totals[key] += values["kept"]
+    return totals
 
 
 def find_offline_total_cell(rows: list[list]) -> tuple[str, float] | None:

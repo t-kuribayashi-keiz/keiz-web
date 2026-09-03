@@ -346,9 +346,14 @@ class TestWriteWhitelist(unittest.TestCase):
             self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
 
     def test_manual_columns_are_never_writable(self):
-        """③PPC/META は自動化保留、④紹介/オフライン合計/AI は転記方法が未確定。"""
-        for key in ("ppc", "meta", "referral", "offline_total", "ai"):
+        """③PPC/META は自動化保留(2026-09-02の判断)。手入力のまま。"""
+        for key in ("ppc", "meta"):
             self.assertNotIn(key, kpi.WRITABLE_PLAN_KEYS, key)
+
+    def test_step_four_columns_are_writable(self):
+        """④は2026-09-03に転記元が確定したので書き込み対象。"""
+        for key in ("referral", "offline_total", "ai"):
+            self.assertIn(key, kpi.WRITABLE_PLAN_KEYS, key)
 
     def test_every_writable_key_has_a_column(self):
         for key in kpi.WRITABLE_PLAN_KEYS:
@@ -478,3 +483,72 @@ class TestTrendsCsv(unittest.TestCase):
             row_number = int(re.search(r"\d+", ref).group(0))
             self.assertIn(column, kpi.TRENDS_VALUE_COLUMNS)
             self.assertLessEqual(row_number, kpi.TRENDS_LAST_ROW)
+
+
+
+class TestReferralExtraction(unittest.TestCase):
+    """工程④。3ブランドの別シートから 紹介 / オフライン合計 / AI を読む。"""
+
+    def _sheet(self, stores):
+        """1行目タイトル / 5行目に合計 / 6行目以降が店舗。列C〜Eを使う簡易版。"""
+        width = 10
+        rows = [[""] * width for _ in range(5)]
+        rows[0][0] = "8月集患媒体"
+        rows[4][0] = "合計"
+        body = []
+        for name, values in stores:
+            row = [""] * width
+            row[0] = name
+            for offset, value in enumerate(values):
+                row[kpi.col_to_index("C") - 1 + offset] = str(value)
+            body.append(row)
+        for offset in range(3):
+            rows[4][kpi.col_to_index("C") - 1 + offset] = str(
+                sum(v[offset] for _, v in stores)
+            )
+        return rows + body
+
+    def test_store_rows_start_below_the_total_row(self):
+        rows = self._sheet([("A院", [1, 2, 3]), ("B院", [4, 5, 6])])
+        stores = kpi.store_rows_of(rows, 5)
+        self.assertEqual([(index, label) for index, label, _ in stores],
+                         [(6, "A院"), (7, "B院")])
+
+    def test_sum_ranges_skips_the_gap(self):
+        """直営はAQを、ミライはWを飛ばす。飛びは意図的な除外なので埋めない。"""
+        row = [""] * 10
+        for column, value in (("C", 1), ("D", 2), ("E", 4)):
+            row[kpi.col_to_index(column) - 1] = str(value)
+        self.assertEqual(kpi.sum_ranges(row, [["C", "C"], ["E", "E"]]), 5)
+
+    def test_excluded_stores_are_found_by_normalised_name(self):
+        """整骨院/接骨院の違いなどを吸収して照合する。"""
+        rows = self._sheet([("逆井駅前整体院", [1, 1, 1]), ("本八幡駅前整骨院", [2, 2, 2])])
+        stores = kpi.store_rows_of(rows, 5)
+        self.assertEqual(kpi.excluded_row_indexes(stores, ["逆井駅前整骨院"]), {6})
+
+    def test_a_renamed_excluded_store_stops_the_run(self):
+        """名前が変わって見つからなくなったら止める。黙って合計に混ぜない。"""
+        rows = self._sheet([("本八幡駅前整骨院", [2, 2, 2])])
+        stores = kpi.store_rows_of(rows, 5)
+        with self.assertRaises(ValueError):
+            kpi.excluded_row_indexes(stores, ["逆井駅前整骨院"])
+
+    def test_the_config_carries_the_five_excluded_stores(self):
+        chokuei = next(s for s in kpi.load_referral_sources() if s["key"] == "chokuei")
+        self.assertEqual(len(chokuei["exclude_store_names"]), 5)
+        self.assertIn("逆井駅前整骨院", chokuei["exclude_store_names"])
+        self.assertEqual(chokuei["ai_ranges"], [["G", "G"], ["H", "H"], ["P", "P"], ["Q", "Q"]])
+
+    def test_only_chokuei_supplies_ai(self):
+        """X列(AI)は直営のみ。サンズ・ミライには無い。"""
+        for source in kpi.load_referral_sources():
+            if source["key"] == "chokuei":
+                self.assertTrue(source.get("ai_ranges"))
+            else:
+                self.assertFalse(source.get("ai_ranges"))
+
+    def test_every_source_is_addressed_by_tab_name_not_gid(self):
+        """gidは月が変わると別物になる。タブ名で解決する。"""
+        for source in kpi.load_referral_sources():
+            self.assertEqual(source["tab_name_pattern"], "{year}年{month}月")
