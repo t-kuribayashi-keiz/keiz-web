@@ -27,6 +27,7 @@ on:
         type: choice
         options:
           - inspect
+          - inspect-referral
           - calibrate
           - dry-run
           - apply
@@ -63,6 +64,7 @@ jobs:
         run: |
           case "${{ inputs.mode }}" in
             inspect)   flag="--inspect" ;;
+            inspect-referral) flag="--inspect-referral" ;;
             calibrate) flag="--calibrate" ;;
             apply)     flag="--apply" ;;
             *)         flag="" ;;

@@ -42,6 +42,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EPARK_CORPORATIONS_PATH = os.path.join(REPO_ROOT, "data", "epark-corporations.json")
 SOURCE_COLUMNS_PATH = os.path.join(REPO_ROOT, "data", "kpi-source-columns.json")
+REFERRAL_SOURCES_PATH = os.path.join(REPO_ROOT, "data", "referral-sources.json")
 AD_SPEND_IGNORE_PATH = os.path.join(REPO_ROOT, "data", "ad-spend-ignore-rows.json")
 
 PLAN_TAB_KEYWORDS = ["年間計画"]
@@ -1208,6 +1209,74 @@ def transfer_trends(service, csv_path: str, month_label: str, apply: bool) -> in
     return 0
 
 
+# --------------------------------------------------------------------------
+# 工程④ 紹介・オフライン合計の転記元を調べる(読み取りのみ)
+# --------------------------------------------------------------------------
+
+def load_referral_sources() -> list[dict]:
+    with open(REFERRAL_SOURCES_PATH, encoding="utf-8") as handle:
+        return json.load(handle)["sources"]
+
+
+def tab_title_for_gid(service, spreadsheet_id: str, gid: int) -> str:
+    """gidからタブ名を引く。**タブ名ではなくgidで指定する**のは、名前は変わりうるが
+    gidはタブを作り直さない限り変わらないため。"""
+    meta = service.spreadsheets().get(
+        spreadsheetId=spreadsheet_id, fields="sheets.properties(sheetId,title,gridProperties)"
+    ).execute()
+    for sheet in meta.get("sheets", []):
+        if sheet["properties"]["sheetId"] == gid:
+            return sheet["properties"]["title"]
+    titles = [s["properties"]["title"] for s in meta.get("sheets", [])]
+    raise ValueError(f"gid={gid} のタブが見つかりません(あるタブ: {titles})。")
+
+
+def inspect_referral(service) -> int:
+    """紹介・オフライン合計の3シートの構造を出すだけ。書き込みはしない。"""
+    for source in load_referral_sources():
+        sid = source["spreadsheet_id"]
+        print(f"\n=== {source['label']} ({sid}) ===")
+        meta = service.spreadsheets().get(
+            spreadsheetId=sid,
+            fields="properties.title,sheets.properties(sheetId,title,gridProperties)",
+        ).execute()
+        print(f"タイトル: {meta['properties']['title']}")
+        sheets = meta.get("sheets", [])
+        print(f"タブ数: {len(sheets)}")
+        for sheet in sheets[:40]:
+            props = sheet["properties"]
+            mark = " ←指定のgid" if props["sheetId"] == source["gid"] else ""
+            grid = props.get("gridProperties", {})
+            print(f"  gid={props['sheetId']:<12} {props['title']!r} "
+                  f"({grid.get('rowCount')}行×{grid.get('columnCount')}列){mark}")
+
+        title = tab_title_for_gid(service, sid, source["gid"])
+        rows = read_tab_range(service, sid, f"'{title}'!A1:AZ12", render="FORMATTED_VALUE")
+        print(f"\n-- {title!r} の1〜12行 --")
+        for row_index, row in enumerate(rows, start=1):
+            filled = [
+                f"{index_to_col(i)}={value!r}"
+                for i, value in enumerate(row, start=1)
+                if str(value).strip()
+            ]
+            print(f"  [{row_index}行] " + (" | ".join(filled[:26]) if filled else "(空)"))
+
+        print("\n-- 指定された範囲の5行目の値 --")
+        for name, ranges in (("紹介", source["referral_ranges"]),
+                             ("オフライン合計", source["offline_ranges"])):
+            total = 0.0
+            parts = []
+            for first, last in ranges:
+                for index in range(col_to_index(first), col_to_index(last) + 1):
+                    column = index_to_col(index)
+                    value = parse_number(cell(rows[source["total_row"] - 1], column))
+                    parts.append(f"{column}={value if value is not None else '-'}")
+                    total += value or 0.0
+            print(f"  {name}: 合計={total:g}")
+            print(f"    {' '.join(parts)}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--month", required=True, help="対象月ラベル(例: 2026年8月)")
@@ -1233,11 +1302,19 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--inspect-referral",
+        action="store_true",
+        help="工程④。紹介・オフライン合計の3シート(直営/サンズ/ミライ)の構造を出すだけ",
+    )
+    parser.add_argument(
         "--inspect",
         action="store_true",
         help="書き込まず、シートの構造(タブ名・ヘッダー行・合計値)を出すだけ",
     )
     args = parser.parse_args()
+
+    if args.inspect_referral:
+        return inspect_referral(build_service())
 
     if args.inspect:
         return inspect(build_service(), args.month)

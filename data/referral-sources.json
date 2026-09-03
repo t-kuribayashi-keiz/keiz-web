@@ -1,0 +1,37 @@
+{
+  "_comment": "工程④。F列(紹介)とJ列(オフライン合計)の転記元。直営・サンズ・ミライで別々のスプレッドシートに分かれており、範囲も違う。2026-09-03に栗林さんから指定。",
+  "_row_comment": "どのシートも5行目にチャネルごとの合計が入っている。列の飛び(直営のAQ、ミライのW)は意図的な除外なので埋めないこと。",
+  "sources": [
+    {
+      "key": "chokuei",
+      "label": "直営",
+      "spreadsheet_id": "1Er7UAqJ7BhZitxBMA1ZPNMLkhdlhBOlS8GzdgOI-cD4",
+      "gid": 761072408,
+      "total_row": 5,
+      "referral_ranges": [["AF", "AI"]],
+      "offline_ranges": [["AE", "AP"], ["AR", "AX"]],
+      "exclude_pink_stores": true,
+      "notes": "店舗名がピンク着色の店舗(逆井・酒々井など)は別ブランドなので合計から除外する。5行目の合計にはそれらも含まれているとみられるため、5行目をそのまま使えるかは要確認。"
+    },
+    {
+      "key": "sans",
+      "label": "サンズ",
+      "spreadsheet_id": "1FM1AvLvBkXYfIfK78VQEMEgiH0RMzEGNr-Rm1NHmwyE",
+      "gid": 1870566803,
+      "total_row": 5,
+      "referral_ranges": [["AD", "AE"]],
+      "offline_ranges": [["W", "AG"]],
+      "exclude_pink_stores": false
+    },
+    {
+      "key": "mirai",
+      "label": "ミライ",
+      "spreadsheet_id": "1V2fX5t5vM64ltiUjn53DrpXAHweYsdThJCbbUfHky3k",
+      "gid": 1435250651,
+      "total_row": 5,
+      "referral_ranges": [["S", "V"]],
+      "offline_ranges": [["R", "V"], ["X", "AF"]],
+      "exclude_pink_stores": false
+    }
+  ]
+}
