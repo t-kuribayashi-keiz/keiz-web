@@ -57,7 +57,15 @@ DASHBOARD_MONTH_COLUMN = "A"
 # 下のブロックは「2025/1整骨院で正規化」したもので、上のブロックから機械的に導ける
 # (2025/1と2026/7・8で検算済み)。どこまでが数式でどこからが手入力かは実物を見て決める。
 TRENDS_COLUMNS = ["AN", "AO", "AP", "AQ", "AR", "AS", "AT"]
-TRENDS_KEYWORDS = ["整骨院", "整体", "腰痛", "肩こり", "骨盤矯正"]
+TRENDS_HEADER_ROW = 2          # AO2:AS2 にキーワード名が入っている
+TRENDS_FIRST_ROW = 3           # 2025年1月
+TRENDS_LAST_ROW = 26           # 2026年12月
+TRENDS_MONTH_COLUMN = "AN"
+TRENDS_VALUE_COLUMNS = ["AO", "AP", "AQ", "AR", "AS"]
+# 2026-09-03に数式を読んで確認した、書き込んではいけない範囲:
+#   AT3:AT26        = AVERAGE(AO{n}:AS{n})
+#   AO30:AT53       = AO{n-27}/$AO$3*100  (2025/1整骨院で正規化したブロック)
+# つまり実データが要るのは AO3:AS26 だけで、残りは自動で追随する。
 DASHBOARD_TAB_KEYWORDS = ["ダッシュボード"]
 AD_SPEND_TAB_KEYWORDS = ["広告費各詳細"]
 
@@ -873,12 +881,12 @@ def inspect(service, month_label: str) -> int:
         (r for r in dash_rows[:5] if any("実績" in str(v) for v in r)),
         dash_rows[0] if dash_rows else [],
     )
-    for _, column in DASHBOARD_COLUMNS:
+    for _, column, _, _ in DASHBOARD_COLUMNS:
         print(f"  {column}: 見出し={cell(header, column)!r}")
     for row_index, row in enumerate(dash_rows, start=1):
         if normalize(cell(row, "A")) == normalize(month_label):
             print(f"  [{row_index}行] " + " | ".join(
-                f"{column}={cell(row, column)!r}" for _, column in DASHBOARD_COLUMNS
+                f"{column}={cell(row, column)!r}" for _, column, _, _ in DASHBOARD_COLUMNS
             ))
     return 0
 
@@ -954,6 +962,202 @@ def build_dashboard_values(
     return values
 
 
+# --------------------------------------------------------------------------
+# 工程⑥ Googleトレンド(CSVからの転記)
+# --------------------------------------------------------------------------
+
+def parse_month_key(text) -> tuple[int, int] | None:
+    """「2025/1」「2025-01」「2025年1月」「2025-01-01」を (年, 月) にする。"""
+    match = re.search(r"(\d{4})\s*[-/年]\s*(\d{1,2})", str(text))
+    return (int(match.group(1)), int(match.group(2))) if match else None
+
+
+def parse_trends_number(text) -> float | None:
+    """Googleトレンドの値。1未満は「<1」と書かれるので0として扱う。"""
+    value = str(text).strip()
+    if value in ("", "-"):
+        return None
+    if value.startswith("<"):
+        return 0.0
+    return parse_number(value)
+
+
+def parse_trends_csv(text: str, keywords: list[str]) -> dict[tuple[int, int], dict[str, float]]:
+    """GoogleトレンドのCSV(multiTimeline.csv)を月→キーワード→値にする。
+
+    列の対応はCSVの見出しに含まれるキーワード名で取る。位置で取ると、比較の並び順が
+    変わったときに黙って別のキーワードの数字が入る。見出しは
+    「整骨院: (日本)」のような形なので部分一致で見る。
+
+    キーワードはシートのAO2:AS2から渡ってくる。**シートが正**とし、CSV側にそれが
+    無ければ止める。
+    """
+    rows = [line.split(",") for line in text.splitlines()]
+    header_index = None
+    for index, row in enumerate(rows):
+        if sum(1 for keyword in keywords if any(keyword in c for c in row)) >= len(keywords):
+            header_index = index
+            break
+    if header_index is None:
+        preview = "\n".join(text.splitlines()[:8])
+        raise ValueError(
+            f"CSVに5キーワード {keywords} をすべて含む見出し行が見つかりませんでした。"
+            "5つを1つの比較で取得したCSVか確認してください"
+            f"(先頭8行:\n{preview}\n)。"
+        )
+
+    header = rows[header_index]
+    column_of = {}
+    for keyword in keywords:
+        hits = [i for i, cell_text in enumerate(header) if keyword in cell_text]
+        if len(hits) != 1:
+            raise ValueError(
+                f"CSVの見出しでキーワード『{keyword}』に対応する列を1つに決められません"
+                f"(該当列: {hits} / 見出し: {header})。"
+            )
+        column_of[keyword] = hits[0]
+
+    parsed: dict[tuple[int, int], dict[str, float]] = {}
+    for row in rows[header_index + 1:]:
+        if not row or not row[0].strip():
+            continue
+        month = parse_month_key(row[0])
+        if month is None:
+            continue
+        values = {}
+        for keyword, index in column_of.items():
+            number = parse_trends_number(row[index]) if index < len(row) else None
+            if number is None:
+                raise ValueError(
+                    f"{month[0]}年{month[1]}月 の『{keyword}』が数値ではありません"
+                    f"(行: {row})。"
+                )
+            values[keyword] = number
+        parsed[month] = values
+
+    if not parsed:
+        raise ValueError("CSVから月次の行を1つも読み取れませんでした。")
+    return parsed
+
+
+def check_joint_normalization(parsed: dict[tuple[int, int], dict[str, float]]) -> None:
+    """5キーワードを1つの比較で取得したCSVかどうかを、値の形から確かめる。
+
+    Googleトレンドは**指定期間・指定キーワードの中の最大値を100**にする。5つ同時に
+    取れば100はどこか1箇所(同点でも数箇所)にしか現れないが、1キーワードずつ取ると
+    **5つそれぞれに100が現れる**。別々に取ったCSVはキーワード間の比較ができないのに
+    数字は自然に見えるので、ここで止める。
+    """
+    peaked = [
+        keyword
+        for keyword in next(iter(parsed.values()))
+        if any(values[keyword] >= 100 for values in parsed.values())
+    ]
+    if not peaked:
+        raise ValueError(
+            "CSVのどこにも100がありません。Googleトレンドは期間内の最大値を100にするため、"
+            "取得範囲か加工の仕方が想定と違います。"
+        )
+    if len(peaked) >= 3:
+        raise ValueError(
+            f"100に達しているキーワードが{len(peaked)}個あります({peaked})。"
+            "1キーワードずつ取得したCSVの可能性が高く、その場合キーワード間の比較ができません。"
+            "5つを1つの比較で取り直してください。"
+        )
+
+
+def build_trends_writes(
+    plan_title: str,
+    header_row: list,
+    month_rows: list[list],
+    parsed: dict[tuple[int, int], dict[str, float]],
+) -> dict[str, tuple[str, str, object]]:
+    """シートの各行の年月に、CSVの値を割り当てる。
+
+    毎月**全期間を取り直して列ごと書き換える**のが正しい運用(栗林さん確認済み、
+    2026-09-03)。Googleトレンドは期間内の最大値を100に正規化するため、期間が延びて
+    新しい最大値が出ると**過去の月の値もすべて再スケールされる**。新しい行だけ足すと
+    古い行と基準がずれた表になる。
+    """
+    keywords = [str(cell(header_row, column)).strip() for column in TRENDS_VALUE_COLUMNS]
+    if any(not keyword for keyword in keywords):
+        raise ValueError(f"シートのキーワード見出し(AO2:AS2)が読めません: {keywords}")
+
+    planned = {}
+    for offset, row in enumerate(month_rows):
+        row_index = TRENDS_FIRST_ROW + offset
+        month = parse_month_key(cell(row, TRENDS_MONTH_COLUMN))
+        if month is None or month not in parsed:
+            continue          # まだ来ていない月。空のまま残す
+        for keyword, column in zip(keywords, TRENDS_VALUE_COLUMNS):
+            if keyword not in parsed[month]:
+                raise ValueError(f"CSVに『{keyword}』の列がありません。")
+            planned[f"trends_{month[0]}-{month[1]:02d}_{keyword}"] = (
+                plan_title,
+                f"{column}{row_index}",
+                parsed[month][keyword],
+            )
+    if not planned:
+        raise ValueError(
+            "CSVの月と、シートのAN列の年月が1つも一致しませんでした。"
+            "期間の指定を確認してください。"
+        )
+    return planned
+
+
+def transfer_trends(service, csv_path: str, apply: bool) -> int:
+    """工程⑥。CSVからAO3:AS26を書き換える。"""
+    print(f"GoogleトレンドCSV: {csv_path}")
+    print(f"モード: {'本番書き込み' if apply else 'ドライラン(書き込まない)'}\n")
+
+    titles = list_tab_titles(service, SPREADSHEET_ID)
+    plan_title = resolve_tab(titles, PLAN_TAB_KEYWORDS, "年間計画・目標")
+    rows = read_tab(service, SPREADSHEET_ID, plan_title)
+    header_row = rows[TRENDS_HEADER_ROW - 1]
+    month_rows = rows[TRENDS_FIRST_ROW - 1:TRENDS_LAST_ROW]
+    keywords = [str(cell(header_row, column)).strip() for column in TRENDS_VALUE_COLUMNS]
+    print(f"シートのキーワード(AO2:AS2): {keywords}")
+
+    with open(csv_path, encoding="utf-8-sig") as handle:
+        text = handle.read()
+    try:
+        parsed = parse_trends_csv(text, keywords)
+        check_joint_normalization(parsed)
+        planned = build_trends_writes(plan_title, header_row, month_rows, parsed)
+    except ValueError as error:
+        fail(str(error))
+        return 1
+
+    months = sorted(parsed)
+    print(f"CSVの期間: {months[0][0]}年{months[0][1]}月 〜 {months[-1][0]}年{months[-1][1]}月"
+          f"({len(months)}か月)")
+    print(f"\n書き込み先: {plan_title} の AO{TRENDS_FIRST_ROW}:AS{TRENDS_LAST_ROW}")
+    before = snapshot(service, {key: (title, ref) for key, (title, ref, _) in planned.items()})
+    changed = [key for key in planned if parse_number(before[key]) != planned[key][2]]
+    for key in sorted(planned):
+        title, ref, value = planned[key]
+        mark = "*" if key in changed else " "
+        print(f" {mark}{key:28s} {ref:6s} 現在={before[key]!r} → {value:g}")
+    print(f"\n{len(planned)}セル中 {len(changed)}セルが変化します"
+          f"(全期間を取り直すため、過去の月も再スケールされることがある)")
+
+    if not apply:
+        print("\nドライランのため書き込みませんでした。--apply で実行します。")
+        return 0
+
+    write_cells(service, planned)
+    mismatches = verify(service, planned)
+    if mismatches:
+        print("\n書き込み後の読み返しが一致しませんでした:", file=sys.stderr)
+        for line in mismatches:
+            print(f"  - {line}", file=sys.stderr)
+        print(f"\n書き込み前の値: {before}", file=sys.stderr)
+        return 1
+    print("\n書き込み後の読み返しも一致しました。")
+    print("AT列(5キーワード平均)と正規化ブロックは数式なので自動で追随します。")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--month", required=True, help="対象月ラベル(例: 2026年8月)")
@@ -971,6 +1175,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--trends",
+        metavar="CSV",
+        help=(
+            "工程⑥。GoogleトレンドのCSV(5キーワードを1つの比較で取得したもの)から"
+            "AO3:AS26を書き換える。AT列と正規化ブロックは数式なので触らない"
+        ),
+    )
+    parser.add_argument(
         "--inspect",
         action="store_true",
         help="書き込まず、シートの構造(タブ名・ヘッダー行・合計値)を出すだけ",
@@ -979,6 +1191,9 @@ def main() -> int:
 
     if args.inspect:
         return inspect(build_service(), args.month)
+
+    if args.trends:
+        return transfer_trends(build_service(), args.trends, args.apply)
 
     if args.calibrate and args.apply:
         fail("--calibrate と --apply は同時に指定できません。答え合わせと書き込みは分ける。")

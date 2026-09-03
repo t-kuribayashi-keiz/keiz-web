@@ -17,6 +17,10 @@ on:
         description: "対象月(例: 2026年8月)"
         required: true
         type: string
+      trends_csv:
+        description: "工程⑥のみ: GoogleトレンドCSVのパス(例 data/trends/2026-08.csv)。指定すると⑥だけを実行する"
+        required: false
+        type: string
       mode:
         description: "inspect=構造を見るだけ / calibrate=答え合わせ / dry-run=書き込む内容の確認 / apply=本番書き込み"
         required: true
@@ -63,4 +67,11 @@ jobs:
             apply)     flag="--apply" ;;
             *)         flag="" ;;
           esac
-          python3 scripts/kpi_aggregate.py --month "${{ inputs.month }}" $flag
+          if [ -n "${{ inputs.trends_csv }}" ]; then
+            # 工程⑥。CSVからAO3:AS26だけを書き換える(AT列と正規化ブロックは数式)。
+            [ "${{ inputs.mode }}" = "apply" ] && flag="--apply" || flag=""
+            python3 scripts/kpi_aggregate.py --month "${{ inputs.month }}" \
+              --trends "${{ inputs.trends_csv }}" $flag
+          else
+            python3 scripts/kpi_aggregate.py --month "${{ inputs.month }}" $flag
+          fi

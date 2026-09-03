@@ -6,6 +6,7 @@
 """
 
 import os
+import re
 import sys
 import unittest
 
@@ -356,3 +357,93 @@ class TestWriteWhitelist(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTrendsCsv(unittest.TestCase):
+    """工程⑥。GoogleトレンドのCSVからAO3:AS26を書き換える。"""
+
+    KEYWORDS = ["整骨院", "整体", "腰痛", "肩こり", "骨盤矯正"]
+    CSV = (
+        "カテゴリ: すべてのカテゴリ\n"
+        "\n"
+        "月,整骨院: (日本),整体: (日本),腰痛: (日本),肩こり: (日本),骨盤矯正: (日本)\n"
+        "2025-01,90,89,35,82,9\n"
+        "2025-02,90,89,35,77,7\n"
+        "2026-07,89,100,32,67,7\n"
+        "2026-08,87,97,28,68,7\n"
+    )
+
+    def test_parses_by_keyword_not_by_position(self):
+        """並び順が変わっても正しい列に入ること。位置で取ると黙って別のキーワードが入る。"""
+        shuffled = self.CSV.replace(
+            "整骨院: (日本),整体: (日本)", "整体: (日本),整骨院: (日本)"
+        )
+        parsed = kpi.parse_trends_csv(shuffled, self.KEYWORDS)
+        self.assertEqual(parsed[(2025, 1)]["整体"], 90)
+        self.assertEqual(parsed[(2025, 1)]["整骨院"], 89)
+
+    def test_reads_the_real_shape(self):
+        parsed = kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+        self.assertEqual(parsed[(2026, 8)],
+                         {"整骨院": 87, "整体": 97, "腰痛": 28, "肩こり": 68, "骨盤矯正": 7})
+
+    def test_less_than_one_becomes_zero(self):
+        csv = self.CSV.replace("2025-01,90,89,35,82,9", "2025-01,90,89,35,82,<1")
+        self.assertEqual(kpi.parse_trends_csv(csv, self.KEYWORDS)[(2025, 1)]["骨盤矯正"], 0)
+
+    def test_missing_keyword_stops(self):
+        csv = self.CSV.replace("骨盤矯正: (日本)", "ぎっくり腰: (日本)")
+        with self.assertRaises(ValueError):
+            kpi.parse_trends_csv(csv, self.KEYWORDS)
+
+    def test_separately_pulled_csv_is_rejected(self):
+        """1キーワードずつ取ると5つそれぞれに100が出る。比較できないのに数字は自然に見える。"""
+        separate = {
+            (2025, 1): {k: 100 for k in self.KEYWORDS},
+            (2025, 2): {k: 80 for k in self.KEYWORDS},
+        }
+        with self.assertRaises(ValueError):
+            kpi.check_joint_normalization(separate)
+
+    def test_jointly_pulled_csv_is_accepted(self):
+        joint = kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+        kpi.check_joint_normalization(joint)   # 整体 2026/7 だけが100
+
+    def test_missing_hundred_stops(self):
+        with self.assertRaises(ValueError):
+            kpi.check_joint_normalization({(2025, 1): {k: 50 for k in self.KEYWORDS}})
+
+    def test_writes_only_the_months_the_sheet_has(self):
+        header = [""] * 45
+        for column, keyword in zip(kpi.TRENDS_VALUE_COLUMNS, self.KEYWORDS):
+            header[kpi.col_to_index(column) - 1] = keyword
+        month_rows = []
+        for label in ("2025/1", "2025/2", "2026/7", "2026/8", "2026/9"):
+            row = [""] * 45
+            row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = label
+            month_rows.append(row)
+
+        parsed = kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+        planned = kpi.build_trends_writes("年間計画・目標", header, month_rows, parsed)
+
+        # 4か月 × 5キーワード。2026/9 はCSVに無いので空のまま残す。
+        self.assertEqual(len(planned), 20)
+        self.assertEqual(planned["trends_2025-01_整骨院"][1], "AO3")
+        self.assertEqual(planned["trends_2026-08_骨盤矯正"][1], "AS6")
+        self.assertNotIn("trends_2026-09_整骨院", planned)
+
+    def test_the_formula_columns_are_never_written(self):
+        """AT列と正規化ブロックは数式。定数で上書きすると壊れる。"""
+        header = [""] * 45
+        for column, keyword in zip(kpi.TRENDS_VALUE_COLUMNS, self.KEYWORDS):
+            header[kpi.col_to_index(column) - 1] = keyword
+        row = [""] * 45
+        row[kpi.col_to_index(kpi.TRENDS_MONTH_COLUMN) - 1] = "2025/1"
+        planned = kpi.build_trends_writes(
+            "年間計画・目標", header, [row], kpi.parse_trends_csv(self.CSV, self.KEYWORDS)
+        )
+        for _, ref, _ in planned.values():
+            column = re.match(r"[A-Z]+", ref).group(0)
+            row_number = int(re.search(r"\d+", ref).group(0))
+            self.assertIn(column, kpi.TRENDS_VALUE_COLUMNS)
+            self.assertLessEqual(row_number, kpi.TRENDS_LAST_ROW)
