@@ -242,7 +242,7 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
             if "http" not in base_url:
                 bulk_updates.append(["", ""])
                 continue
-            print(f"🔍 解析中 ({i + 1}/{len(shop_rows)}): {shop_name}")
+            print(f"🔍 解析中 ({i + 1}/{len(shop_rows)}): {shop_name}", flush=True)
             all_slots = await scrape_hpb_robust(page, base_url, unique_dates, shop_name)
             summary_results = []
             has_any_ng = False
@@ -286,7 +286,7 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
             final_judge = "✕" if has_any_ng else ("○" if has_any_data else "?")
             detail = " | ".join(summary_results)
             bulk_updates.append([detail, final_judge])
-            print(f"  -> 結果: {final_judge}")
+            print(f"  -> 結果: {final_judge} ({detail})", flush=True)
         await browser.close()
 
     range_label = f"K3:L{2 + len(bulk_updates)}"
