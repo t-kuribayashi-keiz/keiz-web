@@ -1336,3 +1336,118 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   検算になるという良い例
 - 対応状況: 工程①②⑤⑥が本番稼働。テスト70件。残りは③(自動化保留の判断済み)と
   ④(紹介・オフライン合計・AIの転記方法のヒアリング待ち)
+
+---
+
+## 2026-09-03 組織全体棚卸し
+
+- きっかけ: 「hpb-crm-reconciliationの確認中に、並行セッション対策(`learnings/`フォルダ・
+  `references/concurrent-sessions.md`)がhpb-salonboard-updateにしか実装されていない」という
+  1件の発見をきっかけに、同種の「決まったはずなのに反映されていない」「未対応のまま放置」を
+  組織全体から広く洗い出す棚卸しを実施した。今回は棚卸し記録のみで、対応(統合/新規Skill化/
+  廃止/ファイル修正)は行っていない
+- 対象: `docs/org-review-log.md`(全1339行、初期構築〜直近まで全件)、`docs/backlog.md`、
+  ルート`CLAUDE.md`、`data/clinics.json`(204件)、`brands/`・`functions/`配下、
+  `.claude/agents/`全7件、`skills/README.md`、`.claude/skills/`配下11Skillの一部SKILL.md
+
+### 見つかった事実
+
+**A. 並行セッション対策の展開漏れ**
+- CLAUDE.mdの「複数セッションの同時実行と、学習の蓄積」ルール(`learnings/`配下への新規ファイル
+  作成、gitコマンド実行禁止など)は全Skill共通のはずだが、実際に`learnings/`フォルダと
+  `references/concurrent-sessions.md`を持つのは`hpb-salonboard-update`のみ。他10Skill
+  (`hpb-crm-reconciliation`、`karte-demographics-chart`、`shift-schedule-gas-automation`、
+  `dji-mic-auto-upload`、`gdrive-store-staff-folders`、`org-structure-artifact`、
+  `org-structure-table`、`customer-acquisition-consulting`、`session-to-skill`、
+  `chatwork-integration`)には該当パターンが無い
+
+**B. Skill間の重複が自己申告されたまま未検証**
+- `.claude/skills/org-structure-artifact/SKILL.md`は本文中に「Likely overlap: a separate
+  session ... may cover the same underlying reorg/deliverable ... Check that skill before
+  using both — they may need merging.」と`org-structure-table`との重複可能性を自ら明記している。
+  これは2026-09-01のskill-kanriからの移設時から存在する記述だが、その後2回以上の棚卸し
+  (本棚卸し含め3回目)を経てもこの重複確認・統合要否判断が一度も行われていない
+
+**C. KPI定義・命名規則セクションが依然として空**
+- ルート`CLAUDE.md`の「KPI定義・命名規則」セクションは「このセクションが空のまま各Skillで
+  独自定義しないこと」と明記された状態のまま、2026-09-01の初期構築から本日まで実質空欄
+  (ブランド個別コンテキストへの委譲方針が追記されているのみで、全社共通KPI定義そのものは
+  一度も書かれていない)
+
+**D. `acquisition_channels`が空のブランド・院が大半**
+- `data/clinics.json`全204件のうち、`acquisition_channels`が埋まっているのは
+  LUNA(`luna-togoshiginza`)1件のみ。サンズミライ(18)・直営(134)・心身堂(7)・
+  スマイル(11)・グッド(7)・リラックス(24〜25)、計7ブランド中6ブランド・約200院が
+  空配列のまま。org-review-logでは各ブランド追加のたびに「未対応として残っている論点」に
+  記載されているが、解消された形跡はない
+
+**E. ブランド専用CLAUDE.mdの未整備**
+- `brands/`配下は`luna`・`smile`の2件のみ。`clinics.json`にブランドとして存在する
+  直営(134院・8法人)・サンズミライ(18院・2法人)・心身堂(7院)・グッド(7院)・
+  リラックス(24〜25院)には専用CLAUDE.mdが無い。特に直営は法人が8社にまたがり、
+  SalonBoard運用・CRM×HPB突合(`hpb-crm-reconciliation`)・月次KPI集計自動化
+  (`functions/kpi-aggregation/`)という複数の実務Skillが既に紐づいているにもかかわらず、
+  ブランド固有の運用複雑さ(法人体系、ドメイン構成、KPIシートの構造等)を集約する場所が
+  無い。この点は`docs/backlog.md`にも「未整備」として記載済みだが、着手の動きは無い
+
+**F. `functions/kpi-aggregation/`が実質1業務相当の自動化に成長しているが、Skillとして
+   登録されていない**
+- `scripts/kpi_aggregate.py`・`scripts/store_matcher.py`・`.github/workflows/
+  kpi-aggregate.yml`・テスト70件という規模の本番自動化が構築されているが、
+  `.claude/skills/`配下にSkillとして存在せず、`skills/README.md`の役割マッピング表にも
+  1行も無い。CLAUDE.mdの「1業務=1Skillを原則」「新しいSkillを追加するとき...追加したら
+  必ずこの表に1行追加する」という規約と噛み合っていない
+
+**G. `smile-marketing-strategist`の対象範囲とデータ基盤の不一致**
+- `smile-marketing-strategist`はスマイル(11院)専属と明記されているが、実データ基盤
+  (「グッド・スマイル月次報告」シート、サービスアカウント`smile-good-reporter`)は
+  グッド(7院)と共有されている。グッドには同型のブランド専属エージェントが無く、
+  CLAUDE.mdの「他ブランドで同様の役割が必要になれば同じ型で追加する」という余地はあるが
+  未判断のまま
+
+**H. `hpb-crm-reconciliation`の対象範囲が`clinics.json`の実データと未照合**
+- SKILL.mdの説明は「~150 chiropractic salons」という概数のままで、`clinics.json`確定後の
+  ブランド別実数(直営134+サンズミライ18=152、心身堂を含めると159等)と照合・明記されて
+  いない。どのブランドが実際にこのGASの対象かの確認は、org-review-log 2026-09-02の
+  「アイワ/リクスム」棚卸し以降も持ち越されたまま
+
+**I. org-review-logの「未対応」記録が前方参照されておらず、解消済みかどうか自己判別できない**
+- org-review-logは各エントリ末尾に「未対応として残っている論点」を書く形式だが、後続の
+  エントリで実際に解消されても元のエントリ側に「解消済み(→YYYY-MM-DD参照)」等の追記が
+  されない(`docs/backlog.md`は打ち消し線で解消を明示しているのと対照的)。今回の棚卸しで
+  実際に以下の混在を確認した:
+  - 解消済みだが元エントリ未更新の例: 「スマイル」「グッド」「リラックス」の店舗リスト
+    未確定(2026-09-02複数エントリ)は、いずれもその後のエントリで確定・`clinics.json`
+    反映済みだが、各エントリ自体には「解消済み」の追記が無い
+  - 依然未解消の例: LUNAのGA4プロパティID/GSCプロパティURL未確認、Meta広告Threads/
+    Audience Network配置の停止判断、チラシQRコードへのUTM付与(いずれも2026-09-01の
+    LUNA組み込み時から一度も後続言及が無い)
+  - `docs/backlog.md`にも移されず宙に浮いている例(org-review-logにしか記録が無く、
+    backlog.md作成(2026-09-02後半)以降のどのエントリにも引き継がれていない):
+    - 広告費集計サマリー行にある「アイワ」という項目が、レセプト代行機能の
+      「アイワ接骨師会」と同一かどうかの確認
+    - スマイルの広告費対象院数(シート上6院 vs 院マスタ11院)の不一致
+      (2026-09-03にEPARK側で11院一致という傍証は出たが、広告費シート自体の確認は未了)
+    - 「グッド・スマイル月次報告」シートの共有設定が「リンクを知っている全員が編集者」に
+      なっている件のセキュリティ要否確認
+    - 既存GCPプロジェクト`smile-story-ga-gsc`・`smile-web-strategy`と、新設した
+      `keizgroup-automation`との重複/統合要否の整理
+    - HPBを実際に利用しているブランド・院の範囲の確定(`clinics.json`側は依然未反映。
+      salonboard-operator新設から4回以上のエントリで繰り返し「未対応」と記載され続けている)
+    - 他ブランドのChatworkルーム追加(監視対象は依然「【WEBマーケ】ケイズ×リラックス」のみ)
+  - `docs/backlog.md`に残っている未解消項目(参考・こちらは自己記述が正しく機能している):
+    リラックスWordPress環境の実機調査、高円寺店の詳細情報、集計自動化工程④
+    (紹介・オフライン合計・AI)のヒアリング、L列(店舗数)の自動化要否、
+    2026年7月C・E不一致の原因確認、`@claude`マーカー規約のメンバー周知、
+    Chatwork依頼Issue処理Routineの作り直し、EPARK表記ゆれ3件の名寄せ
+
+### 提案・対応内容
+
+- 今回は棚卸し・記録のみ。統合/新規Skill化/廃止/ファイル修正などの対応は一切行っていない
+- 上記A〜Iはユーザー(栗林さん)が優先順位を判断する前提のため、本エントリでは重要度付け・
+  実装提案を行わず、事実の列挙に留めた
+
+### 対応状況
+
+棚卸しのみ・対応は未実施。ユーザーが優先順位を判断中。
+変更したファイル: `docs/org-review-log.md`(本エントリの追記のみ)
