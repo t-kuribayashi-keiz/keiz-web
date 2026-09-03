@@ -1231,6 +1231,87 @@ def tab_title_for_gid(service, spreadsheet_id: str, gid: int) -> str:
     raise ValueError(f"gid={gid} のタブが見つかりません(あるタブ: {titles})。")
 
 
+def cell_background(value: dict) -> tuple[float, float, float]:
+    color = (value.get("effectiveFormat") or {}).get("backgroundColor") or {}
+    return (color.get("red", 1.0), color.get("green", 1.0), color.get("blue", 1.0))
+
+
+def is_plain_background(rgb: tuple[float, float, float]) -> bool:
+    """白またはごく薄いグレーか。色が付いていれば False。"""
+    red, green, blue = rgb
+    return min(red, green, blue) > 0.92 and (max(rgb) - min(rgb)) < 0.05
+
+
+def report_colored_stores(service, spreadsheet_id: str, title: str, source: dict, rows: list) -> None:
+    """店舗名に色が付いている行を洗い出し、5行目の合計に含まれているかを確かめる。
+
+    栗林さんの指示は「5行目の合計を使う」と「ピンクの店舗は除外する」の両方。
+    5行目がピンクも含めた全店舗の合計なら、この2つは同時に成り立たない。
+    どちらなのかを数字で確かめる。
+    """
+    data = service.spreadsheets().get(
+        spreadsheetId=spreadsheet_id,
+        ranges=[f"'{title}'!A1:BZ400"],
+        includeGridData=True,
+        fields="sheets/data/rowData/values(formattedValue,effectiveFormat/backgroundColor)",
+    ).execute()
+    grid = data["sheets"][0]["data"][0].get("rowData", [])
+
+    columns = []
+    for first, last in source["referral_ranges"] + source["offline_ranges"]:
+        columns.extend(range(col_to_index(first), col_to_index(last) + 1))
+    referral_cols = {
+        index
+        for first, last in source["referral_ranges"]
+        for index in range(col_to_index(first), col_to_index(last) + 1)
+    }
+    offline_cols = {
+        index
+        for first, last in source["offline_ranges"]
+        for index in range(col_to_index(first), col_to_index(last) + 1)
+    }
+
+    colored, plain = [], []
+    sums = {"colored": [0.0, 0.0], "plain": [0.0, 0.0]}
+    for row_index, row in enumerate(grid, start=1):
+        if row_index <= source["total_row"]:
+            continue
+        values = row.get("values", [])
+        if not values:
+            continue
+        name = (values[0].get("formattedValue") or "").strip()
+        alt = (values[1].get("formattedValue") if len(values) > 1 else "") or ""
+        label = name or alt.strip()
+        if not label:
+            continue
+        tinted = not is_plain_background(cell_background(values[0])) or (
+            len(values) > 1 and not is_plain_background(cell_background(values[1]))
+        )
+        bucket = "colored" if tinted else "plain"
+        for index in columns:
+            number = parse_number(
+                values[index - 1].get("formattedValue") if index <= len(values) else ""
+            ) or 0.0
+            if index in referral_cols:
+                sums[bucket][0] += number
+            if index in offline_cols:
+                sums[bucket][1] += number
+        (colored if tinted else plain).append((row_index, label, cell_background(values[0])))
+
+    print(f"  色付きの店舗 {len(colored)}件 / 色なし {len(plain)}件")
+    for row_index, label, rgb in colored[:25]:
+        print(f"    [{row_index}行] {label!r} rgb=({rgb[0]:.2f},{rgb[1]:.2f},{rgb[2]:.2f})")
+
+    total_row_values = rows[source["total_row"] - 1]
+    for name, cols, index in (("紹介", referral_cols, 0), ("オフライン合計", offline_cols, 1)):
+        header_total = sum(
+            parse_number(cell(total_row_values, index_to_col(c))) or 0.0 for c in sorted(cols)
+        )
+        both = sums["plain"][index] + sums["colored"][index]
+        print(f"  {name}: {source['total_row']}行目={header_total:g} / "
+              f"色なしのみ={sums['plain'][index]:g} / 全店舗={both:g}")
+
+
 def inspect_referral(service) -> int:
     """紹介・オフライン合計の3シートの構造を出すだけ。書き込みはしない。"""
     for source in load_referral_sources():
@@ -1260,6 +1341,10 @@ def inspect_referral(service) -> int:
                 if str(value).strip()
             ]
             print(f"  [{row_index}行] " + (" | ".join(filled[:26]) if filled else "(空)"))
+
+        if source.get("exclude_pink_stores"):
+            print("\n-- 店舗行の背景色(ピンク=別ブランド)と、合計の突き合わせ --")
+            report_colored_stores(service, sid, title, source, rows)
 
         print("\n-- 指定された範囲の5行目の値 --")
         for name, ranges in (("紹介", source["referral_ranges"]),
