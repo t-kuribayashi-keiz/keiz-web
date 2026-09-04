@@ -155,26 +155,115 @@ def decrypt_dir(src_root, dst_root, passwords):
     return {"decrypted": ok, "skipped": skip, "failed": fail, "errors": errors}
 
 
-def extract_pdf(path, completed_index=-2):
-    """1店舗のPDFから対象月号のKPIを抽出。院名はP3の掲載状況(最寄駅の直後)から取る。"""
+# 掲載状況(P3)の数値セルは「-」(データ無)もあり得る。数値と同格に許容しないと、
+# 正規表現が自サロン行をスキップして比較サロン一覧の先頭店の値を拾う事故になる。
+_VAL = r"(?:-|[\d,]+(?:\.\d+)?)"
+_YEN = re.compile(r"^[¥￥]-?[\d,]+$")
+
+# Masterの右側(T列〜)へ足す拡張項目。data/hpb-ribbon-config.json の master_ext_columns と一致させる。
+EXTENDED_COLS = [
+    "口コミ数", "口コミ評点", "評点_総合", "評点_雰囲気", "評点_接客", "評点_技術", "評点_メニュー料金",
+    "口コミ返信率", "月号新規口コミ数", "口コミ直近平均点", "ブログ数", "ブログ月次投稿数", "残キャパ50以上",
+    "設備数", "クーポン数", "最寄駅", "男性率", "ALL予約数", "リピート予約数", "売上万円", "客単価",
+    "マイページ登録数", "比較_PV", "比較_CVR", "比較_ACR", "比較_口コミ数", "比較_評点", "比較_返信率",
+]
+
+
+def _yen_series_value(lines, label, idx=-2):
+    """客単価など ¥ 値の系列。ラベルが見出し+行の2回出るので、次行が¥値のものを採用。"""
+    for i, l in enumerate(lines):
+        if l.strip() == label and i + 1 < len(lines) and _YEN.match(lines[i + 1].strip()):
+            vals = []
+            for nx in lines[i + 1:]:
+                s = nx.strip()
+                if _YEN.match(s):
+                    vals.append(s)
+                else:
+                    break
+            if len(vals) >= abs(idx):
+                return vals[idx]
+    return None
+
+
+def _extract_extended(pages, lines_p1, lines_p2, summary, new_res, completed_index):
+    """Masterの右側へ足す拡張項目(口コミ/評点/返信/ブログ/残キャパ/売上/客単価/比較サロン等)。"""
+    p3 = next((t for t in pages if "自サロンの掲載状況" in t), "")
+    p15 = next((t for t in pages if "新規投稿数" in t and "ブログ" in t[:40]), "")
+    p16 = next((t for t in pages if "口コミ・評点" in t and "評点比較" in t), "")
+    p18 = next((t for t in pages if t.lstrip().startswith("残キャパ")), "")
+    r = {}
+    # 比較サロン PV/CVR/ACR (サマリの3つ目)
+    pv = nums_after(summary, "自サロンTOP PV", 3)
+    cvr = nums_after(summary, "自サロンCVR", 3)
+    acr = nums_after(summary, "自サロンACR", 3)
+    r["比較_PV"] = clean_number(pv[2]) if len(pv) > 2 else None
+    r["比較_CVR"] = clean_number(cvr[2]) if len(cvr) > 2 else None
+    r["比較_ACR"] = clean_number(acr[2]) if len(acr) > 2 else None
+    m = re.search(r"前月予約数\n([\d,]+)", summary)
+    r["ALL予約数"] = clean_number(m.group(1)) if m else None
+    if r["ALL予約数"] is not None and new_res not in (None, ""):
+        try:
+            r["リピート予約数"] = int(float(r["ALL予約数"]) - float(new_res))
+        except ValueError:
+            pass
+    # P3 掲載状況 (自サロン行。「-」許容)
+    m = re.search(rf"最寄駅\n(.+?)\n({_VAL})\n({_VAL})\n({_VAL})\n({_VAL})\n({_VAL})\n(.+?)\n", p3)
+    if m:
+        r["設備数"] = clean_number(m.group(2)); r["口コミ数"] = clean_number(m.group(3))
+        r["口コミ評点"] = clean_number(m.group(4)); r["ブログ数"] = clean_number(m.group(5))
+        r["クーポン数"] = clean_number(m.group(6)); r["最寄駅"] = m.group(7).strip()
+    # P16 口コミ・評点
+    m = re.search(rf"月号口コミ返信率\n自サロン\n({_VAL})\n([\d.\-]+%?|- %|-)\n({_VAL})\n", p16)
+    if m:
+        r["口コミ返信率"] = clean_number(m.group(2)); r["月号新規口コミ数"] = clean_number(m.group(3))
+    m = re.search(r"メニュー・料金\n自サロン\n([\d.]+)\n([\d.]+)\n([\d.]+)\n([\d.]+)\n([\d.]+)", p16)
+    if m:
+        r["評点_総合"] = clean_number(m.group(1)); r["評点_雰囲気"] = clean_number(m.group(2))
+        r["評点_接客"] = clean_number(m.group(3)); r["評点_技術"] = clean_number(m.group(4))
+        r["評点_メニュー料金"] = clean_number(m.group(5))
+    m = re.search(r"比較サロン平均\n([\d,]+)\n([\d.]+%?)\n", p16)
+    if m:
+        r["比較_口コミ数"] = clean_number(m.group(1)); r["比較_返信率"] = clean_number(m.group(2))
+    m = re.search(r"評点比較\n総合\n雰囲気\n接客サービス\n技術・仕上がり\nメニュー・料金\n自サロン\n[\d.]+\n[\d.]+\n[\d.]+\n[\d.]+\n[\d.]+\n比較サロン平均\n([\d.]+)", p16)
+    if m:
+        r["比較_評点"] = clean_number(m.group(1))
+    # P15 ブログ/口コミ 推移
+    m = re.search(r"投稿数の変化\n\(前月号-前々月号\)\n閲覧数の変化\n\(前月号/前々月号\)\n([+\-]?\d+)\n", p15)
+    if m:
+        r["ブログ月次投稿数"] = clean_number(m.group(1))
+    m = re.search(r"平均点\n((?:[\d.\-]+\n){10,16})", p15)
+    if m:
+        vals = m.group(1).strip().split("\n")
+        if len(vals) >= 2:
+            r["口コミ直近平均点"] = clean_number(vals[-2])
+    # P18 残キャパ
+    m = re.search(r"前月の残キャパ状況\n残キャパ50%以上\n残キャパ50%-20%\n残キャパ20%未満\n([\d.]+)%", p18)
+    if m:
+        r["残キャパ50以上"] = clean_number(m.group(1))
+    # P1(予約数推移) / P2(売上推移) の完了月系列
+    r["男性率"] = clean_number(series_completed_value(lines_p1, "男性率", completed_index)[0])
+    r["マイページ登録数"] = clean_number(series_completed_value(lines_p1, "登録者数", completed_index)[0])
+    r["売上万円"] = clean_number(series_completed_value(lines_p2, "売上実績", completed_index)[0])
+    r["客単価"] = clean_number(_yen_series_value(lines_p2, "客単価", completed_index))
+    return r
+
+
+def extract_pdf(path, completed_index=-2, extended=True):
+    """1店舗のPDFから対象月号のKPIを抽出。院名はP3の掲載状況(最寄駅の直後)から取る。
+    extended=True でMaster右側(T列〜)へ足す拡張項目も一緒に取る。"""
     import pymupdf
     doc = pymupdf.open(path)
-    page0 = doc[0].get_text()
-    page2 = doc[2].get_text() if doc.page_count > 2 else ""
+    pages = [doc[i].get_text() for i in range(doc.page_count)]
+    doc.close()
+    page0 = pages[0]
+    page2 = pages[2] if len(pages) > 2 else ""
     summary = ""
     for idx in (3, 4, 2, 5):
-        if idx < doc.page_count:
-            t = doc[idx].get_text()
-            if "自サロンTOP PV" in t and "自サロンCVR" in t:
-                summary = t
-                break
+        if idx < len(pages) and "自サロンTOP PV" in pages[idx] and "自サロンCVR" in pages[idx]:
+            summary = pages[idx]
+            break
     if not summary:
-        for pi in range(doc.page_count):
-            t = doc[pi].get_text()
-            if "自サロンTOP PV" in t and "自サロンCVR" in t:
-                summary = t
-                break
-    doc.close()
+        summary = next((t for t in pages if "自サロンTOP PV" in t and "自サロンCVR" in t), "")
 
     lines = page0.split("\n")
     m = re.search(r"最寄駅\n(.+?)\n", page2)
@@ -190,6 +279,10 @@ def extract_pdf(path, completed_index=-2):
                        ("30代", "30代比率"), ("40代", "40代比率"), ("50代以上", "50代以上比率")):
         val, _ = series_completed_value(lines, label, completed_index)
         row[key] = clean_number(val)
+    if extended:
+        page1_lines = pages[1].split("\n") if len(pages) > 1 else []
+        row.update(_extract_extended(pages, lines, page1_lines, summary,
+                                     row.get("新規予約数実績"), completed_index))
     return row
 
 
@@ -258,10 +351,10 @@ def main(argv=None):
         print(f"  要確認 {name}: {why}", file=sys.stderr)
 
     if args.out:
-        cols = ["HPB店舗名", "院名", "年月号", "自社PV", "エリア平均PV", "自社CVR",
-                "エリア平均CVR", "自社ACR", "エリア平均ACR", "新規予約数実績", "女性率",
-                "20代未満比率", "20代比率", "30代比率", "40代比率", "50代以上比率",
-                "集客数_ribbon_ALL", "_months"]
+        cols = (["HPB店舗名", "院名", "年月号", "自社PV", "エリア平均PV", "自社CVR",
+                 "エリア平均CVR", "自社ACR", "エリア平均ACR", "新規予約数実績", "女性率",
+                 "20代未満比率", "20代比率", "30代比率", "40代比率", "50代以上比率"]
+                + EXTENDED_COLS + ["集客数_ribbon_ALL", "_months"])
         with open(args.out, "w", newline="", encoding="utf-8-sig") as fh:
             w = csv.writer(fh)
             w.writerow(cols)

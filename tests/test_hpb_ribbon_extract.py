@@ -181,5 +181,32 @@ class TestPositionalNo(unittest.TestCase):
         self.assertEqual(wr.positional_no(2), 29)
 
 
+class TestExtendedColumns(unittest.TestCase):
+    def test_col_letter(self):
+        self.assertEqual(wr.col_letter(1), "A")
+        self.assertEqual(wr.col_letter(19), "S")
+        self.assertEqual(wr.col_letter(20), "T")   # 拡張列の先頭
+        self.assertEqual(wr.col_letter(47), "AU")  # 19 + 28 列目
+
+    def test_extended_cols_match_config(self):
+        import json, os
+        cfg = json.load(open(os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "data", "hpb-ribbon-config.json"), encoding="utf-8"))
+        self.assertEqual(ext.EXTENDED_COLS, cfg["master_sheet"]["master_ext_columns"])
+        self.assertEqual(len(ext.EXTENDED_COLS), 28)
+
+    def test_p3_dash_does_not_grab_competitor(self):
+        # 自サロン行の設備数などが「-」でも、比較サロン一覧の先頭店(ミモザ 942)を拾わない
+        p3 = ("自サロンの掲載状況\nサロン名\n設備数\n口コミ数\n口コミ評点\nブログ数\nクーポン数\n最寄駅\n"
+              "本八幡南口鍼灸接骨院\n-\n0\n-\n0\n4\n本八幡\n"
+              "自サロンと比較・検討されているサロン一覧\nサロン名\n設備数\n口コミ数\n口コミ評点\nブログ数\nクーポン数\n最寄駅\n"
+              "ミモザ(mimosa)\n1\n942\n4.94\n26\n44\n本八幡\n")
+        r = ext._extract_extended([p3], [], [], "", None, -2)
+        self.assertEqual(r.get("口コミ数"), "0")     # 942 ではなく自店の 0
+        self.assertEqual(r.get("クーポン数"), "4")
+        self.assertIsNone(r.get("口コミ評点"))        # 「-」→ None
+
+
 if __name__ == "__main__":
     unittest.main()

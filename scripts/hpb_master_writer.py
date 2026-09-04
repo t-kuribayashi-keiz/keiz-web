@@ -233,11 +233,20 @@ def get_values(svc, sheet_id, a1):
         valueRenderOption="UNFORMATTED_VALUE").execute().get("values", [])
 
 
-def load_extract_csv(path):
+def col_letter(n):
+    """1-based 列番号 → A1記法の列文字(1→A, 20→T, 47→AU)。"""
+    s = ""
+    while n > 0:
+        n, m = divmod(n - 1, 26)
+        s = chr(65 + m) + s
+    return s
+
+
+def load_extract_csv(path, ext_columns=()):
     rows = []
     with open(path, encoding="utf-8-sig") as fh:
         for r in csv.DictReader(fh):
-            rows.append({
+            d = {
                 "HPB店舗名": r.get("HPB店舗名", ""),
                 "店舗名": r.get("院名", ""),
                 "年月号": r.get("年月号", ""),
@@ -249,7 +258,10 @@ def load_extract_csv(path):
                 "30代比率": r.get("30代比率", ""), "40代比率": r.get("40代比率", ""),
                 "50代以上比率": r.get("50代以上比率", ""),
                 "集客数": "", "予約枠〇": "",
-            })
+            }
+            for c in ext_columns:                 # Master右側(T列〜)の拡張項目
+                d[c] = r.get(c, "")
+            rows.append(d)
     return rows
 
 
@@ -271,7 +283,10 @@ def main(argv=None):
 
     cfg = load_config()
     master_cfg, shu_cfg = cfg["master_sheet"], cfg["shukyaku_sheet"]
-    columns = master_cfg["columns"]
+    columns = master_cfg["columns"]                      # 既存A〜S(19列)
+    ext_columns = master_cfg.get("master_ext_columns", [])  # 右append T列〜
+    full_columns = columns + ext_columns
+    last_col = col_letter(len(full_columns))
 
     svc = sheets_service()
 
@@ -286,7 +301,7 @@ def main(argv=None):
     print(f"集客数タブ='{shu_tab}' 店舗={len(shukyaku_map)}", file=sys.stderr)
 
     # 2) 抽出CSVを読み、集客数を結合
-    rows = load_extract_csv(args.extract_csv)
+    rows = load_extract_csv(args.extract_csv, ext_columns)
     for r in rows:
         r["年月号"] = args.month
     rows, notes = join_shukyaku(rows, shukyaku_map)
@@ -302,7 +317,7 @@ def main(argv=None):
     # 3) Masterタブ
     m_titles = list_tab_titles(svc, master_cfg["id"])
     m_tab = resolve_tab(m_titles, [master_cfg["tab_keyword"]])
-    m_values = get_values(svc, master_cfg["id"], f"'{m_tab}'!A1:S5000")
+    m_values = get_values(svc, master_cfg["id"], f"'{m_tab}'!A1:{last_col}5000")
     ym_col = columns.index("年月号")
     existing_months = {(r[ym_col] if ym_col < len(r) else "") for r in m_values[2:]}
     last_data_row = len(m_values)  # 0-based長。次に書く行(1-based)は +1
@@ -336,23 +351,35 @@ def main(argv=None):
     if args.month in existing_months:
         raise SystemExit(f"{args.month} は既にMasterにある。二重書き込みを防ぐため停止。")
 
-    matrix = build_master_matrix(rows, columns)
+    matrix = build_master_matrix(rows, full_columns)
     start_row = last_data_row + 1
     a1 = f"'{m_tab}'!A{start_row}"
-    print(f"書き込み先: {a1}  {len(matrix)}行 x {len(columns)}列", file=sys.stderr)
+    print(f"書き込み先: {a1}  {len(matrix)}行 x {len(full_columns)}列(A〜{last_col})", file=sys.stderr)
 
+    # 拡張列のヘッダー(1行目 T列〜)が未設定なら入れる。既存A〜Sヘッダーには触れない。
+    header_row = m_values[0] if m_values else []
+    ext_start_idx = len(columns)  # 0-based。T列 = index 19
+    ext_header_present = len(header_row) > ext_start_idx and any(
+        str(header_row[i]).strip() for i in range(ext_start_idx, min(len(header_row), len(full_columns))))
     if args.mode == "dry-run":
-        print("[dry-run] 先頭3行:", file=sys.stderr)
+        print("[dry-run] 先頭3行(先頭6列+拡張先頭3列):", file=sys.stderr)
         for row in matrix[:3]:
-            print("   ", row, file=sys.stderr)
+            print("   ", row[:6], "...", row[ext_start_idx:ext_start_idx + 3], file=sys.stderr)
+        print(f"[dry-run] 拡張ヘッダー既存={ext_header_present}(未設定なら T1〜 に列名を書く)", file=sys.stderr)
         return 0
 
-    # apply: 書き込み → 読み返して一致確認
+    # apply: (必要なら)拡張ヘッダー → データ本体 → 読み返して一致確認
+    if not ext_header_present:
+        ext_col_letter = col_letter(ext_start_idx + 1)  # T
+        svc.spreadsheets().values().update(
+            spreadsheetId=master_cfg["id"], range=f"'{m_tab}'!{ext_col_letter}1",
+            valueInputOption="USER_ENTERED", body={"values": [ext_columns]}).execute()
+        print(f"拡張ヘッダーを {ext_col_letter}1 に書き込み", file=sys.stderr)
     svc.spreadsheets().values().update(
         spreadsheetId=master_cfg["id"], range=a1,
         valueInputOption="USER_ENTERED", body={"values": matrix}).execute()
     end_row = start_row + len(matrix) - 1
-    back = get_values(svc, master_cfg["id"], f"'{m_tab}'!A{start_row}:S{end_row}")
+    back = get_values(svc, master_cfg["id"], f"'{m_tab}'!A{start_row}:{last_col}{end_row}")
     ok = (len(back) == len(matrix))
     if ok:
         for w, g in zip(matrix, back):
