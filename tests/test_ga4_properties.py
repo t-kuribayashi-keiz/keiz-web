@@ -137,3 +137,50 @@ class TestReportExitCode(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestAnalyticsDiscovery(unittest.TestCase):
+    """APIを叩かない部分だけを試す。API呼び出し自体は鍵が要るのでActionsで確かめる。"""
+
+    @classmethod
+    def setUpClass(cls):
+        import analytics_discover
+        cls.discover = analytics_discover
+
+    def test_scopes_are_read_only(self):
+        """分析は読むだけ。書き込みスコープを持たせない。"""
+        for scope in self.discover.SCOPES:
+            self.assertTrue(scope.endswith(".readonly"), scope)
+
+    def test_store_paths_come_from_the_clinic_master(self):
+        paths = self.discover.store_paths_of("リラックス")
+        self.assertIn("tama", paths)
+        self.assertIn("togoshiginza", paths)
+        # 高円寺店はURL未登録なので24件。25件になったら登録されたということ。
+        self.assertEqual(len(paths), 24)
+
+    def test_an_empty_ga4_response_is_a_failure_with_the_reason(self):
+        """空で返るのは『権限が無い』ではなく『プロパティ単位で付いている』の症状。"""
+        self.assertEqual(self.discover.report_ga4([], "リラックス"), 1)
+
+    def test_an_empty_gsc_response_is_a_failure(self):
+        self.assertEqual(self.discover.report_gsc([], ["tama"]), 1)
+
+    def test_gsc_sites_are_reported_without_failing(self):
+        sites = [{"siteUrl": "sc-domain:refresh-relax.com", "permissionLevel": "siteFullUser"}]
+        self.assertEqual(self.discover.report_gsc(sites, ["tama"]), 0)
+
+    def test_ga4_summaries_resolve_through_the_same_matcher(self):
+        clinics = json.loads(
+            TestResolve.CLINICS.read_text(encoding="utf-8")
+        )["clinics"]
+        names = [c["name"] for c in clinics if c["brand"] == "リラックス"]
+        summaries = [{
+            "displayName": "リラックス",
+            "account": "accounts/1",
+            "propertySummaries": [
+                {"property": f"properties/{i}", "displayName": name}
+                for i, name in enumerate(names, start=100)
+            ],
+        }]
+        self.assertEqual(self.discover.report_ga4(summaries, "リラックス"), 0)

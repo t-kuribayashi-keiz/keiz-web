@@ -143,7 +143,7 @@ Sprocket / Optimize Next はCSSセレクタで要素を掴んでDOMを書き換�
 
 - GCPプロジェクトは全社共通の `keizgroup-automation`(プロジェクト番号578587097928)
 - **サービスアカウントはブランド単位**で分ける。リラックス用は
-  `relax-reporter@keizgroup-automation.iam.gserviceaccount.com` を想定
+  `relax-reporter@keizgroup-automation.iam.gserviceaccount.com`(作成済み)
   (鍵漏洩時の被害範囲を限定でき、ブランドとの関係が終われば削除で済む)。
   直営の `chokuei-sunsumirai-kpi-writer` は書き込み可だが、**リラックスは閲覧専用**
 - 鍵ファイルはローカルPCとGitHub Secretsにのみ置き、**チャットにもリポジトリにも
@@ -204,12 +204,37 @@ GA4のような一括付与が無いため、対象プロパティごとに「�
 **リラックスは1ドメインなので、GSCがドメインプロパティ1つなら付与も1回で済む可能性がある。**
 実際にいくつあるかは付与後の `sites.list` で分かる。
 
+なお2026-09-04時点で、たまプラーザ店のGA4プロパティには `relax-reporter` に
+**プロパティ単位で編集者**が付いている。読むだけなら閲覧者で足りるので、
+落としてよい(最小権限)。このプロパティが他店と別アカウントにある場合、
+アカウント単位の付与ではカバーされないため、個別付与のまま残す判断もあり得る。
+
+### 疎通確認: `scripts/analytics_discover.py`
+
+サービスアカウントで**何が読めているか**を列挙する。GA4は Admin API の
+`accountSummaries`、Search Console は `sites.list`。プロパティIDもサイトURLも人が
+書き写さない。GA4のプロパティはそのまま `ga4_properties.py` で店舗名に突き合わせる。
+
+    python3 scripts/analytics_discover.py --brand リラックス --key-env GCP_RELAX_KEY
+
+ワークフローは `.github/workflows/relax-analytics.yml`(手動実行)。**読み取り専用**で、
+GA4にもSearch Consoleにもリポジトリにも書き込まない。スコープも `.readonly` のみ。
+
+**鍵はリポジトリシークレット `GCP_RELAX_KEY` に置く。** ローカルPCにしか鍵が無いと、
+確認のたびにローカルセッションを経由することになり、分析が回らない。
+
+空で返ったときの読み方をスクリプトが出す:
+
+- **GA4が空** → 権限がアカウント単位ではなくプロパティ単位で付いている
+- **GSCが空** → プロパティごとの個別付与がまだ
+
 ### 残っている確認事項
 
-1. **「リラックス新規客経路集計」シートのURL** — 名前・オーナー・タブ名までは判明。
+1. **`GCP_RELAX_KEY` のシークレット登録** — これが無いとAPIを叩けない
+2. **「リラックス新規客経路集計」シートのURL** — 名前・オーナー・タブ名までは判明。
    URLをもらえばサービスアカウントに閲覧者で共有 → スモークテストに使う
-2. **Search Consoleのプロパティ数と形式** — 付与後に `sites.list` で判明する
-3. **順位ツールのCSVの置き場と書式** — GRC・MEOチェキとも実ファイルを1つもらってから
+3. **Search Consoleのプロパティ数と形式** — 付与後に `sites.list` で判明する
+4. **順位ツールのCSVの置き場と書式** — GRC・MEOチェキとも実ファイルを1つもらってから
    取り込みを書く。書式を推測して書かない
 
 **推測で埋めない。** それらしい数字が入ると誰も気づかないままKPIの傾向判断が狂う。
