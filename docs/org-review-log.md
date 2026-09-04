@@ -1336,3 +1336,46 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
   検算になるという良い例
 - 対応状況: 工程①②⑤⑥が本番稼働。テスト70件。残りは③(自動化保留の判断済み)と
   ④(紹介・オフライン合計・AIの転記方法のヒアリング待ち)
+
+
+---
+
+## 2026-09-04 予約枠の自動化を「作った」あと、結果を見る役割が空いていた
+
+きっかけは栗林さんの「これは組織図で言うとどこのこと?」という問い。9/2から続いていた
+セッション(salonboard-operator動作検証 → 予約枠K/Lチェックの自動化)で学んだことを
+Skillへ畳む作業をしていたが、それが組織図のどこの仕事なのかが誰も言えていなかった。
+
+- **見つかった事実:**
+  - 学習の統合(learnings → SKILL.md/references)・残課題の棚卸し・Skillの扱いの判断は、
+    どれも **cross-functional の責務**だった。にもかかわらず、判断を
+    `docs/org-review-log.md` に記録するというCLAUDE.mdのルールを守っておらず、
+    `docs/backlog.md` にしか書いていなかった(backlog自身が「経緯・判断理由は
+    org-review-logが正」と書いている)。**ルールを持っている側が守っていなかった**
+  - `skills/README.md` の `hpb-reservation-slot-check` の行が **Colab前提のまま古かった**。
+    実態は2026-09-03に`scripts/hpb_slot_check.py`+GitHub Actions(毎日13:07 JST)へ
+    移行済みで、Colabは日常運用では開かない
+  - **「毎日出た結果を見て✕を捌く」役割が組織図に存在しなかった。** K/Lを出すのは自動化済み、
+    ✕の原因をSalonBoardで見るのは salonboard-operator、しかしその間
+    (結果を読み、異常を判定し、担当に渡す)が空白で、**実際には栗林さんが人手で
+    橋渡しをしていた**(「今週分お願い」と声をかける運用)。measurerとは別物で、
+    measurerは「打った施策が効いたか」を月次で見る役割
+- **判断:**
+  - **役割を1つ追加する: `daily-ops-monitor`(日次運用モニター)。** 定期実行の結果を日次で
+    見て、異常だけを拾い、SalonBoard側は salonboard-operator、コード・ワークフローの
+    不具合は implementer へ渡す。ブランド非依存。読むだけの役割にするため
+    `Edit`・ブラウザ操作ツール・スプレッドシートへの書き込みは持たせない
+  - CLAUDE.mdの業務フローに **「施策のサイクル(月次)」と「運用のサイクル(日次)」は別**
+    と明記した。**自動化を作った時点では、結果を見る役割まで決まっていないことが多い**
+    ——これが今回の空白の原因なので、新しい定期実行を本番に乗せたら
+    daily-ops-monitor の対象表に足す、というルールにした
+  - `salonboard_root_cause.py`(M/N自動分類)は**「凍結」と明記**した。「`verify-login`が
+    未実施」という書き方だと、将来のセッションが消化のために本番の本部アカウントへ
+    自動ログインを試しうる。未対応タスクではなく凍結であり、解除には栗林さんの
+    再判断が必要と書いた
+- **対応状況:** 完了。変更したファイル: `.claude/agents/daily-ops-monitor.md`(新規)、
+  `CLAUDE.md`、`skills/README.md`、
+  `.claude/skills/hpb-reservation-slot-check/SKILL.md` および
+  `references/github-actions-ops.md`(新規)、
+  `.claude/skills/hpb-salonboard-update/SKILL.md`、`docs/backlog.md`。
+  `.claude/skills/hpb-salonboard-update/learnings/` は空(README のみ)になった
