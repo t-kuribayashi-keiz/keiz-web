@@ -1,21 +1,21 @@
 {
   "_comment": "監視対象のChatworkルーム設定。ブランドを追加するときはここに1エントリ足すだけで、スクリプトもワークフローも変更不要。room_nameはChatwork上の表示名と完全一致させる(前後の空白は無視される)。詳細は .claude/skills/chatwork-integration/SKILL.md を参照。",
-
   "_mention_markers_comment": "Claudeへの依頼を示す共通マーカー。これがメッセージに含まれていれば「明示的な依頼」として高確度で扱う。日本語IMEが全角＠を出しやすいので全角も、日本語表記も同義として受け付ける。大文字小文字は区別しない。Chatwork公式の[To:]メンションはアカウントが必要なため、あえて単なるテキスト規約にしている(Chatworkの席を増やさずに済む)。",
-  "mention_markers": ["@claude", "＠claude", "@クロード", "＠クロード"],
-
+  "mention_markers": [
+    "@claude",
+    "＠claude",
+    "@クロード",
+    "＠クロード"
+  ],
   "rooms": [
     {
       "room_name": "【WEBマーケ】ケイズ×リラックス",
       "brand": "リラックス",
       "purpose": "リラックスブランドのWEBマーケ全般。SalonBoard(HPB)および自社HPの修正依頼がここに流れてくる。",
-
       "_require_mention_comment": "false = マーカーがなくてもwatch_keywordsに当たれば「参考(低確度)」として報告する。マーカー規約が浸透するまでの移行措置。浸透後はtrueにしてキーワード検知を切り、誤検知をゼロにする。",
       "require_mention": false,
-
       "_allow_auto_hearing_comment": "true = 着手に必要な情報を集める質問(kind: hearing)を、栗林さんの都度承認なしに自動投稿してよいルーム(2026-09-02に合意)。対応の約束・完了報告・経営判断・実作業は対象外で、それらは常に都度承認が必要。トークンは栗林さん個人アカウントのため、自動投稿には必ず「Claudeによる自動確認」ヘッダが付く。",
       "allow_auto_hearing": true,
-
       "watch_keywords": [
         "サロンボード",
         "SalonBoard",
@@ -35,7 +35,7 @@
         "非公開",
         "依頼"
       ],
-      "notes": "2026-09-02に最初の監視対象として設定し、同日の初回実行でroom_id=297116486として解決・API疎通確認済み(参考情報。IDは実行時に名前から解決するのでここに書く必要はない)。ブランドコンテキストは brands/relax/CLAUDE.md(未整備)。"
+      "notes": "2026-09-02に最初の監視対象として設定し、同日の初回実行でroom_id=297116486として解決・API疎通確認済み(参考情報。IDは実行時に名前から解決するのでここに書く必要はない)。ブランドコンテキストは brands/relax/CLAUDE.md。"
     }
   ]
 }
