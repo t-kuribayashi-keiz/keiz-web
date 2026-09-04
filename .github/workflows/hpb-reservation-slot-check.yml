@@ -30,6 +30,24 @@ on:
           - dry-run
           - apply
         default: apply
+      start_date:
+        description: "省略可。臨時でチェック窓を変えたいときだけYYYY-MM-DDを指定(例: 2026-09-04)"
+        type: string
+        required: false
+      start_half:
+        description: "省略可。start_dateを指定した場合のみ使う"
+        type: choice
+        options: ["", AM, PM]
+        default: ""
+      end_date:
+        description: "省略可。臨時でチェック窓を変えたいときだけYYYY-MM-DDを指定"
+        type: string
+        required: false
+      end_half:
+        description: "省略可。end_dateを指定した場合のみ使う"
+        type: choice
+        options: ["", AM, PM]
+        default: ""
 
 concurrency:
   group: hpb-reservation-slot-check
@@ -61,8 +79,10 @@ jobs:
           GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
           TZ: Asia/Tokyo
         run: |
-          if [ "${{ github.event.inputs.mode || 'apply' }}" = "apply" ]; then
-            python3 scripts/hpb_slot_check.py --apply
-          else
-            python3 scripts/hpb_slot_check.py
-          fi
+          args=()
+          [ "${{ github.event.inputs.mode || 'apply' }}" = "apply" ] && args+=(--apply)
+          [ -n "${{ github.event.inputs.start_date }}" ] && args+=(--start-date "${{ github.event.inputs.start_date }}")
+          [ -n "${{ github.event.inputs.start_half }}" ] && args+=(--start-half "${{ github.event.inputs.start_half }}")
+          [ -n "${{ github.event.inputs.end_date }}" ] && args+=(--end-date "${{ github.event.inputs.end_date }}")
+          [ -n "${{ github.event.inputs.end_half }}" ] && args+=(--end-half "${{ github.event.inputs.end_half }}")
+          python3 scripts/hpb_slot_check.py "${args[@]}"
