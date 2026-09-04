@@ -21,6 +21,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `customer-acquisition-consulting` | 集客のデータパイプライン・分析自動化 | analyst |
 | `session-to-skill` | 今の会話の作業手順をSkill化する | cross-functional(型化・再利用の判断) |
 | `hpb-reservation-slot-check` | 予約枠チェックColabノートブック(公開カレンダーのスクレイピング・○✕判定)のデバッグ・保守 | implementer(スクレイパー修正) / analyst(判定結果の活用) |
+| `hpb-ribbon-kpi` | HPBリボンデータ(店舗別PDF)の復号・KPI抽出 → HPB_145店舗KPI Masterへ反映 | implementer(抽出・転記) / measurer(月次KPI更新)。設計は `functions/hpb-ribbon-kpi/` |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
 | `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
 
