@@ -145,9 +145,9 @@ const RUN_CREATE_YEAR_CELL = 'B4';
 const RUN_CREATE_MONTH_CELL = 'B5';
 const RUN_CREATE_QUOTA_CELL = 'B6';
 const RUN_CREATE_RESULT_CELL = 'B9';
-const RUN_FILL_TARGET_CELL = 'B13';
-const RUN_FILL_QUOTA_CELL = 'B14';
-const RUN_FILL_RESULT_CELL = 'B17';
+const RUN_FILL_TARGET_CELL = 'B14';
+const RUN_FILL_QUOTA_CELL = 'B15';
+const RUN_FILL_RESULT_CELL = 'B18';
 
 /** ===== メニュー ===== */
 function onOpen() {
