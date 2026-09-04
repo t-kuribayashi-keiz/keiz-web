@@ -16,8 +16,11 @@ name: HPB reservation slot check
 
 on:
   schedule:
-    # 毎日13:00 JST (04:00 UTC)。当日PM〜2日後PMを判定(栗林さん指定、2026-09-03)
-    - cron: "0 4 * * *"
+    # 毎日13:00 JST頃 (04:07 UTC)。当日PM〜2日後PMを判定(栗林さん指定、2026-09-03)。
+    # 毎時ちょうど(04:00)はGitHub Actions側の負荷が高く遅延・欠落しやすいとの公式の
+    # 注意書きがあるため、07分ずらしている(2026-09-04、04:00指定で初回が発火しなかった
+    # ことを受けての変更)。
+    - cron: "7 4 * * *"
   workflow_dispatch:
     inputs:
       mode:
