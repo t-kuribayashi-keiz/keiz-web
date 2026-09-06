@@ -90,6 +90,20 @@ Same convention as `hpb-salonboard-update`: append anything newly learned to
 (a new browser-automation/Colab-UI quirk) rather than letting it live only in a
 conversation transcript.
 
+**If any other session might be running this skill at the same time (e.g. someone else is
+doing the weekly M/N pass while you're debugging K/L, or two people are each triaging
+different shops), do not edit `references/known-bugs.md` or `references/colab-editing-gotchas.md`
+directly.** Editing either is read → modify → write, so a concurrent edit from another
+session can silently drop yours. Instead drop a new file in
+`learnings/<日時>_<セッションIDの先頭8桁>.md` and let a later single-writer pass fold it
+into the right reference file. Read `learnings/` before starting a task — unmerged notes are
+already valid. Full mechanics (naming, consolidation) are in the sibling skill's
+`hpb-salonboard-update/references/concurrent-sessions.md` — this skill has no differences
+from that procedure, it just targets `known-bugs.md`/`colab-editing-gotchas.md` instead of
+`coupon-editing.md`. Same applies to the "K,L履歴"/M-N-check narrative additions to this
+SKILL.md file itself (e.g. new M/N category findings) — those go in `learnings/` too while
+other sessions may be running, not straight into this file.
+
 ## K/L is now fully automated; M/N stays manual-trigger, AI-driven (2026-09-03 decision)
 
 `scripts/hpb_slot_check.py` is the K/L scraper (this notebook's `main_process` logic,
