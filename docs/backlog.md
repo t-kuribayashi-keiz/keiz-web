@@ -99,6 +99,13 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
   session_014AZLuYQRB4XUS2knkJsMWA)の結果次第
 - **`brands/<name>/CLAUDE.md`の整備** — 直営・サンズミライ・心身堂・グッド・リラックスが未整備
   (LUNAとスマイルのみ作成済み)
+- **`data/clinics.json` に `hours`(診療時間)と `closed_days`(定休日)を足す** — 現状の取り込みは
+  院名・住所・電話・URL・メール等だけで、時間と定休日は入っていない(取り込み元スプレッドシートの
+  **ファイル名が「診療時間」なので入っていると誤解しやすい**。経緯は`data/clinics.json`の`_comment`)。
+  `scripts/clinic_master.py --inspect` と `.github/workflows/clinic-master.yml` は読み取りのみで追加済み。
+  **取り込む列が確定するまでは、定休日を前提にした判定ロジックを書かないこと。**
+  それまで定休日が要るときは、マスタ側スプレッドシートの「AIチェック用」シート
+  (「木曜・日曜・第4木曜」形式の定休日列がある)を見る
 
 ## 未解決の論点
 
