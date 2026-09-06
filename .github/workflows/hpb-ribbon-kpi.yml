@@ -25,7 +25,7 @@ on:
         required: true
         type: string
       csv:
-        description: "抽出CSVのパス(例: data/hpb-ribbon/2026-08.csv)。ローカルで作りコミットしておく"
+        description: "抽出CSVのパス(例: data/hpb-ribbon/2026-08.csv)。ローカルで作りコミットしておく。init-masterでは使わないので何でもよい"
         required: true
         type: string
       profile:
@@ -37,7 +37,7 @@ on:
           - smile-good
         default: chokuei
       mode:
-        description: "inspect=結合の確認 / calibrate=過去月で答え合わせ / dry-run=書く内容の確認 / apply=本番書き込み"
+        description: "init-master=新規Masterの下ごしらえ(初回のみ) / inspect=結合の確認 / calibrate=過去月で答え合わせ / dry-run=書く内容の確認 / apply=本番書き込み"
         required: true
         type: choice
         options:
@@ -45,6 +45,7 @@ on:
           - calibrate
           - dry-run
           - apply
+          - init-master
         default: dry-run
 
 concurrency:
@@ -79,9 +80,10 @@ jobs:
           TZ: Asia/Tokyo
         run: |
           case "${{ inputs.mode }}" in
-            inspect)   flag="--mode inspect" ;;
-            calibrate) flag="--mode calibrate" ;;
-            apply)     flag="--mode apply" ;;
+            inspect)     flag="--mode inspect" ;;
+            calibrate)   flag="--mode calibrate" ;;
+            apply)       flag="--mode apply" ;;
+            init-master) flag="--mode init-master" ;;
             *)         flag="--mode dry-run" ;;
           esac
           python3 scripts/hpb_master_writer.py \

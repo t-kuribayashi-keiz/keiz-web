@@ -197,9 +197,27 @@ class TestBrandProfiles(unittest.TestCase):
                             self.cfg["shukyaku_sheet"]["id"])
         self.assertEqual(prof["key_env"], "GCP_SMILE_GOOD_KEY")
 
-    def test_smile_good_has_no_write_destination_yet(self):
-        """転記先が決まっていないうちは None のまま。空dictで誤魔化さない。"""
-        self.assertIsNone(wr.profile_config(self.cfg, "smile-good")["master_sheet"])
+    def test_smile_good_writes_to_its_own_master(self):
+        """専用Masterに書く。直営の145店舗Masterと同じIDになっていたら事故。"""
+        prof = wr.profile_config(self.cfg, "smile-good")
+        self.assertIsNotNone(prof["master_sheet"])
+        self.assertNotEqual(prof["master_sheet"]["id"], self.cfg["master_sheet"]["id"])
+
+    def test_both_masters_share_the_same_column_layout(self):
+        """列が食い違うと、同じ抽出CSVから作った行が別の意味の列に入る。"""
+        prof = wr.profile_config(self.cfg, "smile-good")
+        self.assertEqual(prof["master_sheet"]["columns"],
+                         self.cfg["master_sheet"]["columns"])
+        self.assertEqual(prof["master_sheet"]["master_ext_columns"],
+                         self.cfg["master_sheet"]["master_ext_columns"])
+
+    def test_smile_good_is_limited_to_its_own_brands(self):
+        self.assertEqual(wr.profile_config(self.cfg, "smile-good").get("brands"),
+                         ["スマイル", "グッド"])
+
+    def test_chokuei_is_not_narrowed(self):
+        """直営側は従来どおり絞らない。ここに絞りを入れると過去と挙動が変わる。"""
+        self.assertIsNone(wr.profile_config(self.cfg, "chokuei").get("brands"))
 
     def test_an_unknown_profile_stops(self):
         with self.assertRaises(ValueError):
@@ -211,6 +229,65 @@ class TestBrandProfiles(unittest.TestCase):
         titles = ["6月HP(速報値)", "報告用", "集計用 （栗林）"]
         kw = wr.month_tab_keywords(prof["shukyaku_sheet"]["tab_keywords"], "2026年06月号")
         self.assertEqual(wr.resolve_tab(titles, kw), "6月HP(速報値)")
+
+
+class TestSplitByBrand(unittest.TestCase):
+    """リボンのZIPは全ブランドまとめて届く。転記先ごとに絞らないと別系列が混ざる。"""
+
+    BRANDS = {
+        wr.normalize_store_name("姿勢堂 段原整体院"): "グッド",
+        wr.normalize_store_name("すまいる針灸接骨院 六甲道院"): "スマイル",
+        wr.normalize_store_name("佐倉ユーカリが丘接骨院"): "直営",
+    }
+
+    ROWS = [
+        {"店舗名": "姿勢堂　段原鍼灸接骨院"},
+        {"店舗名": "すまいる針灸接骨院六甲道院"},
+        {"店舗名": "佐倉ユーカリが丘接骨院"},
+        {"店舗名": "まだ院マスタに無い整骨院"},
+    ]
+
+    def test_only_the_target_brands_are_kept(self):
+        kept, dropped, _ = wr.split_by_brand(self.ROWS, ["スマイル", "グッド"], self.BRANDS)
+        self.assertEqual([r["店舗名"] for r in kept],
+                         ["姿勢堂　段原鍼灸接骨院", "すまいる針灸接骨院六甲道院"])
+        self.assertEqual(dropped, [("佐倉ユーカリが丘接骨院", "直営")])
+
+    def test_the_clinic_master_bridges_the_name_difference(self):
+        """シートは『段原鍼灸接骨院』、院マスタは『段原整体院』。正規化で繋がること。"""
+        kept, _, _ = wr.split_by_brand([self.ROWS[0]], ["グッド"], self.BRANDS)
+        self.assertEqual(len(kept), 1)
+
+    def test_an_unknown_store_is_reported_and_not_forced_in(self):
+        """ブランドが判定できない店舗を混ぜると、別系列のMasterに紛れ込む。"""
+        kept, _, unknown = wr.split_by_brand(self.ROWS, ["スマイル", "グッド"], self.BRANDS)
+        self.assertEqual([r["店舗名"] for r in unknown], ["まだ院マスタに無い整骨院"])
+        self.assertNotIn("まだ院マスタに無い整骨院", [r["店舗名"] for r in kept])
+
+    def test_without_brands_nothing_is_dropped(self):
+        """直営(絞り無し)は従来どおり全行そのまま。不明店も落とさない。"""
+        kept, dropped, unknown = wr.split_by_brand(self.ROWS, None, self.BRANDS)
+        self.assertEqual(len(kept), 4)
+        self.assertEqual(dropped, [])
+        self.assertEqual(len(unknown), 1)
+
+    def test_the_real_clinic_master_covers_every_smile_and_good_store(self):
+        """実データで、スマイル11院・グッド7院がブランド解決できること。"""
+        brand_map = wr.brand_by_store()
+        names = ["姿勢堂　段原鍼灸接骨院", "姿勢堂　西条鍼灸接骨院", "姿勢堂　寺家鍼灸接骨院",
+                 "姿勢堂　府中鍼灸接骨院", "姿勢堂　祇園鍼灸接骨院", "姿勢堂　宮内鍼灸接骨院",
+                 "ひなた鍼灸接骨院",
+                 "やまもと鍼灸接骨院 なかもず院", "やまもと鍼灸接骨院 さかいし院",
+                 "やまもと鍼灸接骨院 おおとり院", "すまいる鍼灸接骨院 ながよし院",
+                 "すまいる鍼灸接骨院 泉が丘院", "金剛まるまる針灸接骨院",
+                 "岸和田まるまる針灸接骨院", "すまいる針灸接骨院六甲道院",
+                 "すまいる針灸接骨院春木院", "すまいる針灸接骨院甲南山手院",
+                 "すまいる針灸接骨院きたのだ院"]
+        rows = [{"店舗名": n} for n in names]
+        kept, dropped, unknown = wr.split_by_brand(rows, ["スマイル", "グッド"], brand_map)
+        self.assertEqual(len(kept), 18, f"未解決={[r['店舗名'] for r in unknown]}")
+        self.assertEqual(dropped, [])
+        self.assertEqual(unknown, [])
 
 
 class TestBlockMarker(unittest.TestCase):

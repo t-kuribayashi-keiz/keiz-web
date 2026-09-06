@@ -91,6 +91,7 @@ def profile_config(cfg, name):
     prof = profiles[name]
     resolved = {
         "key_env": prof.get("key_env", "GCP_KPI_WRITER_KEY"),
+        "brands": prof.get("brands"),          # None = 絞らない(直営の従来挙動)
         "master_sheet": prof.get("master_sheet", cfg["master_sheet"]),
         "shukyaku_sheet": prof.get("shukyaku_sheet", cfg["shukyaku_sheet"]),
     }
@@ -274,6 +275,40 @@ def join_shukyaku(rows, shukyaku_map):
     return rows, notes
 
 
+CLINICS_PATH = os.path.join(REPO_ROOT, "data", "clinics.json")
+
+
+def brand_by_store(clinics_path=CLINICS_PATH):
+    """院マスタから 正規化した院名 → ブランド名 の辞書を作る。"""
+    clinics = json.load(open(clinics_path, encoding="utf-8"))["clinics"]
+    return {normalize_store_name(c["name"]): c.get("brand", "") for c in clinics}
+
+
+def split_by_brand(rows, brands, brand_map):
+    """抽出行を、対象ブランドのものとそれ以外に分ける。
+
+    リボンのZIPは全ブランドの店舗PDFを1つにまとめて届くので、抽出CSVには直営もスマイルも
+    グッドも一緒に入っている。**転記先のMasterごとに絞らないと、別系列の店舗が混ざる。**
+
+    brands が None なら絞らない(従来の挙動)。院マスタに載っていない店舗は「不明」として
+    返し、**捨てずに必ず報告する**(新店・名寄せ漏れの入口なので)。
+    """
+    kept, dropped, unknown = [], [], []
+    for r in rows:
+        brand = brand_map.get(normalize_store_name(r.get("店舗名") or ""))
+        if brand is None:
+            unknown.append(r)
+            if brands is not None:
+                continue
+            kept.append(r)
+            continue
+        if brands is None or brand in brands:
+            kept.append(r)
+        else:
+            dropped.append((r.get("店舗名"), brand))
+    return kept, dropped, unknown
+
+
 def positional_no(index):
     """各月ブロックの位置番号 1,15,29,… (= 1 + 14*i)。No.は集計に使われない飾り。"""
     return 1 + 14 * index
@@ -344,11 +379,49 @@ def build_master_matrix(rows, columns):
     return out
 
 
+def init_master(svc, master_cfg, columns, ext_columns):
+    """空のスプレッドシートをMasterに仕立てる(タブ名 + 1行目タイトル/拡張ヘッダー + 2行目ヘッダー)。
+
+    直営のMasterと同じ形にそろえる。writerは3行目からをデータとして読むので、この2行が
+    無いと1行目のデータをヘッダーとして読み飛ばす。**空のシートにしか実行しない。**
+    """
+    meta = svc.spreadsheets().get(spreadsheetId=master_cfg["id"]).execute()
+    sheets = meta["sheets"]
+    if len(sheets) != 1:
+        raise SystemExit(f"タブが{len(sheets)}枚ある。init-master は新規の空シート専用。")
+    props = sheets[0]["properties"]
+    title, sheet_id = props["title"], props["sheetId"]
+
+    existing = get_values(svc, master_cfg["id"], f"'{title}'!A1:C5")
+    if existing:
+        raise SystemExit(f"タブ'{title}'は空ではない。既存のMasterに init-master は使わない。")
+
+    want_tab = master_cfg["tab_keyword"]
+    if title != want_tab:
+        svc.spreadsheets().batchUpdate(spreadsheetId=master_cfg["id"], body={"requests": [
+            {"updateSheetProperties": {"properties": {"sheetId": sheet_id, "title": want_tab},
+                                       "fields": "title"}}]}).execute()
+        print(f"タブ名を '{title}' → '{want_tab}' に変更", file=sys.stderr)
+
+    row1 = ([master_cfg.get("title", want_tab)] + [""] * (len(columns) - 1) + list(ext_columns))
+    rows = [row1, list(columns)]
+    svc.spreadsheets().values().update(
+        spreadsheetId=master_cfg["id"], range=f"'{want_tab}'!A1",
+        valueInputOption="USER_ENTERED", body={"values": rows}).execute()
+
+    back = get_values(svc, master_cfg["id"],
+                      f"'{want_tab}'!A1:{col_letter(len(columns) + len(ext_columns))}2")
+    ok = len(back) == 2 and [str(x) for x in back[1][:len(columns)]] == list(columns)
+    print(f"[init-master] ヘッダー2行を書き込み / 読み返し一致={ok}", file=sys.stderr)
+    return 0 if ok else 3
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="HPBリボンKPIをMasterへ転記")
     ap.add_argument("--extract-csv", required=True, help="hpb_ribbon_extract.py の出力CSV")
     ap.add_argument("--month", required=True, help="対象年月号(例 2026年08月号)")
-    ap.add_argument("--mode", choices=["inspect", "calibrate", "dry-run", "apply"],
+    ap.add_argument("--mode",
+                    choices=["inspect", "calibrate", "dry-run", "apply", "init-master"],
                     default="dry-run")
     ap.add_argument("--profile", default="chokuei",
                     help="ブランド系列(既定 chokuei = 直営+サンズミライ+リラックス系)")
@@ -357,7 +430,7 @@ def main(argv=None):
     cfg = load_config()
     prof = profile_config(cfg, args.profile)
     master_cfg, shu_cfg = prof["master_sheet"], prof["shukyaku_sheet"]
-    if master_cfg is None and args.mode != "inspect":
+    if master_cfg is None and args.mode != "inspect":  # noqa: E501
         raise SystemExit(
             f"プロファイル {args.profile!r} は転記先(master_sheet)が未決定。"
             "data/hpb-ribbon-config.json に書き込み先を決めてから --mode を上げること。"
@@ -369,6 +442,10 @@ def main(argv=None):
     last_col = col_letter(len(full_columns)) if full_columns else "A"
 
     svc = sheets_service(prof["key_env"])
+
+    if args.mode == "init-master":
+        # 新規Masterの下ごしらえ。集客数も抽出CSVも要らない。
+        return init_master(svc, master_cfg, columns, ext_columns)
 
     # 1) 集客数タブ(◯月HPB速報値)を読む
     shu_titles = list_tab_titles(svc, shu_cfg["id"])
@@ -387,6 +464,27 @@ def main(argv=None):
     rows = load_extract_csv(args.extract_csv, ext_columns)
     for r in rows:
         r["年月号"] = args.month
+
+    # リボンのZIPは全ブランドまとめて届く。転記先のMasterに合わせて絞る。
+    brands = prof.get("brands")
+    rows, dropped, unknown = split_by_brand(rows, brands, brand_by_store())
+    if brands is not None:
+        print(f"対象ブランド={brands} / 採用={len(rows)} 他系列={len(dropped)}", file=sys.stderr)
+        by_brand = {}
+        for _, b in dropped:
+            by_brand[b] = by_brand.get(b, 0) + 1
+        if by_brand:
+            print(f"  [他系列につき除外] {by_brand}", file=sys.stderr)
+    if unknown:
+        # 院マスタに無い店舗。新店か名寄せ漏れ。黙って通さない。
+        names = [r.get("店舗名") for r in unknown]
+        print(f"  [院マスタに無い] {len(names)}店舗: {names[:10]}"
+              f"{' …' if len(names) > 10 else ''}", file=sys.stderr)
+        if brands is not None:
+            print("    → 対象ブランドか判定できないので、この実行では転記しない。"
+                  "data/clinics.json か data/store-name-aliases.json に足すこと。",
+                  file=sys.stderr)
+
     rows, notes = join_shukyaku(rows, shukyaku_map)
     filled = sum(1 for r in rows if str(r["集客数"]).strip() != "")
     print(f"抽出={len(rows)}店舗 / 集客数入り={filled} / 空欄={len(rows)-filled}", file=sys.stderr)

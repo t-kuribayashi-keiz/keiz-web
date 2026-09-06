@@ -40,17 +40,6 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 ## 情報待ち(ユーザーからの回答が必要)
 
-- **スマイル・グッドのリボンデータ(HPB店舗別PDF)が届いているか** ★HPB分析の前提 —
-  直営はHPBから店舗別の23ページ超PDFをパスワード付きZIPで受領しており、口コミ評点・
-  比較サロン・PV/CVR/ACRはすべてここから取っている。スマイル5院(HPB掲載院)・グッド7院の
-  ぶんが同様に届いているかが未確認。**届いていなければ、スマイル・グッドで直営と同じ分析は
-  原理的にできない**(埋められるのは予約枠の×判定だけ)。届いているなら、ZIPを
-  ローカルPCに置いて `scripts/hpb_ribbon_extract.py` にかけるところから直営と同じ手順
-- **スマイル・グッドのHPB KPIの転記先をどこにするか** — 直営の
-  「HPB_145店舗_KPI一括集計結果」Masterに18院を足すか、スマイル・グッド専用のMasterを
-  別に作るか。前者はシート内蔵GASのダッシュボード集計の母数が変わる。決まるまで
-  `data/hpb-ribbon-config.json` の `profiles.smile-good.master_sheet` は `null` のままで、
-  writerは `--mode inspect` しか受け付けない
 - **「グッド・スマイル月次報告」の最新月タブにHPB印のブロックが2つある** — 2026-09-06に
   Drive経由で構造を確認したところ、直近の月次タブだけ『HPB』と印の付いたブロックが2つ並び、
   同じ院の当月値が違う(例: 姿勢堂 段原 14 と 10)。片方は別チャネル(meta/EPARK等)の
@@ -142,8 +131,14 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 | `GCP_RELAX_KEY` | `claude\keys\relax-reporter.json` | リラックス | **未登録** |
 | `GCP_SMILE_GOOD_KEY` | `claude\keys\smile-good-reporter.json` | スマイル+グッド | **未登録** |
 
-`GCP_SMILE_GOOD_KEY` が入ると、`hpb-ribbon-kpi.yml` を `--profile smile-good --mode inspect`
-で回せる(スマイル・グッドの院名の名寄せと集客数の結合を、書き込まずに確かめられる)。
+`GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
+`hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、
+以降は `inspect → dry-run → apply`)。他の前提(リボンPDF・専用Master・共有設定)は
+2026-09-06に片付いている。
+
+鍵はリポジトリSecretに1つ登録すればよく、**PCごとに登録する必要はない**。Actionsの中で
+だけ復号されるので、どのPCから起動しても同じように動く(逆にローカル直実行ではSecretsを
+読めないため、鍵ファイルのあるPCでしか動かない)。
 
 登録手順(どちらでもよい):
 
