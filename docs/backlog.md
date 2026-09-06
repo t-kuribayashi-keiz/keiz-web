@@ -40,6 +40,22 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 ## 情報待ち(ユーザーからの回答が必要)
 
+- **スマイル・グッドのリボンデータ(HPB店舗別PDF)が届いているか** ★HPB分析の前提 —
+  直営はHPBから店舗別の23ページ超PDFをパスワード付きZIPで受領しており、口コミ評点・
+  比較サロン・PV/CVR/ACRはすべてここから取っている。スマイル5院(HPB掲載院)・グッド7院の
+  ぶんが同様に届いているかが未確認。**届いていなければ、スマイル・グッドで直営と同じ分析は
+  原理的にできない**(埋められるのは予約枠の×判定だけ)。届いているなら、ZIPを
+  ローカルPCに置いて `scripts/hpb_ribbon_extract.py` にかけるところから直営と同じ手順
+- **スマイル・グッドのHPB KPIの転記先をどこにするか** — 直営の
+  「HPB_145店舗_KPI一括集計結果」Masterに18院を足すか、スマイル・グッド専用のMasterを
+  別に作るか。前者はシート内蔵GASのダッシュボード集計の母数が変わる。決まるまで
+  `data/hpb-ribbon-config.json` の `profiles.smile-good.master_sheet` は `null` のままで、
+  writerは `--mode inspect` しか受け付けない
+- **「グッド・スマイル月次報告」の最新月タブにHPB印のブロックが2つある** — 2026-09-06に
+  Drive経由で構造を確認したところ、直近の月次タブだけ『HPB』と印の付いたブロックが2つ並び、
+  同じ院の当月値が違う(例: 姿勢堂 段原 14 と 10)。片方は別チャネル(meta/EPARK等)の
+  貼り間違いの可能性。どちらがHPBかシート側で決着させないと自動取り込みができない
+  (writerは一意に決まらないとき例外で止まる)
 - **アイワ(レセプト代行)・リクスム(採用)の実利用範囲** — 直営整骨院グループが実際にどの範囲・
   頻度でこれらを利用しているか、2026-09-02の判明時点(`functions/receipt-agency/CLAUDE.md`、
   `functions/recruiting/CLAUDE.md`)から未確認のまま
@@ -125,6 +141,9 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 | `GCP_KPI_WRITER_KEY` | `claude\keys\chokuei-sunsumirai-kpi-writer.json` | 直営+サンズミライ | **登録済み** |
 | `GCP_RELAX_KEY` | `claude\keys\relax-reporter.json` | リラックス | **未登録** |
 | `GCP_SMILE_GOOD_KEY` | `claude\keys\smile-good-reporter.json` | スマイル+グッド | **未登録** |
+
+`GCP_SMILE_GOOD_KEY` が入ると、`hpb-ribbon-kpi.yml` を `--profile smile-good --mode inspect`
+で回せる(スマイル・グッドの院名の名寄せと集客数の結合を、書き込まずに確かめられる)。
 
 登録手順(どちらでもよい):
 

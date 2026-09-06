@@ -12,8 +12,10 @@ name: HPB ribbon KPI to Master
 # 意図的に手動のみ(cron無し)。本番の業務シートに書くうえ、月号のCSVが揃わないと走らせる意味が
 # 無いため、無人で走らせて安全な日が無い。対象月は必ず明示する。
 #
-# サービスアカウント鍵は GCP_KPI_WRITER_KEY(リポジトリSecret)にだけあり、リポジトリにも
-# Claudeのセッションにも入らない。※PDFパスワードはローカル専用でSecretsに入れない。
+# サービスアカウント鍵はリポジトリSecretにだけあり、リポジトリにもClaudeのセッションにも
+# 入らない。系列ごとに鍵が違う(chokuei=GCP_KPI_WRITER_KEY / smile-good=GCP_SMILE_GOOD_KEY)。
+# 両方を env に渡し、どちらを使うかは data/hpb-ribbon-config.json の profiles.key_env が決める。
+# ※PDFパスワードはローカル専用でSecretsに入れない。
 
 on:
   workflow_dispatch:
@@ -26,6 +28,14 @@ on:
         description: "抽出CSVのパス(例: data/hpb-ribbon/2026-08.csv)。ローカルで作りコミットしておく"
         required: true
         type: string
+      profile:
+        description: "ブランド系列。chokuei=直営+サンズミライ+リラックス系 / smile-good=スマイル+グッド(転記先未決のためinspectのみ)"
+        required: true
+        type: choice
+        options:
+          - chokuei
+          - smile-good
+        default: chokuei
       mode:
         description: "inspect=結合の確認 / calibrate=過去月で答え合わせ / dry-run=書く内容の確認 / apply=本番書き込み"
         required: true
@@ -65,6 +75,7 @@ jobs:
       - name: Transfer to Master
         env:
           GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          GCP_SMILE_GOOD_KEY: ${{ secrets.GCP_SMILE_GOOD_KEY }}
           TZ: Asia/Tokyo
         run: |
           case "${{ inputs.mode }}" in
@@ -75,4 +86,5 @@ jobs:
           esac
           python3 scripts/hpb_master_writer.py \
             --extract-csv "${{ inputs.csv }}" \
-            --month "${{ inputs.month }}" $flag
+            --month "${{ inputs.month }}" \
+            --profile "${{ inputs.profile }}" $flag

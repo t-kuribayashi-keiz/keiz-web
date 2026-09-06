@@ -11,6 +11,13 @@
   「【2026年_月次報告】集客数」の『◯月HPB (速報値)』タブの、院名(各行)×当月列。
   タブ全体の合計(kpi_aggregate が読むもの)ではなく、店舗別の当月値を使う。
 
+ブランド系列(--profile):
+  読み書き先の組は data/hpb-ribbon-config.json の profiles に持つ。既定の chokuei が
+  直営+サンズミライ+リラックス系で、従来と同じ挙動。スマイル・グッドは集客数シート自体が
+  別物(『グッド・スマイル月次報告』)で、しかも1つの月次タブの中に HP / HPB / meta /
+  オフライン のブロックが縦に並ぶため、block_marker で目的のブロックまで降りてから
+  見出しを探す。降りずに見出しだけ探すと**HPの数字をHPBとして取り込む**。
+
 鍼灸併設リスティングの扱い(重要):
   同一店舗がHPB上で『◯◯接骨院』と『◯◯鍼灸接骨院』の2リスティングを持つことがある。
   集客数シートには本体側(非鍼灸)に1つだけ計上される。正規化すると両者は同じキーになるため、
@@ -70,6 +77,56 @@ def month_tab_keywords(base_keywords, month_label):
     return [f"{int(m.group(1))}月"] + list(base_keywords)
 
 
+def profile_config(cfg, name):
+    """系列名(chokuei / smile-good …)→ そのプロファイルの読み書き先。
+
+    直営系はトップレベルの master_sheet / shukyaku_sheet をそのまま使う。他系列は
+    profiles 側の同名キーで**丸ごと差し替える**(部分マージにすると、書いていない
+    キーが直営の値のまま残って別シートを読みに行く事故になる)。
+    """
+    profiles = cfg.get("profiles", {})
+    if name not in profiles:
+        known = [k for k in profiles if not k.startswith("_")]
+        raise ValueError(f"未知のプロファイル {name!r}。定義済み: {known}")
+    prof = profiles[name]
+    resolved = {
+        "key_env": prof.get("key_env", "GCP_KPI_WRITER_KEY"),
+        "master_sheet": prof.get("master_sheet", cfg["master_sheet"]),
+        "shukyaku_sheet": prof.get("shukyaku_sheet", cfg["shukyaku_sheet"]),
+    }
+    if resolved["master_sheet"] is None:
+        # 転記先が未決のプロファイル。読むところまでは動かせるが書けない。
+        resolved["master_sheet"] = None
+    return resolved
+
+
+def find_block_header(values, marker, name_contains, count_exact, lookahead=5):
+    """『HPB』のようなブロック印の下にある見出し行(院名/当月)の行番号を返す。
+
+    1タブに HP / HPB / meta / オフライン のブロックが縦に並ぶシート用。見出しだけを
+    探すと先頭ブロック(HP)に当たり、**別チャネルの数字を黙って取り込む**。
+
+    印の付いたブロックが1つに定まらなければ例外。片方を勝手に選ばない
+    (2026-09-06時点、最新月のタブには『HPB』印のブロックが2つ見えている。
+    どちらが集客数かはシート側で決着させること)。
+    """
+    hits = []
+    for i, row in enumerate(values):
+        if not any((c or "").strip() == marker for c in row):
+            continue
+        for j in range(i + 1, min(i + 1 + lookahead, len(values))):
+            row_j = values[j]
+            if (any(name_contains in (c or "") for c in row_j)
+                    and any((c or "").strip() == count_exact for c in row_j)):
+                hits.append(j)
+                break
+    if len(hits) != 1:
+        raise ValueError(
+            f"『{marker}』ブロックが一意に決まらない(見出し行={hits})。"
+            "シート側でブロック名を分けるか、どちらを使うかを決めること。")
+    return hits[0]
+
+
 def header_index(header_row, *, contains=None, exact=None):
     for i, cell in enumerate(header_row):
         c = (cell or "").strip()
@@ -80,30 +137,44 @@ def header_index(header_row, *, contains=None, exact=None):
     raise ValueError(f"見出し列が見つからない contains={contains} exact={exact}")
 
 
-def build_shukyaku_map(values, name_contains="院名", count_exact="当月"):
-    """『◯月HPB(速報値)』タブの2次元配列 → 院名(生, 正規化) → 当月 の辞書。
+DEFAULT_STOP_PREFIXES = ("合計", "既存", "昨年", "昨対", "店舗数", "1店舗", "目標")
 
-    合計行以降(合計/既存/店舗数 等のラベル)は店舗ではないので取り込まない。
+
+def build_shukyaku_map(values, name_contains="院名", count_exact="当月",
+                       block_marker=None, stop_prefixes=DEFAULT_STOP_PREFIXES,
+                       stop_contains=()):
+    """集客数タブの2次元配列 → 院名(生, 正規化) → 当月 の辞書。
+
+    合計行以降(合計/既存/店舗数 等のラベル)は店舗ではないので取り込まない。直営の
+    シートは行頭一致で足りるが、系列によっては『グッド・スマイル合計』のように
+    ラベルが途中に来るので stop_contains も見る。
+
+    block_marker を渡すと、その印の付いたブロックの見出しから読む(1タブに複数
+    チャネルのブロックが縦に並ぶシート向け)。
     """
-    # 見出し行を探す(院名 と 当月 が同じ行にある)
-    hdr_i = None
-    for i, row in enumerate(values[:20]):
-        if any(name_contains in (c or "") for c in row) and any((c or "").strip() == count_exact for c in row):
-            hdr_i = i
-            break
-    if hdr_i is None:
-        raise ValueError("集客数タブの見出し行(院名/当月)が見つからない")
+    if block_marker:
+        hdr_i = find_block_header(values, block_marker, name_contains, count_exact)
+    else:
+        # 見出し行を探す(院名 と 当月 が同じ行にある)
+        hdr_i = None
+        for i, row in enumerate(values[:20]):
+            if any(name_contains in (c or "") for c in row) and any((c or "").strip() == count_exact for c in row):
+                hdr_i = i
+                break
+        if hdr_i is None:
+            raise ValueError("集客数タブの見出し行(院名/当月)が見つからない")
     header = values[hdr_i]
     ni = header_index(header, contains=name_contains)
     ci = header_index(header, exact=count_exact)
 
     raw = {}          # 正規化キー → (生の院名, 当月)
-    STOP = ("合計", "既存", "昨年", "昨対", "店舗数", "1店舗", "目標")
     for row in values[hdr_i + 1:]:
         name = (row[ni] if ni < len(row) else "").strip()
         if not name:
             continue
-        if any(name.startswith(s) for s in STOP):
+        if any(name.startswith(s) for s in stop_prefixes):
+            break
+        if any(s in name for s in stop_contains):
             break
         count = (row[ci] if ci < len(row) else "").strip()
         raw[normalize_store_name(name)] = (name, count)
@@ -210,12 +281,12 @@ def positional_no(index):
 
 # --- Sheets I/O -----------------------------------------------------------------------------
 
-def sheets_service():
+def sheets_service(key_env="GCP_KPI_WRITER_KEY"):
     from google.oauth2 import service_account
     from googleapiclient.discovery import build
-    raw = os.environ.get("GCP_KPI_WRITER_KEY", "")
+    raw = os.environ.get(key_env, "")
     if not raw:
-        raise SystemExit("GCP_KPI_WRITER_KEY が未設定。鍵はSecrets経由でのみ渡す。")
+        raise SystemExit(f"{key_env} が未設定。鍵はSecrets経由でのみ渡す。")
     info = json.loads(raw)
     creds = service_account.Credentials.from_service_account_info(
         info, scopes=["https://www.googleapis.com/auth/spreadsheets"])
@@ -279,16 +350,25 @@ def main(argv=None):
     ap.add_argument("--month", required=True, help="対象年月号(例 2026年08月号)")
     ap.add_argument("--mode", choices=["inspect", "calibrate", "dry-run", "apply"],
                     default="dry-run")
+    ap.add_argument("--profile", default="chokuei",
+                    help="ブランド系列(既定 chokuei = 直営+サンズミライ+リラックス系)")
     args = ap.parse_args(argv)
 
     cfg = load_config()
-    master_cfg, shu_cfg = cfg["master_sheet"], cfg["shukyaku_sheet"]
-    columns = master_cfg["columns"]                      # 既存A〜S(19列)
-    ext_columns = master_cfg.get("master_ext_columns", [])  # 右append T列〜
-    full_columns = columns + ext_columns
-    last_col = col_letter(len(full_columns))
+    prof = profile_config(cfg, args.profile)
+    master_cfg, shu_cfg = prof["master_sheet"], prof["shukyaku_sheet"]
+    if master_cfg is None and args.mode != "inspect":
+        raise SystemExit(
+            f"プロファイル {args.profile!r} は転記先(master_sheet)が未決定。"
+            "data/hpb-ribbon-config.json に書き込み先を決めてから --mode を上げること。"
+            "いまは --mode inspect(集客数の結合確認)だけ動かせる。")
 
-    svc = sheets_service()
+    columns = master_cfg["columns"] if master_cfg else []          # 既存A〜S(19列)
+    ext_columns = master_cfg.get("master_ext_columns", []) if master_cfg else []
+    full_columns = columns + ext_columns
+    last_col = col_letter(len(full_columns)) if full_columns else "A"
+
+    svc = sheets_service(prof["key_env"])
 
     # 1) 集客数タブ(◯月HPB速報値)を読む
     shu_titles = list_tab_titles(svc, shu_cfg["id"])
@@ -297,7 +377,10 @@ def main(argv=None):
     shukyaku_map = build_shukyaku_map(
         shu_values,
         name_contains=shu_cfg["columns"]["store_name_header_contains"],
-        count_exact=shu_cfg["columns"]["count_header_exact"])
+        count_exact=shu_cfg["columns"]["count_header_exact"],
+        block_marker=shu_cfg.get("block_marker"),
+        stop_prefixes=tuple(shu_cfg.get("stop_prefixes", DEFAULT_STOP_PREFIXES)),
+        stop_contains=tuple(shu_cfg.get("stop_contains", ())))
     print(f"集客数タブ='{shu_tab}' 店舗={len(shukyaku_map)}", file=sys.stderr)
 
     # 2) 抽出CSVを読み、集客数を結合
@@ -311,7 +394,7 @@ def main(argv=None):
         print(f"  [{kind}] {detail}", file=sys.stderr)
 
     if args.mode == "inspect":
-        print("[inspect] Master列:", columns, file=sys.stderr)
+        print("[inspect] Master列:", columns or "(転記先未決定)", file=sys.stderr)
         return 0
 
     # 3) Masterタブ

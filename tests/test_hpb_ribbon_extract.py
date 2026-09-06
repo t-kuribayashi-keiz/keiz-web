@@ -174,6 +174,114 @@ class TestShukyakuJoin(unittest.TestCase):
             wr.normalize_store_name("堺市美原区整骨院"))
 
 
+class TestBrandProfiles(unittest.TestCase):
+    """系列ごとの読み書き先。ここを取り違えると、別ブランドのシートを読む/書く。"""
+
+    @classmethod
+    def setUpClass(cls):
+        import json, os
+        cls.cfg = json.load(open(os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "data", "hpb-ribbon-config.json"), encoding="utf-8"))
+
+    def test_chokuei_is_unchanged(self):
+        """既定は従来どおり。プロファイル化で直営の挙動を変えていないこと。"""
+        prof = wr.profile_config(self.cfg, "chokuei")
+        self.assertEqual(prof["master_sheet"], self.cfg["master_sheet"])
+        self.assertEqual(prof["shukyaku_sheet"], self.cfg["shukyaku_sheet"])
+        self.assertEqual(prof["key_env"], "GCP_KPI_WRITER_KEY")
+
+    def test_smile_good_reads_its_own_sheet_with_its_own_key(self):
+        prof = wr.profile_config(self.cfg, "smile-good")
+        self.assertNotEqual(prof["shukyaku_sheet"]["id"],
+                            self.cfg["shukyaku_sheet"]["id"])
+        self.assertEqual(prof["key_env"], "GCP_SMILE_GOOD_KEY")
+
+    def test_smile_good_has_no_write_destination_yet(self):
+        """転記先が決まっていないうちは None のまま。空dictで誤魔化さない。"""
+        self.assertIsNone(wr.profile_config(self.cfg, "smile-good")["master_sheet"])
+
+    def test_an_unknown_profile_stops(self):
+        with self.assertRaises(ValueError):
+            wr.profile_config(self.cfg, "存在しない系列")
+
+    def test_smile_good_tab_keywords_do_not_hit_the_hpb_tab_name(self):
+        """このシートの月次タブは『◯月HP(速報値)』1枚。HPはHPBに当たってはいけない。"""
+        prof = wr.profile_config(self.cfg, "smile-good")
+        titles = ["6月HP(速報値)", "報告用", "集計用 （栗林）"]
+        kw = wr.month_tab_keywords(prof["shukyaku_sheet"]["tab_keywords"], "2026年06月号")
+        self.assertEqual(wr.resolve_tab(titles, kw), "6月HP(速報値)")
+
+
+class TestBlockMarker(unittest.TestCase):
+    """1タブに HP / HPB / meta / オフライン が縦に並ぶシート(グッド・スマイル月次報告)。"""
+
+    VALUES = [
+        ["", "", "", "", "", "", "", ""],
+        ["No.", "担当", "エリア", "院名", "HP合計", "6月", "5月"],
+        ["1", "グッド", "広島県", "姿勢堂 段原鍼灸接骨院", "30", "10", "9"],
+        ["", "", "", "グッド・スマイル合計", "300", "", ""],
+        [""],
+        ["", "", "", "", "", "", "HPB"],
+        ["", "担当", "エリア", "院名", "当月", "前月", "前月比較"],
+        ["1", "グッド", "広島県", "姿勢堂 段原鍼灸接骨院", "14", "12", "2"],
+        ["2", "スマイル", "堺市エリア", "やまもと鍼灸接骨院 なかもず院", "13", "5", "8"],
+        ["", "", "", "グッド・スマイル合計", "108", "83", "25"],
+        ["", "", "", "グッド1院当たり", "10.7", "", ""],
+    ]
+
+    def marker_map(self, values=None):
+        return wr.build_shukyaku_map(
+            values if values is not None else self.VALUES,
+            block_marker="HPB", stop_contains=("合計", "平均", "店舗数", "1院当たり"))
+
+    def test_the_hpb_block_is_read_not_the_hp_block_above_it(self):
+        """見出しだけ探すと先頭のHPブロックに当たる。数字が黙って入れ替わる一番危ない罠。"""
+        m = self.marker_map()
+        self.assertEqual(m[wr.normalize_store_name("姿勢堂 段原鍼灸接骨院")][1], "14")
+
+    def test_without_the_marker_the_blocks_are_silently_merged(self):
+        """印なしだと何が起きるかを記録しておく。
+
+        先頭のHPブロックの見出しから読み始め、打ち切りラベル(『グッド・スマイル合計』)も
+        行頭一致では止まらないので、下のHPBブロックまで走って**同じ院名を上書きする**。
+        エラーは出ない。だから印が要る。
+        """
+        m = wr.build_shukyaku_map(self.VALUES)
+        danbara = m[wr.normalize_store_name("姿勢堂 段原鍼灸接骨院")][1]
+        self.assertIn(danbara, ("10", "14"))
+        self.assertIn(wr.normalize_store_name("グッド・スマイル合計"), m,
+                      "合計行まで店舗として取り込まれてしまう")
+
+    def test_totals_in_the_middle_of_the_label_stop_the_read(self):
+        """『グッド・スマイル合計』は行頭一致では止まらない。部分一致で打ち切る。"""
+        m = self.marker_map()
+        self.assertNotIn(wr.normalize_store_name("グッド・スマイル合計"), m)
+        self.assertNotIn(wr.normalize_store_name("グッド1院当たり"), m)
+        self.assertEqual(len(m), 2)
+
+    def test_two_blocks_with_the_same_marker_stop_instead_of_guessing(self):
+        """同じ印のブロックが2つあるとき、片方を選ぶと外れたほうの数字が消える。"""
+        doubled = self.VALUES + [[""], ["", "", "", "", "", "", "HPB"],
+                                 ["", "担当", "エリア", "院名", "当月", "前月"],
+                                 ["1", "グッド", "広島県", "姿勢堂 段原鍼灸接骨院", "10", "10"]]
+        with self.assertRaises(ValueError):
+            self.marker_map(doubled)
+
+    def test_a_missing_marker_stops(self):
+        with self.assertRaises(ValueError):
+            wr.build_shukyaku_map(self.VALUES, block_marker="EPARK")
+
+    def test_the_chokuei_sheet_still_reads_without_a_marker(self):
+        values = [
+            ["エリア", "", "…院名", "当月", "前月"],
+            ["関東", "", "佐倉ユーカリが丘接骨院", "8", "9"],
+            ["", "", "合計", "2607", ""],
+        ]
+        m = wr.build_shukyaku_map(values)
+        self.assertEqual(m[wr.normalize_store_name("佐倉ユーカリが丘接骨院")][1], "8")
+
+
 class TestPositionalNo(unittest.TestCase):
     def test_step14(self):
         self.assertEqual(wr.positional_no(0), 1)
