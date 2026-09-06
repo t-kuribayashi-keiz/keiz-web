@@ -113,6 +113,32 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 
 ## 設定・環境
 
+### サービスアカウントの鍵をGitHub Secretsに登録する ★分析の前提
+
+鍵がローカルPCにしか無いと、確認のたびにローカルセッションを経由することになり、分析が
+回らない。**Secretsに入れればGitHub Actions経由でどのPCからでも同じ処理を回せる**
+(鍵はActions内でのみ復号され、どのPCにも置かれず、ログにも出ない)。
+ローカルでスクリプトを直接叩く場合はSecretsを読めないので、そちらは従来どおり鍵ファイルが要る。
+
+| シークレット名 | 鍵ファイル(ローカルPC Keizgroup500) | 対象 | 状態 |
+|---|---|---|---|
+| `GCP_KPI_WRITER_KEY` | `claude\keys\chokuei-sunsumirai-kpi-writer.json` | 直営+サンズミライ | **登録済み** |
+| `GCP_RELAX_KEY` | `claude\keys\relax-reporter.json` | リラックス | **未登録** |
+| `GCP_SMILE_GOOD_KEY` | `claude\keys\smile-good-reporter.json` | スマイル+グッド | **未登録** |
+
+登録手順(どちらでもよい):
+
+- リポジトリ → Settings → Secrets and variables → Actions → New repository secret に
+  鍵JSONの中身を貼る
+- またはローカルのClaude Codeに `gh secret set <名前> < <鍵ファイル>` の形で
+  **ファイルから直接流し込ませる**(中身をターミナルにもチャットにも表示しないこと)
+
+登録後にできるようになること:
+
+- `.github/workflows/relax-analytics.yml` の実行(GA4 Admin / Search Console の疎通確認)
+- 「グッド・スマイル月次報告」シートの読み取り(スマイル・グッドの分析はここが入口)
+
+
 - ~~`kpi-aggregate`ワークフローの初回実行~~ → 2026-09-03に完了。工程①②が本番稼働し、
   2026年8月の行を中間値から速報値へ更新済み
 
