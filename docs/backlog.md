@@ -69,12 +69,13 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
   心身堂・スマイル・グッド・LUNAのルームは未追加(2026-09-03に`data/chatwork-rooms.json`を
   確認して判明)
 
-- **高円寺店の詳細情報**(住所・電話・自社サイトURL)。2026年7月開店で`data/clinics.json`には
-  名前のみ登録済み(現在リラックスは25件)。URL未登録のため、GA4/GSCの照合対象にまだ入れない
-- **★栗林さんの作業: リラックスGSCの残り10店舗への個別付与** — Search ConsoleはAPIでの
+- ~~**高円寺店の自社サイトURL**~~ → 2026-09-07に栗林さんから回答(`https://refresh-relax.com/koenji/`)、
+  `data/clinics.json`に登録済み。住所・電話はまだ未取得
+- **★栗林さんの作業: リラックスGSCの残り11店舗への個別付与** — Search ConsoleはAPIでの
   一括/個別付与ができないため(GA4のアカウント単位付与のような手段が無い)、
   「設定→ユーザーと権限→ユーザーを追加」で`relax-reporter@keizgroup-automation.iam.gserviceaccount.com`
-  を「フル」で1店舗ずつ追加する必要がある。対象10店舗:
+  を「フル」で1店舗ずつ追加する必要がある。対象11店舗(チェックリストは
+  [サチコ権限付与チェックリスト](https://claude.ai/code/artifact/9e2ab330-b42f-48d2-ae14-b6ed84773648)):
   水戸京成百貨店(https://refresh-relax.com/mito/)・
   FKDインターパーク店(https://refresh-relax.com/fkd/)・
   サクラス戸塚店(https://refresh-relax.com/totsuka/)・
@@ -84,10 +85,11 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
   西新宿店(https://refresh-relax.com/nishishinjuku/)・
   祖師谷店(https://refresh-relax.com/soshigaya/)・
   久我山店(https://refresh-relax.com/kugayama/)・
-  戸越銀座店(https://refresh-relax.com/togoshiginza/)。
+  戸越銀座店(https://refresh-relax.com/togoshiginza/)・
+  高円寺店(https://refresh-relax.com/koenji/)。
   `sc-domain:refresh-relax.com`のドメインプロパティが既にあれば1回の共有で済む可能性があり、
   確認依頼中(2026-09-07)。終わったら`relax-analytics.yml`(scope=gsc)を再実行して
-  `sites.list`に10件増えることを確認する
+  `sites.list`に11件増えることを確認する
 - ~~**「リラックス新規客経路集計」シートの`relax-reporter`への共有**~~ → 2026-09-07に
   栗林さんが共有完了。同日`sheets-smoke-test.yml`で実データの読み取りにも成功
   (店舗名・媒体・新患合計等の実値を確認)。詳細は`brands/relax/CLAUDE.md`

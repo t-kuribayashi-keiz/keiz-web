@@ -19,7 +19,7 @@ class TestStorePaths(unittest.TestCase):
         paths = rows.store_paths("リラックス")
         self.assertEqual(paths["tama"], "たまプラーザ東急百貨店")
         self.assertEqual(paths["togoshiginza"], "戸越銀座店")
-        self.assertEqual(len(paths), 24)  # 高円寺店はURL未登録
+        self.assertEqual(len(paths), 25)  # 2026-09-07にURL登録され全25店舗ぶん揃った
 
     def test_another_brand_gets_its_own_paths(self):
         self.assertEqual(rows.store_paths("存在しないブランド"), {})

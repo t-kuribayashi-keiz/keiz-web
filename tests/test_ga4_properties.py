@@ -168,8 +168,7 @@ class TestAnalyticsDiscovery(unittest.TestCase):
         paths = self.discover.store_paths_of("リラックス")
         self.assertIn("tama", paths)
         self.assertIn("togoshiginza", paths)
-        # 高円寺店はURL未登録なので24件。25件になったら登録されたということ。
-        self.assertEqual(len(paths), 24)
+        self.assertEqual(len(paths), 25)  # 2026-09-07に高円寺店のURLが登録され全店揃った
 
     def test_an_empty_ga4_response_is_a_failure_with_the_reason(self):
         """空で返るのは『権限が無い』ではなく『プロパティ単位で付いている』の症状。"""
