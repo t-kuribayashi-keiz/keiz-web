@@ -50,7 +50,7 @@ def ga4_property_ids(summaries: list[dict]) -> dict[str, str]:
     return found
 
 
-def pull_ga4(creds, brand: str, month_label: str) -> list[dict]:
+def pull_ga4(creds, brand: str, month_label: str, stores: set[str] | None = None) -> list[dict]:
     start, end = month_range(month_label)
     data_api = build("analyticsdata", "v1beta", creds)
     summaries = ga4_account_summaries(creds)
@@ -67,6 +67,8 @@ def pull_ga4(creds, brand: str, month_label: str) -> list[dict]:
 
     all_rows: list[dict] = []
     for store, display_name in sorted(result["matched"].items()):
+        if stores and store not in stores:
+            continue
         property_id = id_map.get(display_name)
         if not property_id:
             print(f"  [プロパティID不明] {store} ({display_name!r})", file=sys.stderr)
@@ -83,7 +85,7 @@ def pull_ga4(creds, brand: str, month_label: str) -> list[dict]:
     return all_rows
 
 
-def pull_gsc(creds, brand: str, month_label: str) -> list[dict]:
+def pull_gsc(creds, brand: str, month_label: str, stores: set[str] | None = None) -> list[dict]:
     start, end = month_range(month_label)
     search_console = build("searchconsole", "v1", creds)
     sites = gsc_sites(creds)
@@ -110,6 +112,8 @@ def pull_gsc(creds, brand: str, month_label: str) -> list[dict]:
         if not store:
             continue
         matched_urls.add(url)
+        if stores and store not in stores:
+            continue
         response = search_console.searchanalytics().query(
             siteUrl=site["siteUrl"],
             body={"startDate": start, "endDate": end, "dimensions": ["page"],
@@ -131,22 +135,27 @@ def main(argv=None) -> int:
     parser.add_argument("--month", required=True, help="対象年月号(例 2026年08月号)")
     parser.add_argument("--skip-ga4", action="store_true")
     parser.add_argument("--skip-gsc", action="store_true")
+    parser.add_argument("--stores", default="",
+                         help="カンマ区切りで店舗を絞る(省略時は全店)。"
+                              "出力が大きくログが途中で切れるときの分割実行用。")
     parser.add_argument("--out", default="", help="TSVの出力先。省略時は標準出力")
     args = parser.parse_args(argv)
+
+    stores = {s.strip() for s in args.stores.split(",") if s.strip()} or None
 
     creds = credentials(args.key_env)
     rows: list[dict] = []
 
     if not args.skip_ga4:
         try:
-            rows.extend(pull_ga4(creds, args.brand, args.month))
+            rows.extend(pull_ga4(creds, args.brand, args.month, stores))
         except Exception as error:  # noqa: BLE001
             print(f"GA4の取得に失敗しました: {error}", file=sys.stderr)
             return 1
 
     if not args.skip_gsc:
         try:
-            rows.extend(pull_gsc(creds, args.brand, args.month))
+            rows.extend(pull_gsc(creds, args.brand, args.month, stores))
         except Exception as error:  # noqa: BLE001
             print(f"Search Consoleの取得に失敗しました: {error}", file=sys.stderr)
             return 1
