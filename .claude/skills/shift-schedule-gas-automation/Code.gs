@@ -1189,8 +1189,10 @@ function pickDayForStaff(
   let bestScore = null;
   let bestGroup = [];
   pool.forEach((c) => {
-    // crowdingを最優先、同点ならソフト制約のペナルティが小さい方を優先
-    const score = c.crowding * 100 + c.penalty;
+    // ソフト制約(女性/新患対応/保持者1人しかいない資格など)のペナルティが小さい方を最優先し、
+    // 同点の場合にのみ、その日の休み人数が少ない方（＝日ごとの休み人数をできるだけ均等にする、
+    // 優先度は低いが考慮したい項目）を優先する
+    const score = c.penalty * 100 + c.crowding;
     if (bestScore === null || score < bestScore) {
       bestScore = score;
       bestGroup = [c];
