@@ -1,10 +1,13 @@
-name: Relax analytics discovery
+name: Relax analytics
 
-# リラックスの分析環境の疎通確認。サービスアカウント relax-reporter で
-# GA4(Admin API)と Search Console に何が見えているかを列挙し、GA4のプロパティを
-# 院マスタの店舗名に突き合わせる。
+# リラックスの分析環境。サービスアカウント relax-reporter で GA4(Admin API / Data API)と
+# Search Console に何が見えているか・実際の指標値を取得する。
 #
-# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない。
+#   mode=discover … どのプロパティ/サイトが見えるかの疎通確認だけ(実指標は取らない)
+#   mode=pull     … 対象月のセッション数・表示回数等の実指標を取得し、TSVをログに出す
+#
+# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない
+# (TSVはこのジョブのログにのみ出す。実データをリポジトリにコミットしない)。
 #
 # 鍵はリポジトリシークレット GCP_RELAX_KEY にのみ置く。Claudeのセッションには渡らない。
 
@@ -16,8 +19,16 @@ on:
         required: true
         type: string
         default: リラックス
+      mode:
+        description: "discover=疎通確認だけ / pull=対象月の実指標を取得"
+        required: true
+        type: choice
+        options:
+          - discover
+          - pull
+        default: discover
       scope:
-        description: "確認する対象"
+        description: "確認・取得する対象(discover/pull共通)"
         required: true
         type: choice
         options:
@@ -25,12 +36,17 @@ on:
           - ga4
           - gsc
         default: both
+      month:
+        description: "mode=pull のときだけ使う対象年月号(例 2026年08月号)"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
-  discover:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +64,7 @@ jobs:
         run: python3 -m unittest discover -s tests
 
       - name: Discover
+        if: inputs.mode == 'discover'
         env:
           GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
           TZ: Asia/Tokyo
@@ -58,3 +75,21 @@ jobs:
             *)   flag="" ;;
           esac
           python3 scripts/analytics_discover.py --brand "${{ inputs.brand }}" $flag
+
+      - name: Pull
+        if: inputs.mode == 'pull'
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          if [ -z "${{ inputs.month }}" ]; then
+            echo "mode=pull には month の指定が必要です(例: 2026年08月号)" >&2
+            exit 1
+          fi
+          case "${{ inputs.scope }}" in
+            ga4) flag="--skip-gsc" ;;
+            gsc) flag="--skip-ga4" ;;
+            *)   flag="" ;;
+          esac
+          python3 scripts/analytics_pull.py --brand "${{ inputs.brand }}" \
+            --month "${{ inputs.month }}" $flag
