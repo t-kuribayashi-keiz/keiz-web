@@ -99,6 +99,42 @@ class TestClosedColumnAboveTheHeaderRow(unittest.TestCase):
         self.assertEqual(cm.closed_column(ROWS_CLOSED_ON_A_HIGHER_ROW, 2), 8)
 
 
+# 実物のミライ・サンズタブの形(2026-09-07、実データで判明)。サブ見出し行(前/後に
+# 相当する行)は「平日」側にだけ「松原：全日」という注記が入り、「土日祝」側は空。
+ROWS_LEAKING_SUB_HEADER = [
+    ["", "", "平日", "", "", "", "土日祝", "", "", ""],
+    ["", "", "松原：全日", "松原：全日", "松原：全日", "松原：全日", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "院名", "開始", "終了", "開始", "終了", "開始", "終了", "開始", "終了"],
+    ["1", "弁慶はりきゅう整骨院 西大津院", "10:00", "13:00", "15:30", "21:00",
+     "9:00", "12:30", "15:00", "18:00"],
+]
+
+
+class TestSubHeaderDoesNotLeakAcrossGroups(unittest.TestCase):
+    """平日側だけにある注記が、空の土日祝側にまで持ち越されると、
+    4つの時間帯が同じラベルになって read_hours が後の時間帯で前の時間帯を上書きする。"""
+
+    def test_forward_fill_resets_at_a_group_boundary(self):
+        groups = cm.forward_fill(ROWS_LEAKING_SUB_HEADER[0], 10)
+        subs = cm.forward_fill(ROWS_LEAKING_SUB_HEADER[1], 10, boundaries=groups)
+        self.assertEqual(subs[2:6], ["松原：全日"] * 4)
+        self.assertEqual(subs[6:10], ["", "", "", ""])
+
+    def test_all_four_time_bands_survive_with_distinct_labels(self):
+        columns = cm.hour_columns(ROWS_LEAKING_SUB_HEADER, 3)
+        labels = [label for label, _, _ in columns]
+        self.assertEqual(len(labels), 4)
+        self.assertEqual(len(set(labels)), 4, labels)
+
+    def test_no_time_band_is_silently_dropped(self):
+        columns = cm.hour_columns(ROWS_LEAKING_SUB_HEADER, 3)
+        hours = cm.read_hours(ROWS_LEAKING_SUB_HEADER[4], columns)
+        self.assertEqual(len(hours), 4, hours)
+        self.assertEqual(set(hours.values()),
+                         {"10:00-13:00", "15:30-21:00", "9:00-12:30", "15:00-18:00"})
+
+
 class TestAllowedTabs(unittest.TestCase):
     """『診療時間』にはバックアップ・旧版タブが多数同居する(2026-09-07、実データで判明)。
     栗林さんに確認して固定した現行タブの一覧を、決め打ちにせず設定ファイルから読む。"""

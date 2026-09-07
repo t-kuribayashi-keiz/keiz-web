@@ -80,14 +80,24 @@ def text(cell) -> str:
     return str(cell).strip()
 
 
-def forward_fill(row: list, width: int) -> list[str]:
+def forward_fill(row: list, width: int, boundaries: list[str] | None = None) -> list[str]:
     """結合セルの見出しを右へ持ち越す。
 
     「平日」がC1:F1の結合なら、APIはC列にしか値を返さない。D〜F列を空のまま扱うと
     土日祝の列と区別できなくなる。
+
+    `boundaries` を渡すと、その値が変わった列で持ち越しをリセットする。ミライ・サンズ
+    タブは「松原：全日」という注記が平日側のサブ見出しセルにだけ埋まっており、土日祝側は
+    空だった。境界を見ずに持ち越すと、平日側の文字が土日祝側にまで漏れて両方の区分名が
+    同じになり、あとの時間帯が前の時間帯を静かに上書きする(2026-09-07 実データで発覚)。
     """
-    filled, carried = [], ""
+    filled, carried, prev_boundary = [], "", object()
     for index in range(width):
+        if boundaries is not None:
+            boundary = boundaries[index] if index < len(boundaries) else ""
+            if boundary != prev_boundary:
+                carried = ""
+            prev_boundary = boundary
         value = text(row[index]) if index < len(row) else ""
         if value:
             carried = value
@@ -118,9 +128,11 @@ def hour_columns(rows: list[list], header_index: int) -> list[tuple[str, int, in
     header = rows[header_index]
     width = max(len(row) for row in rows[:header_index + 1])
     groups = forward_fill(rows[header_index - 2], width) if header_index >= 2 else [""] * width
-    subs = forward_fill(rows[header_index - 1], width) if header_index >= 1 else [""] * width
+    # サブ見出しはグループ列(平日/土日祝等)の境界を越えて持ち越さない。
+    subs = forward_fill(rows[header_index - 1], width, boundaries=groups) if header_index >= 1 else [""] * width
 
     found = []
+    seen: dict[str, int] = {}
     for index, cell in enumerate(header):
         if text(cell) not in START_HEADERS:
             continue
@@ -128,7 +140,14 @@ def hour_columns(rows: list[list], header_index: int) -> list[tuple[str, int, in
         if index + 1 >= len(header) or text(header[index + 1]) not in END_HEADERS:
             continue
         label = " ".join(part for part in (groups[index], subs[index]) if part)
-        found.append((label or f"列{index + 1}", index, index + 1))
+        label = label or f"列{index + 1}"
+        # 見出しの区分名だけでは区別できない列が残ることがある(グループはあるが
+        # サブ見出しが無い等)。同名になったら番号を振って区別する——さもないと
+        # read_hours の辞書で後の時間帯が前の時間帯を静かに上書きしてしまう。
+        seen[label] = seen.get(label, 0) + 1
+        if seen[label] > 1:
+            label = f"{label}（{seen[label]}）"
+        found.append((label, index, index + 1))
     return found
 
 
