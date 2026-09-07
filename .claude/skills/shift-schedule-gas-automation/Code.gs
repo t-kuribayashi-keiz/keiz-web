@@ -310,35 +310,69 @@ function clearCalendarNames(sheet) {
   });
 }
 
+// 祝日ICSフィードの生テキストをキャッシュするためのキー・保持時間（CacheServiceの上限＝6時間）
+const HOLIDAY_ICS_CACHE_KEY = 'holiday_ics_text';
+const HOLIDAY_ICS_CACHE_SECONDS = 6 * 60 * 60;
+
+// 祝日ICSフィードの生テキストを取得する。スクリプトキャッシュにあればそれを使い、外部アクセスを
+// 減らす（同じセッション内で何度も月次シートを作るような操作でも、毎回は取得しに行かない）。
+// 429(レート制限)を受け取った場合は少し待って数回リトライする。
+// 戻り値: { text: string|null, error: string|null }
+function fetchHolidayIcsText() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get(HOLIDAY_ICS_CACHE_KEY);
+  if (cached) return { text: cached, error: null };
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = UrlFetchApp.fetch(HOLIDAY_ICS_URL, { muteHttpExceptions: true });
+      const code = res.getResponseCode();
+      if (code === 200) {
+        const text = res.getContentText();
+        try {
+          cache.put(HOLIDAY_ICS_CACHE_KEY, text, HOLIDAY_ICS_CACHE_SECONDS);
+        } catch (e) {
+          // キャッシュへの保存に失敗しても致命的ではないため無視（サイズ上限などの可能性）
+        }
+        return { text, error: null };
+      }
+      if (code === 429 && attempt < 2) {
+        Utilities.sleep(1500 * (attempt + 1)); // レート制限なので少し待ってからリトライ
+        continue;
+      }
+      return {
+        text: null,
+        error: `祝日カレンダーの取得に失敗しました（HTTP ${code}）。祝日の色分けは行われていません。`,
+      };
+    } catch (e) {
+      return {
+        text: null,
+        error: `祝日の取得に失敗しました: ${e}。祝日の色分けは行われていません。`,
+      };
+    }
+  }
+  return { text: null, error: '祝日カレンダーの取得に失敗しました（リトライ上限）。祝日の色分けは行われていません。' };
+}
+
 // 指定した年月の日本の祝日（日にちの数値の集合）を、公開ICSフィードから取得する。
 // 戻り値: { holidays: Set<number>, error: string|null }（取得・解析に失敗した場合は holidays は空、error にメッセージ）
 function getJapaneseHolidays(year, month) {
   const holidays = new Set();
   const monthPrefix = `${year}${('0' + month).slice(-2)}`;
-  try {
-    const res = UrlFetchApp.fetch(HOLIDAY_ICS_URL, { muteHttpExceptions: true });
-    if (res.getResponseCode() !== 200) {
-      return {
-        holidays,
-        error: `祝日カレンダーの取得に失敗しました（HTTP ${res.getResponseCode()}）。祝日の色分けは行われていません。`,
-      };
-    }
-    const text = res.getContentText();
-    const re = /DTSTART;VALUE=DATE:(\d{8})/g;
-    let match;
-    while ((match = re.exec(text)) !== null) {
-      const ymd = match[1];
-      if (ymd.slice(0, 6) === monthPrefix) {
-        holidays.add(parseInt(ymd.slice(6, 8), 10));
-      }
-    }
-    return { holidays, error: null };
-  } catch (e) {
-    return {
-      holidays,
-      error: `祝日の取得に失敗しました: ${e}。祝日の色分けは行われていません。`,
-    };
+  const fetchResult = fetchHolidayIcsText();
+  if (!fetchResult.text) {
+    return { holidays, error: fetchResult.error };
   }
+
+  const re = /DTSTART;VALUE=DATE:(\d{8})/g;
+  let match;
+  while ((match = re.exec(fetchResult.text)) !== null) {
+    const ymd = match[1];
+    if (ymd.slice(0, 6) === monthPrefix) {
+      holidays.add(parseInt(ymd.slice(6, 8), 10));
+    }
+  }
+  return { holidays, error: null };
 }
 
 // 指定した年月の日付をカレンダーに配置（曜日に応じた列に自動配置）。
