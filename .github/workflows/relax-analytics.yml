@@ -5,6 +5,8 @@ name: Relax analytics
 #
 #   mode=discover … どのプロパティ/サイトが見えるかの疎通確認だけ(実指標は取らない)
 #   mode=pull     … 対象月のセッション数・表示回数等の実指標を取得し、TSVをログに出す
+#   mode=probe-metrics … GA4 Data APIで実際に使える指標名(apiName)をgetMetadataで確認する
+#                        (UI表示名とAPI名が一致しない指標を、記憶や検索結果で推測せずに選ぶため)
 #
 # **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない
 # (TSVはこのジョブのログとワークフローの成果物(Artifact、7日で自動削除)にのみ出す。
@@ -21,13 +23,19 @@ on:
         type: string
         default: リラックス
       mode:
-        description: "discover=疎通確認だけ / pull=対象月の実指標を取得"
+        description: "discover=疎通確認だけ / pull=対象月の実指標を取得 / probe-metrics=使える指標名の確認"
         required: true
         type: choice
         options:
           - discover
           - pull
+          - probe-metrics
         default: discover
+      metrics_grep:
+        description: "mode=probe-metricsのときだけ使う。カンマ区切りのキーワード(apiName/uiName/descriptionに部分一致)"
+        required: false
+        type: string
+        default: "user,conversion,key"
       scope:
         description: "確認・取得する対象(discover/pull共通)"
         required: true
@@ -117,6 +125,15 @@ jobs:
               --out "out/${m_trimmed}.tsv"
             cat "out/${m_trimmed}.tsv"
           done
+
+      - name: Probe metrics
+        if: inputs.mode == 'probe-metrics'
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          python3 scripts/ga4_metrics_probe.py --brand "${{ inputs.brand }}" \
+            --grep "${{ inputs.metrics_grep }}"
 
       - name: Upload results
         if: inputs.mode == 'pull'
