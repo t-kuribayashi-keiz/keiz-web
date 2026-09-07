@@ -125,11 +125,28 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 (鍵はActions内でのみ復号され、どのPCにも置かれず、ログにも出ない)。
 ローカルでスクリプトを直接叩く場合はSecretsを読めないので、そちらは従来どおり鍵ファイルが要る。
 
-| シークレット名 | 鍵ファイル(ローカルPC Keizgroup500) | 対象 | 状態 |
+**この表は2026-09-06にローカルセッションが実物を確認して直したもの。** 以前ここに書いて
+あった「`GCP_RELAX_KEY` は未登録、鍵は `claude\keys\relax-reporter.json`」は**両方とも
+誤り**だった(Secretsには2026-09-05に登録済みで、その名前の鍵ファイルはKeizgroup500に
+存在しない)。**Secretsとローカルの実物を見ずに状態を書かないこと。**
+
+| シークレット名 | 対象 | Secretsの状態 | Keizgroup500の鍵ファイル |
 |---|---|---|---|
-| `GCP_KPI_WRITER_KEY` | `claude\keys\chokuei-sunsumirai-kpi-writer.json` | 直営+サンズミライ | **登録済み** |
-| `GCP_RELAX_KEY` | `claude\keys\relax-reporter.json` | リラックス | **未登録** |
-| `GCP_SMILE_GOOD_KEY` | `claude\keys\smile-good-reporter.json` | スマイル+グッド | **未登録** |
+| `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
+| `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | **無し**(中身がどのサービスアカウントかは未確認) |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter.json` |
+| `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
+
+`ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
+まだActions経由で読んでいない)。
+
+**`GCP_RELAX_KEY` の中身の確認が先**: 鍵ファイルが手元に無いので、登録されている鍵が
+`relax-reporter@…` なのか別のサービスアカウントなのかがリポジトリ側から分からない。
+再登録ではなく、`relax-analytics.yml` を1回回して確かめる — `analytics_discover.py` は
+最初にサービスアカウントのメールアドレスを印字するので、**鍵の中身を一切出さずに**
+どのアカウントかが分かる。GA4/GSCで何が見えているかも同時に出る。
+なお `relax-analytics.yml` はまだ作業ブランチにしか無く、workflow_dispatch は既定ブランチに
+ワークフローが無いと起動できないので、確認の前にmainへ取り込む必要がある。
 
 `GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
 `hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、

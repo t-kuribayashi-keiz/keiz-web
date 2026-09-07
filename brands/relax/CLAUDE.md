@@ -230,7 +230,12 @@ GA4にもSearch Consoleにもリポジトリにも書き込まない。スコー
 
 ### 残っている確認事項
 
-1. **`GCP_RELAX_KEY` のシークレット登録** — これが無いとAPIを叩けない
+1. ~~**`GCP_RELAX_KEY` のシークレット登録**~~ → 2026-09-05に登録済み(2026-09-06にローカル
+   セッションがSecretsの実物で確認)。ただし**登録されている鍵がどのサービスアカウントかは
+   未確認** — `claude\keys\relax-reporter.json` はKeizgroup500に存在せず、あるのは
+   `ad-spend-reporter` / `chokuei-sunsumirai-kpi-writer` / `smile-good-reporter` の3つだけ。
+   再登録して上書きするのではなく、`relax-analytics.yml` を1回回して先頭に出る
+   サービスアカウントのメールアドレスで確かめること(鍵の中身は出ない)
 2. **「リラックス新規客経路集計」シートのURL** — 名前・オーナー・タブ名までは判明。
    URLをもらえばサービスアカウントに閲覧者で共有 → スモークテストに使う
 3. **Search Consoleのプロパティ数と形式** — 付与後に `sites.list` で判明する
