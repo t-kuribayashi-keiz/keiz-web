@@ -30,6 +30,18 @@ class TestCleanPropertyName(unittest.TestCase):
         self.assertNotEqual(ga4.clean_property_name("GA4"), "")
         self.assertNotEqual(ga4.clean_property_name("refresh-relax.com"), "")
 
+    def test_leading_management_numbering_is_dropped(self):
+        """実物のGA4プロパティ名(2026-09-06 relax-analytics.yml実行結果)に付く連番。"""
+        for raw, want in (
+            ("02. リラックスイオン入間店", "リラックスイオン入間店"),
+            ("20. FKDインターパーク店", "FKDインターパーク店"),
+            ("99.リラックス たまプラーザ東急百貨店", "リラックス たまプラーザ東急百貨店"),
+        ):
+            self.assertEqual(ga4.clean_property_name(raw), want, raw)
+
+    def test_a_name_that_is_only_numbering_is_left_alone(self):
+        self.assertNotEqual(ga4.clean_property_name("02."), "")
+
     def test_a_plain_store_name_is_untouched(self):
         self.assertEqual(ga4.clean_property_name("久我山店"), "久我山店")
 

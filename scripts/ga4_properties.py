@@ -47,6 +47,11 @@ PROPERTY_DECORATIONS = (
 )
 
 
+# 管理用の連番。「02. リラックスイオン入間店」「20. FKDインターパーク店」のように先頭に付く。
+# 全角ピリオドも見る(「０２．」のような入力を将来受けても壊れないように)。
+LEADING_NUMBERING = re.compile(r"^\s*\d{1,3}[.\uff0e]\s*")
+
+
 def clean_property_name(name: str) -> str:
     """プロパティ名から、店舗名でない飾りを落とす。
 
@@ -54,6 +59,7 @@ def clean_property_name(name: str) -> str:
     どの店舗にも当たらないのではなく全店舗に当たってしまう)。
     """
     text = str(name).strip()
+    text = LEADING_NUMBERING.sub("", text, count=1) or text
     for pattern in PROPERTY_DECORATIONS:
         stripped = re.sub(pattern, " ", text, flags=re.IGNORECASE)
         if stripped.strip(" 　-_|/（）()[]【】"):
