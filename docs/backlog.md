@@ -71,17 +71,25 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 - **高円寺店の詳細情報**(住所・電話・自社サイトURL)。2026年7月開店で`data/clinics.json`には
   名前のみ登録済み(現在リラックスは25件)。URL未登録のため、GA4/GSCの照合対象にまだ入れない
-- **リラックスGSCの残り10店舗への個別付与** — Search ConsoleはAPIでの一括/個別付与ができないため
-  (GA4のアカウント単位付与のような手段が無い)、「設定→ユーザーと権限→ユーザーを追加」で
-  `relax-reporter@…`を「フル」で1店舗ずつ追加する必要がある。対象: 水戸京成百貨店・
-  FKDインターパーク店・サクラス戸塚店・下高井戸店・浜田山店・笹塚店・西新宿店・祖師谷店・
-  久我山店・戸越銀座店。`sc-domain:refresh-relax.com`のドメインプロパティが既にあれば
-  1回の共有で済む可能性があり、栗林さんに確認依頼中
-- **「リラックス新規客経路集計」シートの`relax-reporter`への共有** — URLは判明
-  (`1v6ruoGHKQ4Gny5lVO8fVIVAzlRDozQjo2I9K5oRjjxA`)。Google Driveの`share_file`で共有を
-  試みたが「The caller does not have permission」で失敗(2026-09-07、原因未特定・他シートでは
-  同じ操作が成功しているのでこの1件固有の事情の可能性)。オーナー本人がシートのUIから
-  「共有」→サービスアカウントのメール→閲覧者、で共有する必要がある
+- **★栗林さんの作業: リラックスGSCの残り10店舗への個別付与** — Search ConsoleはAPIでの
+  一括/個別付与ができないため(GA4のアカウント単位付与のような手段が無い)、
+  「設定→ユーザーと権限→ユーザーを追加」で`relax-reporter@keizgroup-automation.iam.gserviceaccount.com`
+  を「フル」で1店舗ずつ追加する必要がある。対象10店舗:
+  水戸京成百貨店(https://refresh-relax.com/mito/)・
+  FKDインターパーク店(https://refresh-relax.com/fkd/)・
+  サクラス戸塚店(https://refresh-relax.com/totsuka/)・
+  下高井戸店(https://refresh-relax.com/shimotakaido/)・
+  浜田山店(https://refresh-relax.com/hamadayama/)・
+  笹塚店(https://refresh-relax.com/sasazuka/)・
+  西新宿店(https://refresh-relax.com/nishishinjuku/)・
+  祖師谷店(https://refresh-relax.com/soshigaya/)・
+  久我山店(https://refresh-relax.com/kugayama/)・
+  戸越銀座店(https://refresh-relax.com/togoshiginza/)。
+  `sc-domain:refresh-relax.com`のドメインプロパティが既にあれば1回の共有で済む可能性があり、
+  確認依頼中(2026-09-07)。終わったら`relax-analytics.yml`(scope=gsc)を再実行して
+  `sites.list`に10件増えることを確認する
+- ~~**「リラックス新規客経路集計」シートの`relax-reporter`への共有**~~ → 2026-09-07に
+  栗林さんが共有完了。読み取りのスモークテストはこの後実施
 - **集計自動化の残り工程** — ④(F列紹介・J列オフライン合計・X列AI の転記方法)と
   ⑥(Googleトレンド)は「別途指示」とのこと。③(V/W列のPPC・META)は自動化保留の判断済み
 - **「年間計画・目標」タブのL列(店舗数)の自動化** — 2026-09-03に栗林さんの判断で当面手動。
