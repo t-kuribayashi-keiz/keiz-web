@@ -19,6 +19,8 @@
  *     希望休(赤字)を除いた残り日数を、店舗ごとに独立して以下のルールで自動割り振り
  *        ・各資格（柔道整復師/鍼灸師など）を持つスタッフ、およびピラティス対応スタッフが、
  *          その店舗の全出勤日で最低1人は勤務（ハード制約）
+ *        ・1日あたりの出勤者がMIN_WORKING_STAFF_PER_DAY人を下回らないようにする（ワンオペ防止。
+ *          ハード制約。店舗ごとに判定）
  *        ・院長は月初1〜7日間、希望休を含めて公休1日まで（ハード制約）
  *        ・同じスタッフに公休を2日以上連続させない（原則禁止。避けられない場合のみ警告の上で許容）
  *        ・同じスタッフを6日以上連続で勤務させない（MAX_CONSECUTIVE_WORK_DAYSを超える手前で公休を差し込む）
@@ -139,6 +141,11 @@ const MAX_CONSECUTIVE_OFF_DAYS = 1;
 
 // 同じスタッフを連続で勤務させてよい日数の上限（これを超える手前で公休を優先的に差し込む）
 const MAX_CONSECUTIVE_WORK_DAYS = 5;
+
+// 1日あたり最低限出勤しているべき人数（ワンオペ防止のハード制約。店舗ごとに判定。例: 4人配属で
+// 3人が同じ日に休むと1人勤務になってしまうケースを防ぐ）。資格/ピラティスカバレッジと同じ扱いで、
+// 通常は必ず守るが、連勤解消の最終手段でどうしても他に方法が無い場合にのみ上書きを許容する。
+const MIN_WORKING_STAFF_PER_DAY = 2;
 
 // 「実行用」シート名（スマホ/iPad向け）。カスタムメニューの代わりに、このシート上の図形(ボタン)に
 // スクリプトを割り当てて実行できるようにするための入力欄・結果欄のセル位置。
@@ -964,6 +971,9 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
   days.forEach((day) => {
     const working = roster.filter((n) => !day.filledNames.has(n));
     const reasons = [];
+    if (working.length < MIN_WORKING_STAFF_PER_DAY) {
+      reasons.push(`出勤者${working.length}人(ワンオペ)`);
+    }
     coverageGroups.concat(softGroups).forEach(({ label, names }) => {
       if (names.length > 0 && !working.some((n) => names.includes(n))) {
         reasons.push(`${label}0人`);
@@ -1087,7 +1097,7 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
       .join('、')}（手動で調整してください）`;
   }
   if (existingViolations.length) {
-    msg += `\n※希望休の時点で既に女性/新患対応/資格のカバレッジが0人になっている日: ${existingViolations.join('、')}`;
+    msg += `\n※希望休の時点で既に最低出勤人数割れ、または女性/新患対応/資格のカバレッジが0人になっている日: ${existingViolations.join('、')}`;
   }
   if (directorWarnings.length) {
     msg += `\n※院長ルール（月初${DIRECTOR_EARLY_WEEK_DAYS}日間は公休${DIRECTOR_EARLY_WEEK_MAX}日まで）が希望休の時点で既に超過: ${directorWarnings.join('、')}`;
@@ -1137,6 +1147,14 @@ function hardConstraintReasons(day, staffName, roster, coverageGroups, directorN
   }
 
   const workingNames = roster.filter((n) => !day.filledNames.has(n) && n !== staffName);
+
+  // ワンオペ防止：staffNameも休ませると、その日の出勤者がMIN_WORKING_STAFF_PER_DAY人未満になる場合。
+  // ただしロスター自体がMIN_WORKING_STAFF_PER_DAY人以下（例:2人配属の店舗でMIN=2）の場合は、
+  // 誰にも一切休みを出せなくなってしまう（構造的に満たせない）ため、その場合はこの制約自体を適用しない
+  if (roster.length > MIN_WORKING_STAFF_PER_DAY && workingNames.length < MIN_WORKING_STAFF_PER_DAY) {
+    overridable.push(`最低出勤人数(${MIN_WORKING_STAFF_PER_DAY}人未満)`);
+  }
+
   coverageGroups.forEach(({ label, names }) => {
     if (!names || names.length === 0) return;
     if (!workingNames.some((n) => names.includes(n))) overridable.push(`資格カバレッジ(${label}が0人)`);
