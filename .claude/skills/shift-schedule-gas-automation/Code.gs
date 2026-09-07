@@ -158,16 +158,22 @@ const RUN_FILL_QUOTA_CELL = 'B15';
 const RUN_FILL_RESULT_CELL = 'B18';
 
 /** ===== メニュー ===== */
+// 日常運用（月次シート作成・公休自動入力）と、初期設定・不具合対応用のメニューを分けて、
+// 毎月の操作と一度きりの操作が混ざって迷わないようにしている。
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('休暇シート自動化')
+  const ui = SpreadsheetApp.getUi();
+
+  const setupMenu = ui
+    .createMenu('初期設定・メンテナンス')
+    .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
+    .addItem('行事欄をテンプレートに追加（初回のみ）', 'insertEventRowIntoTemplate')
+    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate');
+
+  ui.createMenu('休暇シート自動化')
     .addItem('① 月次シートを作成', 'createMonthlySheets')
     .addItem('② 公休を自動入力（このシート）', 'autoFillRegularHolidays')
     .addSeparator()
-    .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
-    .addItem('行事欄をテンプレートに追加（初回のみ）', 'insertEventRowIntoTemplate')
-    .addSeparator()
-    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate')
+    .addSubMenu(setupMenu)
     .addToUi();
 }
 
