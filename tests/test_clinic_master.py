@@ -135,6 +135,47 @@ class TestSubHeaderDoesNotLeakAcrossGroups(unittest.TestCase):
                          {"10:00-13:00", "15:30-21:00", "9:00-12:30", "15:00-18:00"})
 
 
+class TestNameColumns(unittest.TestCase):
+    """心身堂タブだけ法人名(B列)と支店名(C列)が別セルに分かれている(2026-09-07、
+    --applyの衝突検出で発覚: 7院すべてがB列だけの同じキーに正規化されていた)。"""
+
+    def test_shinshindo_uses_two_columns(self):
+        self.assertEqual(cm.name_columns_for("心身堂［20260708］"), [1, 2])
+
+    def test_other_tabs_use_the_default_single_column(self):
+        self.assertEqual(cm.name_columns_for("直営院"), [1])
+        self.assertEqual(cm.name_columns_for("ミライ・サンズ"), [1])
+
+    def test_the_joined_name_matches_the_clinic_masters_spelling(self):
+        row = ["1", "心身堂鍼灸整骨院・整体院", "泉大津院", "9:00"]
+        self.assertEqual(cm.read_name(row, [1, 2]), "心身堂鍼灸整骨院・整体院 泉大津院")
+
+    def test_a_single_column_join_is_unchanged(self):
+        row = ["1", "本八幡駅前整骨院", "9:30"]
+        self.assertEqual(cm.read_name(row, [1]), "本八幡駅前整骨院")
+
+    def test_seven_shinshindo_branches_no_longer_collapse_to_one_key(self):
+        branches = ["泉大津院", "泉ヶ丘店", "守山院", "草津院", "松原院", "大津堅田院", "羽曳野院"]
+        rows = [["", "心身堂鍼灸整骨院・整体院", b] for b in branches]
+        keys = {cm.normalize_store_name(cm.read_name(r, [1, 2])) for r in rows}
+        self.assertEqual(len(keys), 7, keys)
+
+    def test_the_joined_names_resolve_against_the_clinic_master(self):
+        import json
+        path = Path(__file__).resolve().parent.parent / "data" / "clinics.json"
+        clinics = json.loads(path.read_text(encoding="utf-8"))["clinics"]
+        keys = {cm.normalize_store_name(c["name"]) for c in clinics}
+        branches = ["泉大津院", "泉ヶ丘店", "草津院", "松原院", "大津堅田院", "羽曳野院"]
+        for b in branches:
+            row = ["", "心身堂鍼灸整骨院・整体院", b]
+            name = cm.read_name(row, [1, 2])
+            self.assertIn(cm.normalize_store_name(name), keys, name)
+        # 守山院だけ法人名が「心身堂鍼灸接骨院」(整骨院・整体院ではない)
+        row = ["", "心身堂鍼灸接骨院", "守山院"]
+        name = cm.read_name(row, [1, 2])
+        self.assertIn(cm.normalize_store_name(name), keys, name)
+
+
 class TestAllowedTabs(unittest.TestCase):
     """『診療時間』にはバックアップ・旧版タブが多数同居する(2026-09-07、実データで判明)。
     栗林さんに確認して固定した現行タブの一覧を、決め打ちにせず設定ファイルから読む。"""

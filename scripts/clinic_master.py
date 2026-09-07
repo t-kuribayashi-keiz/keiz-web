@@ -168,6 +168,17 @@ def cell_at(row: list, index: int) -> str:
     return text(row[index]) if index < len(row) else ""
 
 
+def read_name(row: list, name_columns: list[int]) -> str:
+    """院名を組み立てる。複数列指定なら空白でつなぐ。
+
+    心身堂タブは法人名(B列)と支店名(C列)が別セルに分かれており、B列だけを読むと
+    7院すべてが同じ『心身堂鍼灸整骨院・整体院』に潰れる(2026-09-07、--applyの
+    衝突検出で発覚)。data/clinics.json 側は『心身堂鍼灸整骨院・整体院 泉大津院』の
+    ように空白区切りの1文字列なので、同じ形につなぐ。
+    """
+    return " ".join(part for idx in name_columns if (part := cell_at(row, idx)))
+
+
 def read_hours(row: list, columns: list[tuple[str, int, int]]) -> dict[str, str]:
     """1院ぶんの診療時間。開始と終了が両方入っている区分だけ返す。
 
@@ -200,6 +211,16 @@ def allowed_tabs(config_path: Path = TABS_CONFIG_PATH) -> list[str]:
     ここに無いタブは--inspectでも中身を読まない(『未設定』として一覧するだけ)。
     """
     return json.loads(config_path.read_text(encoding="utf-8"))["allowed_tabs"]
+
+
+def name_columns_for(title: str, config_path: Path = TABS_CONFIG_PATH) -> list[int]:
+    """院名として読む列(0始まり)。ほとんどのタブはB列(1)だけだが、心身堂タブだけ
+    法人名(B列)と支店名(C列)が別セルに分かれている(2026-09-07、--applyの衝突検出で
+    発覚: 7院すべてが法人名だけの同じキーに正規化されていた)。設定に無いタブは既定で
+    [NAME_COLUMN_INDEX] のみ。
+    """
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    return config.get("name_columns_by_tab", {}).get(title, [NAME_COLUMN_INDEX])
 
 
 def sheet_titles(service) -> tuple[str, list[str]]:
@@ -236,9 +257,10 @@ def collect(service) -> dict[str, dict]:
             print(f"  {title!r}: 開始/終了の組が見つからないので飛ばします")
             continue
 
+        name_columns = name_columns_for(title)
         count = 0
         for row in rows[header_index + 1:]:
-            name = cell_at(row, NAME_COLUMN_INDEX)
+            name = read_name(row, name_columns)
             if not name:
                 continue
             key = normalize_store_name(name)
