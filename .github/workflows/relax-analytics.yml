@@ -41,6 +41,11 @@ on:
         required: false
         type: string
         default: ""
+      stores:
+        description: "mode=pullのときだけ使う。カンマ区切りで店舗を絞る(省略時は全店。出力が大きくログが途中で切れるときの分割実行用)"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -92,4 +97,4 @@ jobs:
             *)   flag="" ;;
           esac
           python3 scripts/analytics_pull.py --brand "${{ inputs.brand }}" \
-            --month "${{ inputs.month }}" $flag
+            --month "${{ inputs.month }}" --stores "${{ inputs.stores }}" $flag
