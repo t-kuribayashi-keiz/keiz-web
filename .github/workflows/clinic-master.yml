@@ -60,7 +60,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/clinics.json
-          git commit -m "Import 診療時間 and 定休 from the clinic master
-
-Filled in by .github/workflows/clinic-master.yml (mode: apply)."
+          git commit -m "Import 診療時間 and 定休 from the clinic master (clinic-master.yml, mode: apply)"
           git push origin HEAD:${{ github.ref_name }}
