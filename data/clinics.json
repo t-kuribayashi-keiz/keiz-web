@@ -1,5 +1,5 @@
 {
-  "_comment": "院マスタ。id は kpi-history/ や proposals/ から参照するキーとして使う。ブランド別の詳細コンテキストは brands/<ブランド名>/CLAUDE.md を参照。**診療時間と定休日はここには入っていない。** 取り込み元のスプレッドシートのファイル名が「診療時間」(ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)なので取り込んだつもりになりやすいが、取ったのは院名・住所・電話・URL・メールだけ。時間や定休日が要るときはマスタ側を見る(同スプレッドシートの「AIチェック用」シートに定休日列がある)。2026-09-03、salonboard-operatorが定休日を見つけられなかった原因。",
+  "_comment": "院マスタ。id は kpi-history/ や proposals/ から参照するキーとして使う。ブランド別の詳細コンテキストは brands/<ブランド名>/CLAUDE.md を参照。hours(診療時間)と closed_day(定休)は院マスタのスプレッドシート「診療時間」(ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)から scripts/clinic_master.py --apply で取り込む。**closed_day が空文字なのは『マスタの定休列が空だった』という意味で、『定休日が無い』と確定したわけではない。**hours や closed_day のキー自体が無い院は、マスタと院名を照合できなかった院。",
   "clinics": [
     {
       "id": "luna-togoshiginza",
@@ -32,7 +32,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:30-12:30",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-nishiotsu",
@@ -47,7 +54,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "10:00-13:00",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "sunsmirai-otsu-ishiyama",
@@ -62,7 +76,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "10:00-13:00",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": "金"
     },
     {
       "id": "sunsmirai-otsu",
@@ -77,7 +98,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "10:00-13:00",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "sunsmirai-sakai-mihara",
@@ -92,7 +120,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:30-12:30",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-tondabayashi-170",
@@ -107,7 +142,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:30-12:30",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-wakayama-arimoto",
@@ -122,7 +164,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:30",
+        "松原：全日（2）": "15:30-20:30",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "sunsmirai-wakayama-higashiguchi",
@@ -137,7 +186,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:30-12:30",
+        "松原：全日（2）": "15:30-21:00",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-hiramatsu-joto",
@@ -152,7 +208,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:30",
+        "松原：全日（2）": "15:30-20:30",
+        "松原：全日（3）": "9:00-12:30",
+        "松原：全日（4）": "15:00-18:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "sunsmirai-hirakata-nagao",
@@ -167,7 +230,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:00",
+        "松原：全日（2）": "15:30-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-kawachi-iwafune",
@@ -182,7 +252,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:00",
+        "松原：全日（2）": "16:00-21:00",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-takatsuki",
@@ -197,7 +274,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:00",
+        "松原：全日（2）": "15:30-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": "金"
     },
     {
       "id": "sunsmirai-hirakata-gotenyama",
@@ -212,7 +296,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:30",
+        "松原：全日（2）": "16:00-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-matsuiyamate",
@@ -227,7 +318,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "10:00-13:00",
+        "松原：全日（2）": "16:00-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-fukaebashi",
@@ -242,7 +340,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日（3）": "10:00-13:00",
+        "松原：全日（4）": "15:00-18:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-minami-ibaraki",
@@ -257,7 +360,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:00",
+        "松原：全日（2）": "15:30-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": "火"
     },
     {
       "id": "sunsmirai-shinobugaoka",
@@ -272,7 +382,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:30",
+        "松原：全日（2）": "16:00-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "sunsmirai-hirakata-koen",
@@ -287,7 +404,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。"
+      "notes": "院マスタ(Googleスプレッドシート「診療時間」/ID: 1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8)『ミライ・サンズ』シートより取得。集客チャネルは未確認。",
+      "hours": {
+        "松原：全日": "9:00-12:30",
+        "松原：全日（2）": "16:00-20:30",
+        "松原：全日（3）": "9:00-13:00",
+        "松原：全日（4）": "15:00-17:30"
+      },
+      "closed_day": "火"
     },
     {
       "id": "chokuei-motoyawata",
@@ -303,7 +427,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人はクラシオン/エフアール/ケイズ/フォース/ドリーム/アポロ/バーニング/トラストの8社で、いずれもブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人はクラシオン/エフアール/ケイズ/フォース/ドリーム/アポロ/バーニング/トラストの8社で、いずれもブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-wakaba",
@@ -319,7 +450,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:30",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-tsuga",
@@ -335,7 +473,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:00",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sakura",
@@ -351,7 +496,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:30-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-minamikashiwa",
@@ -367,7 +519,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-genki",
@@ -383,7 +542,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:30-21:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kamagaya",
@@ -399,7 +565,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:00",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-inagekaigan",
@@ -415,7 +588,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-futawa",
@@ -431,7 +611,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:30-20:45",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-hatsuishi",
@@ -447,7 +634,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-tennodai",
@@ -463,7 +657,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kashiwaminamiguchi",
@@ -479,7 +680,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:15",
+        "平日 後": "15:00-21:15",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-abikoekimae",
@@ -495,7 +703,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sakuraekimae",
@@ -511,7 +726,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nakayama",
@@ -527,7 +749,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:30-21:15",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nagareyama",
@@ -543,7 +772,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shizu",
@@ -559,7 +795,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-yachimata",
@@ -575,7 +818,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-13:00",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-lifegarden",
@@ -591,7 +841,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:15-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kozu",
@@ -607,7 +864,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shinmatsudo",
@@ -623,7 +887,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-ichikawa",
@@ -639,7 +910,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-narita",
@@ -655,7 +933,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-makuhari",
@@ -671,7 +956,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-toyoshiki",
@@ -687,7 +979,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-owada",
@@ -703,7 +1002,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-13:00",
+        "平日 後": "15:30-20:15",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ooami",
@@ -719,7 +1025,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-abekawa",
@@ -735,7 +1048,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-ginowan",
@@ -751,7 +1071,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-hachioji",
@@ -767,7 +1094,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kotoni",
@@ -783,7 +1117,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-okayama",
@@ -799,7 +1140,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-jujo",
@@ -815,7 +1163,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-12:30",
+        "平日 後": "15:00-21:30",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:30-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-asaka",
@@ -831,7 +1186,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:30",
+        "平日 後": "16:30-20:30",
+        "土日祝 前": "10:00-14:00",
+        "土日祝 後": "16:30-20:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nishiogikubo",
@@ -847,7 +1209,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shinbashi",
@@ -863,7 +1232,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-14:00",
+        "平日 後": "16:00-20:45",
+        "土日祝 前": "11:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-mikuni",
@@ -879,7 +1254,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "16:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-taniyon",
@@ -895,7 +1277,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "16:00-21:00",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "16:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-natori",
@@ -911,7 +1300,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sekiya",
@@ -927,7 +1323,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-machida",
@@ -943,7 +1346,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:00",
+        "土日祝 後": "14:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kamoi",
@@ -959,7 +1369,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:45",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-tateishiekimae",
@@ -975,7 +1392,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:00",
+        "平日 後": "15:00-21:15",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-motoyawata",
@@ -991,7 +1415,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-13:00",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ooyama",
@@ -1007,7 +1438,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shimoigusa",
@@ -1023,7 +1461,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "9:30-13:00",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-motosumiyoshi",
@@ -1039,7 +1484,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shinshizuoka",
@@ -1055,7 +1507,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "10:00-13:00",
+        "土日祝 後": "15:30-18:30"
+      },
+      "closed_day": "日"
     },
     {
       "id": "chokuei-rikuzen",
@@ -1071,7 +1530,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-koiwakuramae",
@@ -1087,7 +1553,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:30",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sapporo",
@@ -1103,7 +1576,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-13:00",
+        "平日 後": "16:00-20:45",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-urasoe",
@@ -1119,7 +1599,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-hattoritenjin",
@@ -1135,7 +1622,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "16:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shimoakatsuka",
@@ -1151,7 +1645,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-higashifukai",
@@ -1167,7 +1668,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kitasenju",
@@ -1183,7 +1691,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-hanajiri",
@@ -1199,7 +1714,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "火"
     },
     {
       "id": "chokuei-naritamisatodai",
@@ -1215,7 +1737,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-toyoshikichuo",
@@ -1231,7 +1760,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-e-kamiitabashi",
@@ -1247,7 +1783,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-aja",
@@ -1263,7 +1806,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-teraohigashi",
@@ -1279,7 +1829,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-e-minamisendai",
@@ -1295,7 +1852,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:00",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ikeshita",
@@ -1311,7 +1875,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:45",
+        "平日 後": "15:30-20:45",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "月"
     },
     {
       "id": "chokuei-fujimino",
@@ -1327,7 +1898,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-tomisato",
@@ -1343,7 +1921,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-kitakogane",
@@ -1359,7 +1944,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-tenjinbashi",
@@ -1375,7 +1967,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "16:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ijiri",
@@ -1391,7 +1990,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-karasuma",
@@ -1407,7 +2013,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-14:00",
+        "平日 後": "16:00-20:30",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "chokuei-imaike",
@@ -1423,7 +2036,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "chokuei-kurashiki",
@@ -1439,7 +2059,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-nishijin",
@@ -1455,7 +2082,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kodaira",
@@ -1471,7 +2105,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-umesato",
@@ -1487,7 +2128,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-awase",
@@ -1503,7 +2151,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-kawaguchiekimae",
@@ -1519,7 +2174,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "15:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-n-funabashi",
@@ -1535,7 +2197,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-s-asaka",
@@ -1551,7 +2220,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kashiwahigashi",
@@ -1567,7 +2243,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-c-kashiwanoha",
@@ -1583,7 +2266,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-e-kawama",
@@ -1599,7 +2289,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kawagoekasumigaseki",
@@ -1615,7 +2312,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shinsayama",
@@ -1631,7 +2335,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sakurayukarigaoka",
@@ -1647,7 +2358,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-higashikoganei",
@@ -1663,7 +2381,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-sayamagaoka",
@@ -1679,7 +2404,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-sapporokotoni",
@@ -1695,7 +2427,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:30-20:45",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-honda",
@@ -1711,7 +2450,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:15-20:45",
+        "土日祝 前": "8:00-12:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ikebukuro",
@@ -1727,7 +2473,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-14:00",
+        "平日 後": "16:00-20:45",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ishida",
@@ -1743,7 +2496,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": "火"
     },
     {
       "id": "chokuei-eniwa",
@@ -1759,7 +2519,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-higashijujo",
@@ -1775,7 +2542,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-13:00",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-matsusaki",
@@ -1791,7 +2565,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:00",
+        "平日 後": "15:00-20:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-fuchinobe",
@@ -1807,7 +2588,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:15",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:00",
+        "土日祝 後": "14:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kohdo",
@@ -1823,7 +2611,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:00",
+        "土日祝 後": "14:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-mabashi",
@@ -1839,7 +2634,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:00-12:00",
+        "土日祝 後": "14:30-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-mutsumi",
@@ -1855,7 +2657,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-koriyama",
@@ -1871,7 +2680,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:30-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nagamachi",
@@ -1887,7 +2703,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:30-20:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-katsutadai",
@@ -1903,7 +2726,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-keiseiyawata",
@@ -1919,7 +2749,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:30-21:15",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shiki",
@@ -1935,7 +2772,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-12:30",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-monenosato",
@@ -1951,7 +2795,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-takada",
@@ -1967,7 +2818,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "10:00-13:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-chitose",
@@ -1983,7 +2841,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-mizue",
@@ -1999,7 +2864,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shinhamamatsu",
@@ -2015,7 +2887,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:45-13:00",
+        "平日 後": "15:30-20:15",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": "日"
     },
     {
       "id": "chokuei-shimosakitaguchi",
@@ -2031,7 +2910,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:15-13:00",
+        "平日 後": "15:00-20:45",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-minamihiragishi",
@@ -2047,7 +2933,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-goi-h",
@@ -2063,7 +2956,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:30",
+        "土日祝 前": "8:30-13:00",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nakamurakouen",
@@ -2079,7 +2979,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:45",
+        "平日 後": "15:30-20:45",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kitasendai",
@@ -2095,7 +3002,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-nijyo",
@@ -2111,7 +3025,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "8:30-12:00",
+        "平日 後": "15:30-20:00",
+        "土日祝 前": "8:30-13:00",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "chokuei-kameda",
@@ -2127,7 +3048,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-shindohigashi",
@@ -2143,7 +3071,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "14:30-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kawanishinoseguchi",
@@ -2159,7 +3094,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-yawatajuku-n",
@@ -2175,7 +3117,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kitayama",
@@ -2191,7 +3140,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "15:30-20:00",
+        "土日祝 前": "9:00-13:30",
+        "土日祝 後": "15:00-17:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "chokuei-otakanomori",
@@ -2207,7 +3163,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-anegasaki",
@@ -2223,7 +3186,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-koriyama-n",
@@ -2239,7 +3209,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-teine",
@@ -2255,7 +3232,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-yotsukaido-k",
@@ -2271,7 +3255,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:15-12:30",
+        "平日 後": "15:00-20:15",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-creamall",
@@ -2287,7 +3278,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-kikugawa",
@@ -2303,7 +3301,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "9:30-13:00",
+        "土日祝 後": "15:30-18:00"
+      },
+      "closed_day": "水"
     },
     {
       "id": "chokuei-haijima",
@@ -2319,7 +3324,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-motoyama",
@@ -2335,7 +3347,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:30-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "chokuei-musashisakai",
@@ -2351,7 +3370,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-miraidaira",
@@ -2367,7 +3393,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "8:30-12:30",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-ichinomiya",
@@ -2383,7 +3416,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-12:30",
+        "土日祝 後": "15:00-18:00"
+      },
+      "closed_day": "火・金"
     },
     {
       "id": "chokuei-mizuhodai",
@@ -2399,7 +3439,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-12:30",
+        "平日 後": "15:00-21:00",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-moriya",
@@ -2415,7 +3462,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:00-20:30",
+        "土日祝 前": "9:00-13:00",
+        "土日祝 後": "15:00-17:30"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-meinohama",
@@ -2431,7 +3485,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「直営院」タブ。法人8社がブランド「直営」に束ねられている。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "10:00-13:00",
+        "平日 後": "15:30-20:30",
+        "土日祝 前": "10:00-13:00",
+        "土日祝 後": "14:30-18:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "shinshindou-izumiotsu",
@@ -2446,7 +3507,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-13:00",
+        "平日 後": "16:00-20:00",
+        "土日祝": "9:00-18:00"
+      },
+      "closed_day": "日"
     },
     {
       "id": "shinshindou-izumigaoka",
@@ -2461,7 +3528,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-13:00",
+        "平日 後": "16:00-20:00",
+        "土日祝": "9:00-18:00"
+      },
+      "closed_day": "日"
     },
     {
       "id": "shinshindou-moriyama",
@@ -2476,7 +3549,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-13:00",
+        "平日 後": "16:00-20:00",
+        "土日祝": "9:30-18:00"
+      },
+      "closed_day": "日"
     },
     {
       "id": "shinshindou-kusatsu",
@@ -2491,7 +3570,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。郵便番号は元データ未記載。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。郵便番号は元データ未記載。",
+      "hours": {
+        "平日 前": "9:00-13:00",
+        "平日 後": "16:00-20:00",
+        "土日祝": "9:30-18:00"
+      },
+      "closed_day": "水・日"
     },
     {
       "id": "shinshindou-matsubara",
@@ -2506,7 +3591,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-13:00",
+        "平日 後": "15:30-20:00",
+        "土日祝": "9:30-18:30"
+      },
+      "closed_day": "水"
     },
     {
       "id": "shinshindou-otsu-katata",
@@ -2521,7 +3612,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-13:00",
+        "平日 後": "15:30-20:00",
+        "土日祝": "9:30-18:30"
+      },
+      "closed_day": "日"
     },
     {
       "id": "shinshindou-habikino",
@@ -2536,7 +3633,13 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)「心身堂」タブ。法人名はすべて「心身堂」でブランド名と完全一致。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-13:00",
+        "平日 後": "15:30-20:00",
+        "土日祝": "9:30-18:30"
+      },
+      "closed_day": "日"
     },
     {
       "id": "smile-nakamozu",
@@ -2552,7 +3655,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-otori",
@@ -2568,7 +3678,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-sakaishi",
@@ -2584,7 +3701,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-nagayoshi",
@@ -2600,7 +3724,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-rokkomichi",
@@ -2616,7 +3747,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "15:30-19:30",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-konanyamate",
@@ -2632,7 +3770,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "15:30-19:30",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-haruki",
@@ -2648,7 +3793,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-kitanoda",
@@ -2664,7 +3816,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-izumigaoka",
@@ -2680,7 +3839,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:30-13:00",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:30-13:30",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-kishiwada",
@@ -2696,7 +3862,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "smile-kongou",
@@ -2712,7 +3885,14 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のスマイルブランド該当タブ(法人名は全て「スマイルストーリー」、11院)より取得。法人名「スマイルストーリー」からブランド名「スマイル」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "平日 前": "9:00-12:30",
+        "平日 後": "16:00-20:00",
+        "土 前": "9:00-13:00",
+        "土 後": "14:00-18:00"
+      },
+      "closed_day": "木・日・祝"
     },
     {
       "id": "good-miyauchi",
@@ -2728,7 +3908,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "9:00-12:00",
+        "終日 後": "14:00-19:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "good-jike",
@@ -2744,7 +3929,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "9:00-13:00",
+        "終日 後": "15:00-19:00"
+      },
+      "closed_day": "日・祝"
     },
     {
       "id": "good-saijo",
@@ -2760,7 +3950,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "9:00-13:00",
+        "終日 後": "15:00-19:00"
+      },
+      "closed_day": "日・祝"
     },
     {
       "id": "good-danbara",
@@ -2776,7 +3971,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "10:00-13:30",
+        "終日 後": "15:30-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "good-fuchu",
@@ -2792,7 +3992,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "10:00-13:30",
+        "終日 後": "15:30-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "good-gion",
@@ -2808,7 +4013,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。メールアドレスのローカル部が「chitoseshinkyuuseikotuin」となっており院名(祇園)と一致しないが、元データのまま採用した。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。メールアドレスのローカル部が「chitoseshinkyuuseikotuin」となっており院名(祇園)と一致しないが、元データのまま採用した。",
+      "hours": {
+        "終日 前": "10:00-13:30",
+        "終日 後": "15:30-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "good-kamezaki",
@@ -2824,7 +4034,12 @@
       "status": "active",
       "type": "seikotsuin",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。"
+      "notes": "出典: 院マスタ(Googleスプレッドシート)のグッドブランド該当タブ(法人名は全て「グッドフォーチュン」、店名は「姿勢堂」または「ひなた整体院」、7院)より取得。法人名「グッドフォーチュン」からブランド名「グッド」への対応はユーザー確認済み(認識問題なしとの回答済み)。集客チャネルは未確認。",
+      "hours": {
+        "終日 前": "9:00-13:00",
+        "終日 後": "15:00-19:00"
+      },
+      "closed_day": "木"
     },
     {
       "id": "relax-tamaplaza",
@@ -2840,7 +4055,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:00-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-iruma",
@@ -2855,7 +4074,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:00-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-chitose-karasuyama",
@@ -2870,7 +4093,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-mito",
@@ -2885,7 +4112,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:30-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-fkd-interpark",
@@ -2901,7 +4132,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:00-20:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-urawa",
@@ -2917,7 +4152,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-totsuka",
@@ -2933,7 +4172,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-umegaoka",
@@ -2949,7 +4192,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-shimotakaido",
@@ -2965,7 +4212,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-asagaya",
@@ -2981,7 +4232,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-hamadayama",
@@ -2997,7 +4252,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-sasazuka",
@@ -3013,7 +4272,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-hatagaya",
@@ -3029,7 +4292,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-nishishinjuku",
@@ -3045,7 +4312,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-honancho",
@@ -3061,7 +4332,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-nakanoshinbashi",
@@ -3077,7 +4352,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-soshigaya",
@@ -3093,7 +4372,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-sakurajosui",
@@ -3109,7 +4392,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-23:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-kugayama",
@@ -3125,7 +4412,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-musashikoyama",
@@ -3141,7 +4432,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-nakanosakaue",
@@ -3157,7 +4452,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-shinyamashita",
@@ -3173,7 +4472,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "10:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-sengawa",
@@ -3189,7 +4492,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "relax-togoshiginza",
@@ -3204,7 +4511,11 @@
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。id `relax-togoshiginza` はLUNAブランドの `luna-togoshiginza` と地名(戸越銀座)が同じだが、ブランドプレフィックスが異なるため衝突しない。"
+      "notes": "出典: 院マスタ内『リラックス』ブランドの店舗リスト。2026-09-02の棚卸しで、内容が食い違うブロックA(25件)とブロックB(24件)が存在することを検出していたが、ユーザー確認により決着: ブロックBのみにあった宇都宮東口駅前店・代々木公園店は閉院店舗、『リハビリセンターリラックス』『株式会社リラックス(本社)』は店舗ではなく本社機関(元々除外対象)。ブロックAのみにあった武蔵小山店・中野坂上店・新山下店・仙川店・戸越銀座店は直近開業の新店で現在も営業中(この5店舗の新店該当例)。よってブロックA(25店舗)が現行の正しい店舗リストと確定した。整骨院ではなくマッサージ・リラクゼーション店(refresh-relax.com)。集客チャネルは未確認。2026-09-06のGA4プロパティ突合(relax-analytics.yml)でも院マスタに無いプロパティが見つかり、2026-09-07にユーザー確認: 茅場町店・市川真間店・下総中山店(リラックス)・京成立石店(リラックス)・池袋店(リラックス)は5件とも閉院済み(直営の同名駅名店舗とは法人が別、混同しないこと)。元住吉店(リラックス)は2026-09-02に別途(『リラックス新規客経路集計』シートとの突き合わせ)既に閉院確認済みで`relax-motosumiyoshi`は削除済み。GA4側にも同名の未マッチプロパティがあり、独立した2つの手がかりが一致している。id `relax-togoshiginza` はLUNAブランドの `luna-togoshiginza` と地名(戸越銀座)が同じだが、ブランドプレフィックスが異なるため衝突しない。",
+      "hours": {
+        "列4": "11:00-21:00"
+      },
+      "closed_day": ""
     },
     {
       "id": "chokuei-yakuendai",
