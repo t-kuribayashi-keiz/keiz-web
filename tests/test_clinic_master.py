@@ -79,6 +79,26 @@ class TestReadingAClinicRow(unittest.TestCase):
         self.assertEqual(cm.read_hours(row, self.COLUMNS), {"平日 後": "15:30-21:00"})
 
 
+# 実物の直営院タブの形(2026-09-07、clinic-master.yml --inspect の実行で判明)。
+# 「定休」は開始/終了の行ではなく、平日/土日祝と同じグループ見出し行(2つ上)にある。
+# ROWS(既存のモック)は定休が開始/終了と同じ行にあり、これとは形が違う——
+# 両方に対応できることをここで固定する。
+ROWS_CLOSED_ON_A_HIGHER_ROW = [
+    ["平日", "", "", "", "土日祝", "", "", "", "定休", "電話番号"],
+    ["前", "", "後", "", "前", "", "後", "", "", ""],
+    ["開始", "終了", "開始", "終了", "開始", "終了", "開始", "終了", "短縮番号", "携帯電話"],
+    ["9:30", "12:30", "15:30", "21:00", "8:00", "12:00", "14:30", "17:00", "", "047-332-7767"],
+]
+
+
+class TestClosedColumnAboveTheHeaderRow(unittest.TestCase):
+    def test_header_row_is_found_without_requiring_closed_on_it(self):
+        self.assertEqual(cm.header_row_index(ROWS_CLOSED_ON_A_HIGHER_ROW), 2)
+
+    def test_closed_column_is_found_on_the_group_row_above(self):
+        self.assertEqual(cm.closed_column(ROWS_CLOSED_ON_A_HIGHER_ROW, 2), 8)
+
+
 class TestNameMatching(unittest.TestCase):
     def test_the_sheet_names_resolve_against_the_clinic_master(self):
         """院名の列には見出しが無いので、照合できることが唯一の裏取りになる。"""

@@ -95,14 +95,17 @@ def forward_fill(row: list, width: int) -> list[str]:
 
 
 def header_row_index(rows: list[list]) -> int | None:
-    """見出しの最下段(開始/終了・定休が並ぶ行)を探す。
+    """見出しの最下段(開始のすぐ右に終了が並ぶ行)を探す。
 
-    先頭行が見出しとは限らないので行番号を決め打ちしない。
+    先頭行が見出しとは限らないので行番号を決め打ちしない。定休は要求しない
+    ——実物の直営院タブでは定休が「平日/土日祝」と同じグループ見出し行(この行より
+    1〜2行上)にあり、開始/終了の行とは別なため(2026-09-07、実データで判明)。
     """
     for index, row in enumerate(rows[:10]):
-        texts = {text(cell) for cell in row}
-        if texts & set(CLOSED_HEADERS) and texts & set(START_HEADERS):
-            return index
+        texts = [text(cell) for cell in row]
+        for i, cell in enumerate(texts):
+            if cell in START_HEADERS and i + 1 < len(texts) and texts[i + 1] in END_HEADERS:
+                return index
     return None
 
 
@@ -129,9 +132,15 @@ def hour_columns(rows: list[list], header_index: int) -> list[tuple[str, int, in
 
 
 def closed_column(rows: list[list], header_index: int) -> int | None:
-    for index, cell in enumerate(rows[header_index]):
-        if text(cell) in CLOSED_HEADERS:
-            return index
+    """定休の列を探す。開始/終了の行だけでなく、その上のグループ見出し行も見る。
+
+    実物の直営院タブでは「定休」が「平日/土日祝」と同じ行(開始/終了の行より上)に
+    ある。開始/終了の行にしか無いシート(テスト用のモック等)にも両対応する。
+    """
+    for row in rows[: header_index + 1]:
+        for index, cell in enumerate(row):
+            if text(cell) in CLOSED_HEADERS:
+                return index
     return None
 
 
