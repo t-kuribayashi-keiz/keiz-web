@@ -310,6 +310,17 @@ function writeRosterSummary(sheet, names) {
     sheet.getRange(row, ROSTER_SUMMARY_NAME_COL + 1).setFormula(`=COUNTIF(${calendarRange},${nameColLetter}${row})`);
   });
 
+  // 原本テンプレートの手動の枠線・配置は、最初に作った人数ぶんしか用意されていないことがあるため
+  // (追加したスタッフの行が枠から外れる・中央揃えのまま残るなど)、実際に書き込んだ行数ぶんは
+  // 必ずスクリプト側で罫線・左揃えを統一する
+  if (toWrite.length) {
+    const writtenRange = sheet.getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 2);
+    writtenRange.setBorder(true, true, true, true, true, true);
+    sheet
+      .getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 1)
+      .setHorizontalAlignment('left');
+  }
+
   return names.slice(ROSTER_SUMMARY_MAX_ROWS);
 }
 
@@ -1437,7 +1448,12 @@ function writeRosterNames(sheet, names) {
 
   sheet.getRange(startRow, col, clearRows, 1).clearContent();
   if (names.length) {
-    sheet.getRange(startRow, col, names.length, 1).setValues(names.map((n) => [n]));
+    // 原本テンプレートの手動の配置設定は、最初に作った人数ぶんしか用意されていないことが
+    // あるため（追加したスタッフの行だけ中央揃えのまま残るなど）、必ず左揃えに統一する
+    sheet
+      .getRange(startRow, col, names.length, 1)
+      .setValues(names.map((n) => [n]))
+      .setHorizontalAlignment('left');
   }
   return true;
 }
