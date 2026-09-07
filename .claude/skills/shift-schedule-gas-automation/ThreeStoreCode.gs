@@ -143,6 +143,8 @@ function onOpen() {
     .addSeparator()
     .addItem('③ 月次シートを作成', 'createMonthlySheets')
     .addItem('④ 公休を自動入力（このシート・3店舗まとめて）', 'autoFillRegularHolidays')
+    .addSeparator()
+    .addItem('日曜日の色を修正（既存シートの不具合対応・このシート）', 'fixSundayDateColor')
     .addToUi();
 }
 
@@ -278,10 +280,14 @@ function createThreeStoreTemplateSheet() {
 
   // カレンダー本体（5週間ぶん）
   DATE_ROWS.forEach((dateRow) => {
-    // 日付行：曜日ごとに1セル、太字・中央寄せにしておく（実際の日付は③で入る）
-    WEEKDAY_COL_PAIRS.forEach((pair) => {
+    // 日付行：曜日ごとに1セル、太字・中央寄せにしておく（実際の日付は③で入る）。
+    // 日曜は赤・土曜は青にしておく（fillCalendarDatesは、祝日でない日の文字色をこの色を基準に
+    // 引き継ぐため、ここで設定しておかないと日曜が赤くならない）
+    WEEKDAY_COL_PAIRS.forEach((pair, i) => {
       const range = sheet.getRange(dateRow, pair[0], 1, 2);
       range.merge().setFontWeight('bold').setFontSize(12).setHorizontalAlignment('center');
+      if (i === 0) range.setFontColor(HOLIDAY_FONT_COLOR);
+      if (i === 6) range.setFontColor('#1155cc');
     });
 
     // 行事欄：曜日ごとに1セルへ結合し、共通の行事メモを書き込めるようにする
@@ -334,6 +340,20 @@ function createThreeStoreTemplateSheet() {
       '引き継がれます。準備ができたら「③ 月次シートを作成」に進んでください。',
     ui.ButtonSet.OK
   );
+}
+
+// 【不具合修正用】このシート（「原本」または既に作成済みの月次シート）の日付行のうち、
+// 日曜日の日付の文字色を赤に修正する。
+// createThreeStoreTemplateSheetの旧バージョンで日曜日の日付を赤くし忘れていたため、
+// それより前に作成した「原本」・月次シートに残る色の不具合を直すための一時的な修正メニュー。
+// このシートを開いた状態で実行してください（「原本」・既存の月次シートそれぞれで1回ずつ実行）。
+function fixSundayDateColor() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSheet();
+  DATE_ROWS.forEach((dateRow) => {
+    sheet.getRange(dateRow, 1, 1, 2).setFontColor(HOLIDAY_FONT_COLOR);
+  });
+  ui.alert(`「${sheet.getName()}」の日曜日の文字色を赤に修正しました。`);
 }
 
 /** ===================================================================
