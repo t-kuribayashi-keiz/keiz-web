@@ -14,14 +14,22 @@ A列(店舗名)が埋まっている行でブロックの開始を判定し、C�
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from analytics_discover import credentials, build  # noqa: E402
 from store_matcher import normalize_store_name  # noqa: E402
+
+# Sheets読み取り専用スコープ。analytics_discover.credentials()はGA4/GSC用のスコープしか
+# 持たないため使い回せない(2026-09-07、実行して初めて気付いた: HttpError 403
+# insufficient authentication scopes)。書き込みは行わないので spreadsheets ではなく
+# spreadsheets.readonly にとどめる(hpb_master_writer.sheets_service とは異なり、
+# あちらは書き込み用途があるため広いスコープを持つ)。
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 SHEET_ID = "1v6ruoGHKQ4Gny5lVO8fVIVAzlRDozQjo2I9K5oRjjxA"
 TAB = "集客数(新ルール6月～)"  # ～は全角チルダ(U+FF5E)。波ダッシュ(〜 U+301C)ではない。
@@ -80,6 +88,22 @@ def parse_blocks(values: list[list], month_col: int) -> dict[str, dict[str, int 
     return result
 
 
+def credentials(key_env: str):
+    raw = os.environ.get(key_env, "").strip()
+    if not raw:
+        raise SystemExit(f"{key_env} が未設定。鍵はSecrets経由でのみ渡す。")
+    from google.oauth2 import service_account
+    info = json.loads(raw)
+    creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
+    print(f"サービスアカウント: {creds.service_account_email}", file=sys.stderr)
+    return creds
+
+
+def build(creds):
+    from googleapiclient.discovery import build as _build
+    return _build("sheets", "v4", credentials=creds, cache_discovery=False)
+
+
 def pull(svc, month_label: str) -> dict[str, dict[str, int | None]]:
     values = svc.spreadsheets().values().get(
         spreadsheetId=SHEET_ID, range=f"'{TAB}'!A1:BZ2000",
@@ -99,10 +123,9 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     creds = credentials(args.key_env)
-    svc = build("sheets", "v4", creds)
+    svc = build(creds)
     blocks = pull(svc, args.month)
 
-    import json
     clinics_path = Path(__file__).resolve().parent.parent / "data" / "clinics.json"
     clinics = json.loads(clinics_path.read_text(encoding="utf-8"))["clinics"]
     in_brand = {normalize_store_name(c["name"]): c["name"]
