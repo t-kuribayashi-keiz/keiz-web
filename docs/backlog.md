@@ -69,13 +69,19 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
   心身堂・スマイル・グッド・LUNAのルームは未追加(2026-09-03に`data/chatwork-rooms.json`を
   確認して判明)
 
-- **リラックスの新店候補5件**(2026-09-06 `relax-analytics.yml` 実行結果) — GA4に
-  プロパティがあるが`data/clinics.json`に無い店舗: 茅場町店・市川真間店・下総中山店・
-  京成立石店・池袋店(直営に同名駅名の店舗があるが法人・ブランドは別)。新規開店なら
-  `data/clinics.json`への追加が必要。詳細は`brands/relax/CLAUDE.md`「`relax-analytics.yml`
-  実行結果」参照
-- **高円寺店の詳細情報**(住所・電話・自社サイトURL)。2026年7月開店で`data/clinics.json`に未登録。
-  元住吉店(閉店)を削除済みなので、現在リラックスは24件で登録されている
+- **高円寺店の詳細情報**(住所・電話・自社サイトURL)。2026年7月開店で`data/clinics.json`には
+  名前のみ登録済み(現在リラックスは25件)。URL未登録のため、GA4/GSCの照合対象にまだ入れない
+- **リラックスGSCの残り10店舗への個別付与** — Search ConsoleはAPIでの一括/個別付与ができないため
+  (GA4のアカウント単位付与のような手段が無い)、「設定→ユーザーと権限→ユーザーを追加」で
+  `relax-reporter@…`を「フル」で1店舗ずつ追加する必要がある。対象: 水戸京成百貨店・
+  FKDインターパーク店・サクラス戸塚店・下高井戸店・浜田山店・笹塚店・西新宿店・祖師谷店・
+  久我山店・戸越銀座店。`sc-domain:refresh-relax.com`のドメインプロパティが既にあれば
+  1回の共有で済む可能性があり、栗林さんに確認依頼中
+- **「リラックス新規客経路集計」シートの`relax-reporter`への共有** — URLは判明
+  (`1v6ruoGHKQ4Gny5lVO8fVIVAzlRDozQjo2I9K5oRjjxA`)。Google Driveの`share_file`で共有を
+  試みたが「The caller does not have permission」で失敗(2026-09-07、原因未特定・他シートでは
+  同じ操作が成功しているのでこの1件固有の事情の可能性)。オーナー本人がシートのUIから
+  「共有」→サービスアカウントのメール→閲覧者、で共有する必要がある
 - **集計自動化の残り工程** — ④(F列紹介・J列オフライン合計・X列AI の転記方法)と
   ⑥(Googleトレンド)は「別途指示」とのこと。③(V/W列のPPC・META)は自動化保留の判断済み
 - **「年間計画・目標」タブのL列(店舗数)の自動化** — 2026-09-03に栗林さんの判断で当面手動。
@@ -159,20 +165,15 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 | シークレット名 | 対象 | Secretsの状態 | Keizgroup500の鍵ファイル |
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
-| `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | **無し**(中身がどのサービスアカウントかは未確認) |
+| `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
 | `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter.json` |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
 まだActions経由で読んでいない)。
 
-**`GCP_RELAX_KEY` の中身の確認が先**: 鍵ファイルが手元に無いので、登録されている鍵が
-`relax-reporter@…` なのか別のサービスアカウントなのかがリポジトリ側から分からない。
-再登録ではなく、`relax-analytics.yml` を1回回して確かめる — `analytics_discover.py` は
-最初にサービスアカウントのメールアドレスを印字するので、**鍵の中身を一切出さずに**
-どのアカウントかが分かる。GA4/GSCで何が見えているかも同時に出る。
-なお `relax-analytics.yml` はまだ作業ブランチにしか無く、workflow_dispatch は既定ブランチに
-ワークフローが無いと起動できないので、確認の前にmainへ取り込む必要がある。
+~~**`GCP_RELAX_KEY` の中身の確認**~~ → 2026-09-06に`relax-analytics.yml`を実行して解決。
+`relax-reporter@keizgroup-automation.iam.gserviceaccount.com`で正しい。再登録は不要だった。
 
 `GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
 `hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、
