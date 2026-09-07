@@ -1,0 +1,52 @@
+name: Sheets smoke test
+
+# 新しく共有してもらったスプレッドシートを、サービスアカウントで実際に読めるかだけを
+# 確かめる。使い捨てのチェック。読み取り専用で、リポジトリにもシートにも書き込まない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      key_env:
+        description: "鍵JSONが入っているリポジトリシークレット名(例: GCP_RELAX_KEY)"
+        required: true
+        type: string
+      sheet_id:
+        description: "スプレッドシートID(URLの /d/ と /edit の間)"
+        required: true
+        type: string
+      tab:
+        description: "省略可。読むタブ名(省略するとタブ一覧だけ出す)"
+        required: false
+        type: string
+      range:
+        description: "省略可。--tab指定時に読む範囲(既定 A1:E5)"
+        required: false
+        type: string
+        default: "A1:E5"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client
+
+      - name: Read
+        env:
+          SECRET_VALUE: ${{ secrets[inputs.key_env] }}
+        run: |
+          export "${{ inputs.key_env }}=$SECRET_VALUE"
+          args=(--key-env "${{ inputs.key_env }}" --sheet-id "${{ inputs.sheet_id }}")
+          if [ -n "${{ inputs.tab }}" ]; then
+            args+=(--tab "${{ inputs.tab }}" --range "${{ inputs.range }}")
+          fi
+          python3 scripts/sheets_smoke_test.py "${args[@]}"
