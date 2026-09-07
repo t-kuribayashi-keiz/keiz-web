@@ -36,6 +36,7 @@ from store_matcher import normalize_store_name  # noqa: E402
 # docs/org-review-log.md(2026-09-02)に出典として記録されている院マスタ本体。
 CLINIC_MASTER_ID = "1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8"
 CLINICS_PATH = Path(__file__).resolve().parent.parent / "data" / "clinics.json"
+TABS_CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "clinic-master-tabs.json"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 CLOSED_HEADERS = ("定休", "定休日", "休診日", "休業日")
@@ -172,6 +173,16 @@ def read_sheet(service, title: str) -> list[list]:
     return result.get("values", [])
 
 
+def allowed_tabs(config_path: Path = TABS_CONFIG_PATH) -> list[str]:
+    """各ブランドの現行タブだけを許可リストとして返す。
+
+    『診療時間』には旧版・バックアップ・雑多なタブが多数同居しており(2026-09-07、
+    栗林さんに確認済み)、見出し構造がたまたま一致すると無差別に読み込まれてしまう。
+    ここに無いタブは--inspectでも中身を読まない(『未設定』として一覧するだけ)。
+    """
+    return json.loads(config_path.read_text(encoding="utf-8"))["allowed_tabs"]
+
+
 def sheet_titles(service) -> tuple[str, list[str]]:
     meta = service.spreadsheets().get(
         spreadsheetId=CLINIC_MASTER_ID,
@@ -181,10 +192,18 @@ def sheet_titles(service) -> tuple[str, list[str]]:
 
 
 def collect(service) -> dict[str, dict]:
-    """院名(正規化後) → {hours, closed_day, tab} を全タブから集める。"""
+    """院名(正規化後) → {hours, closed_day, tab} を、各ブランドの現行タブだけから集める。"""
     _, titles = sheet_titles(service)
+    allowed = set(allowed_tabs())
+    missing = allowed - set(titles)
+    if missing:
+        fail(f"許可リストのタブがシートに見つかりません: {sorted(missing)}。"
+             "タブ名が変わった可能性があります。data/clinic-master-tabs.json を確認してください。")
+
     collected: dict[str, dict] = {}
     for title in titles:
+        if title not in allowed:
+            continue
         rows = read_sheet(service, title)
         if not rows:
             continue
@@ -227,7 +246,11 @@ def inspect(service) -> int:
     """構造と、clinics.json との照合率を出すだけ。書き込みはしない。"""
     file_title, titles = sheet_titles(service)
     print(f"スプレッドシート名: {file_title}")
-    print(f"タブ: {titles}\n")
+    print(f"タブ: {titles}")
+    allowed = allowed_tabs()
+    ignored = [t for t in titles if t not in allowed]
+    print(f"対象タブ({len(allowed)}件): {allowed}")
+    print(f"対象外として読まないタブ({len(ignored)}件): {ignored}\n")
 
     collected = collect(service)
     print(f"\n読めた院: {len(collected)}件")

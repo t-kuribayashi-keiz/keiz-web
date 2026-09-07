@@ -99,6 +99,28 @@ class TestClosedColumnAboveTheHeaderRow(unittest.TestCase):
         self.assertEqual(cm.closed_column(ROWS_CLOSED_ON_A_HIGHER_ROW, 2), 8)
 
 
+class TestAllowedTabs(unittest.TestCase):
+    """『診療時間』にはバックアップ・旧版タブが多数同居する(2026-09-07、実データで判明)。
+    栗林さんに確認して固定した現行タブの一覧を、決め打ちにせず設定ファイルから読む。"""
+
+    def test_exactly_the_six_confirmed_brand_tabs(self):
+        self.assertEqual(cm.allowed_tabs(), [
+            "直営院",
+            "ミライ・サンズ",
+            "スマイルストーリー［20231113］",
+            "心身堂［20260708］",
+            "グッドフォーチュン［20240112］",
+            "【整体】リラックス",
+        ])
+
+    def test_known_junk_tabs_are_not_in_the_list(self):
+        junk = ("～20240930までbk", "経営計画書用", "（旧）太洋光井",
+                "美容", "トップソルブ", "整体院", "閉院")
+        allowed = cm.allowed_tabs()
+        for title in junk:
+            self.assertNotIn(title, allowed, title)
+
+
 class TestNameMatching(unittest.TestCase):
     def test_the_sheet_names_resolve_against_the_clinic_master(self):
         """院名の列には見出しが無いので、照合できることが唯一の裏取りになる。"""
