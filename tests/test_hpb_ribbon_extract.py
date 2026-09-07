@@ -229,9 +229,12 @@ class TestBrandProfiles(unittest.TestCase):
         self.assertEqual(wr.profile_config(self.cfg, "smile-good").get("brands"),
                          ["スマイル", "グッド"])
 
-    def test_chokuei_is_not_narrowed(self):
-        """直営側は従来どおり絞らない。ここに絞りを入れると過去と挙動が変わる。"""
-        self.assertIsNone(wr.profile_config(self.cfg, "chokuei").get("brands"))
+    def test_chokuei_is_limited_to_its_own_brands(self):
+        """『集客数』シートもMaster(HPB_145)も直営+サンズミライ専用(2026-09-07、栗林さんに確認)。
+        以前はbrands未設定(絞らない)だったため、リラックス等のリボンCSVをこのprofileで
+        流すと誤って直営のMasterに書き込まれ得た。smile-goodと同じくbrandsで明示的に絞る。"""
+        self.assertEqual(wr.profile_config(self.cfg, "chokuei").get("brands"),
+                         ["直営", "サンズミライ"])
 
     def test_an_unknown_profile_stops(self):
         with self.assertRaises(ValueError):

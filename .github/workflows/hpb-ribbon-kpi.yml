@@ -29,7 +29,7 @@ on:
         required: true
         type: string
       profile:
-        description: "ブランド系列。chokuei=直営+サンズミライ+リラックス系 / smile-good=スマイル+グッド(転記先未決のためinspectのみ)"
+        description: "ブランド系列。chokuei=直営+サンズミライ系(リラックスは対象外) / smile-good=スマイル+グッド(転記先未決のためinspectのみ)"
         required: true
         type: choice
         options:
