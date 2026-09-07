@@ -65,6 +65,15 @@ def main() -> int:
             print(f"  {m.get('apiName'):<28} {m.get('uiName')!r}")
             print(f"      {m.get('description')}")
 
+    print()
+    print("=" * 60)
+    print("DIMENSIONS")
+    print("=" * 60)
+    for d in metadata.get("dimensions", []):
+        if matches(d):
+            print(f"  {d.get('apiName'):<28} {d.get('uiName')!r}")
+            print(f"      {d.get('description')}")
+
     return 0
 
 
