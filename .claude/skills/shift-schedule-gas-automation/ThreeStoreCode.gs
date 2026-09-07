@@ -140,6 +140,17 @@ const MAX_CONSECUTIVE_OFF_DAYS = 1;
 // 同じスタッフを連続で勤務させてよい日数の上限（これを超える手前で公休を優先的に差し込む）
 const MAX_CONSECUTIVE_WORK_DAYS = 5;
 
+// 「実行用」シート名（スマホ/iPad向け）。カスタムメニューの代わりに、このシート上の図形(ボタン)に
+// スクリプトを割り当てて実行できるようにするための入力欄・結果欄のセル位置。
+const RUN_SHEET_NAME = '実行用';
+const RUN_CREATE_YEAR_CELL = 'B4';
+const RUN_CREATE_MONTH_CELL = 'B5';
+const RUN_CREATE_QUOTA_CELL = 'B6'; // 全店舗共通の公休数
+const RUN_CREATE_RESULT_CELL = 'B9';
+const RUN_FILL_TARGET_CELL = 'B14';
+const RUN_FILL_QUOTA_CELL = 'B15'; // 空欄なら対象シートの各店舗の「公休数」欄から自動検出
+const RUN_FILL_RESULT_CELL = 'B18';
+
 /** ===== メニュー ===== */
 // 日常運用（月次シート作成・公休自動入力）と、初期設定・不具合対応用のメニューを分けて、
 // 毎月の操作と一度きりの操作が混ざって迷わないようにしている。
@@ -150,6 +161,7 @@ function onOpen() {
     .createMenu('初期設定・メンテナンス')
     .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
     .addItem('原本テンプレートを作成（初回のみ）', 'createThreeStoreTemplateSheet')
+    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate')
     .addSeparator()
     .addItem('日曜日の色を修正（既存シートの不具合対応・このシート）', 'fixSundayDateColor');
 
@@ -367,6 +379,137 @@ function fixSundayDateColor() {
     sheet.getRange(dateRow, 1, 1, 2).setFontColor(HOLIDAY_FONT_COLOR);
   });
   ui.alert(`「${sheet.getName()}」の日曜日の文字色を赤に修正しました。`);
+}
+
+/** ===================================================================
+ *  「実行用」シート（スマホ/iPad向け・カスタムメニューの代わりにボタン操作で実行）
+ *  =================================================================== */
+
+// 「実行用」シートの雛形を作成する（初回のみ）。
+// スマホ/iPadのGoogleスプレッドシートアプリはカスタムメニュー「休暇シート自動化(3店舗)」を
+// 表示できないため、代わりにこのシート上へ「図形描画」で作ったボタンにスクリプトを割り当てて
+// 実行する運用にする（図形へのスクリプト割り当てはカスタムメニューと違いモバイルアプリでも動作する。
+// ただし割り当ての設定自体はPCからしか行えないため、雛形作成後に1回だけPCで設定する必要がある）。
+function createRunSheetTemplate() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss.getSheetByName(RUN_SHEET_NAME)) {
+    ui.alert(`「${RUN_SHEET_NAME}」は既に存在します。`);
+    return;
+  }
+  const sheet = ss.insertSheet(RUN_SHEET_NAME, 0);
+
+  sheet.getRange('A1').setValue('実行用シート（スマホ・iPadからはここから操作してください）').setFontWeight('bold').setFontSize(12);
+
+  sheet.getRange('A3').setValue('① 月次シートを作成').setFontWeight('bold');
+  sheet.getRange('A4').setValue('対象年を入力→');
+  sheet.getRange('A5').setValue('対象月を入力→');
+  sheet.getRange('A6').setValue('公休数（取得可能日数）→（全店舗共通）');
+  sheet.getRange('A7').setValue('実行ボタンをタップ→').setFontColor('#999999').setFontStyle('italic');
+  sheet.getRange('A9').setValue('実行結果');
+  sheet.getRange(RUN_CREATE_YEAR_CELL).setNumberFormat('0');
+  sheet.getRange(RUN_CREATE_MONTH_CELL).setNumberFormat('0');
+  sheet.getRange(RUN_CREATE_QUOTA_CELL).setNumberFormat('0');
+  sheet.getRange('B9:B11').merge().setWrap(true).setVerticalAlignment('top');
+
+  sheet.getRange('A13').setValue('② 公休を自動入力').setFontWeight('bold');
+  sheet.getRange('A14').setValue('対象シート名（例: 2026年10月）→');
+  sheet.getRange('A15').setValue('公休数（空欄なら対象シートの各店舗の欄から自動検出）→');
+  sheet.getRange('A16').setValue('実行ボタンをタップ→').setFontColor('#999999').setFontStyle('italic');
+  sheet.getRange('A18').setValue('実行結果');
+  sheet.getRange('B18:B20').merge().setWrap(true).setVerticalAlignment('top');
+
+  sheet.setColumnWidth(1, 320);
+  sheet.setColumnWidth(2, 260);
+
+  ui.alert(
+    '実行用シート作成 完了',
+    `「${RUN_SHEET_NAME}」シートを作成しました。スマホ/iPadからボタン感覚で実行できるようにするには、` +
+      'あと1回だけ、PCで以下の設定が必要です（画像へのスクリプト割り当てはPCからしか行えません）。\n\n' +
+      '1.「挿入」→「図形描画」でボタン用の四角形を2つ作成し、保存してシートに挿入する\n' +
+      '   （①用はA7付近、②用はA16付近に配置してください）\n' +
+      '2. 挿入した図形を右クリック →「スクリプトを割り当てる」を選択\n' +
+      '3. ①の図形には「runCreateMonthlySheetFromButton」、②の図形には「runAutoFillFromButton」と入力\n\n' +
+      '設定後は、スマホ/iPadのスプレッドシートアプリからでもこの図形をタップするだけで実行できます。\n' +
+      '実行前に、①は年・月・公休数を、②は対象シート名（・必要なら公休数）をB列に入力してください。',
+    ui.ButtonSet.OK
+  );
+}
+
+// 「実行用」シートのボタン（①用の図形）に割り当てる関数。
+// ui.prompt/ui.alertはモバイルアプリで動作しないため使わず、入力はB列のセルから読み取り、
+// 結果はB9セルへ書き込む（あわせてトーストでも簡易通知する）。
+function runCreateMonthlySheetFromButton() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const runSheet = ss.getSheetByName(RUN_SHEET_NAME);
+  if (!runSheet) return; // 「実行用」シートが無い場合は何もしない
+
+  const resultCell = runSheet.getRange(RUN_CREATE_RESULT_CELL);
+  const year = parseInt(runSheet.getRange(RUN_CREATE_YEAR_CELL).getValue(), 10);
+  const month = parseInt(runSheet.getRange(RUN_CREATE_MONTH_CELL).getValue(), 10);
+  const commonQuota = parseInt(runSheet.getRange(RUN_CREATE_QUOTA_CELL).getValue(), 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(commonQuota)) {
+    resultCell.setValue('年・月・公休数をすべて入力してから実行してください。');
+    return;
+  }
+
+  const quotas = {};
+  STORES.forEach((store) => {
+    quotas[store.label] = commonQuota;
+  });
+
+  try {
+    const result = createMonthlySheetCore(ss, year, month, quotas);
+    resultCell.setValue(result.message);
+    ss.toast(result.ok ? `シート「${year}年${month}月」を作成しました。` : result.message, '月次シート作成', 8);
+  } catch (e) {
+    resultCell.setValue(`エラー: ${e}`);
+  }
+}
+
+// 「実行用」シートのボタン（②用の図形）に割り当てる関数。
+// 対象シート名はB列で指定する（getActiveSheet()はこの「実行用」シート自身になってしまうため使えない）。
+// 公休数（B15）が空欄なら、対象シートの各店舗の「公休数」欄から自動検出する。
+function runAutoFillFromButton() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const runSheet = ss.getSheetByName(RUN_SHEET_NAME);
+  if (!runSheet) return; // 「実行用」シートが無い場合は何もしない
+
+  const resultCell = runSheet.getRange(RUN_FILL_RESULT_CELL);
+  const targetName = String(runSheet.getRange(RUN_FILL_TARGET_CELL).getValue() || '').trim();
+  const targetSheet = ss.getSheetByName(targetName);
+  if (!targetSheet) {
+    resultCell.setValue(`シート「${targetName}」が見つかりません。対象シート名を確認してください。`);
+    return;
+  }
+
+  const overrideQuota = parseInt(runSheet.getRange(RUN_FILL_QUOTA_CELL).getValue(), 10);
+  const detectedQuotas = getQuotasFromNote(targetSheet);
+  const quotas = {};
+  const missing = [];
+  STORES.forEach((store) => {
+    const q = !isNaN(overrideQuota) ? overrideQuota : detectedQuotas[store.label];
+    if (q === null || q === undefined || isNaN(q)) {
+      missing.push(store.label);
+    } else {
+      quotas[store.label] = q;
+    }
+  });
+  if (missing.length) {
+    resultCell.setValue(
+      `「${missing.join('、')}」の公休数が取得できません。対象シートのB列、またはこのシートのB15に数値を入力してください。`
+    );
+    return;
+  }
+
+  try {
+    const result = autoFillRegularHolidaysCore(targetSheet, quotas);
+    resultCell.setValue(result.message);
+    ss.toast(`合計${result.writeCount}件の公休を自動入力しました。`, '公休自動入力', 8);
+  } catch (e) {
+    resultCell.setValue(`エラー: ${e}`);
+  }
 }
 
 /** ===================================================================
