@@ -1189,10 +1189,11 @@ function pickDayForStaff(
   let bestScore = null;
   let bestGroup = [];
   pool.forEach((c) => {
-    // ソフト制約(女性/新患対応/保持者1人しかいない資格など)のペナルティが小さい方を最優先し、
-    // 同点の場合にのみ、その日の休み人数が少ない方（＝日ごとの休み人数をできるだけ均等にする、
-    // 優先度は低いが考慮したい項目）を優先する
-    const score = c.penalty * 100 + c.crowding;
+    // その日の休み人数が少ない方（＝日ごとの休み人数をできるだけ均等にする）を最優先し、
+    // 同点の場合にのみ、ソフト制約(女性/新患対応/保持者1人しかいない資格など)のペナルティが
+    // 小さい方を優先する。資格/院長/連休/連勤/ワンオペのハード制約は、この時点で候補から
+    // 除外済みなので、ここでの優先順位に関わらず必ず守られる
+    const score = c.crowding * 100 + c.penalty;
     if (bestScore === null || score < bestScore) {
       bestScore = score;
       bestGroup = [c];
