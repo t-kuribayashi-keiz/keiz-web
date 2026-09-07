@@ -723,9 +723,19 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
   const directorNames = roster.filter((n) => master[n].director);
   const pilatesNames = roster.filter((n) => master[n].pilates);
 
-  const coverageGroups = QUALIFICATIONS.map((q) => ({ label: q, names: qualifiedByQual[q] })).concat([
+  // 資格/ピラティスを「全出勤日で最低1人」の制約として扱うためのグループ一覧。
+  // ただし保持者がその店舗に1人しかいない資格は、その人が休むたびに必ず0人になってしまい、
+  // ハード制約として扱うと無理な連勤強要や大量の警告を生むだけなので、女性/新患対応と同じ
+  // 「できるだけ避けるソフト制約」に格下げする（保持者2人以上の資格だけをハード制約として残す）。
+  const qualityPairs = QUALIFICATIONS.map((q) => ({ label: q, names: qualifiedByQual[q] })).concat([
     { label: 'ピラティス', names: pilatesNames },
   ]);
+  const coverageGroups = qualityPairs.filter(({ names }) => names.length >= 2);
+  const soleCoverageGroups = qualityPairs.filter(({ names }) => names.length === 1);
+  const softGroups = [
+    { label: '女性スタッフ', names: femaleNames },
+    { label: '新患対応スタッフ', names: newPatientNames },
+  ].concat(soleCoverageGroups);
 
   const directorEarlyWeekCount = {};
   const directorWarnings = [];
@@ -743,17 +753,11 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
   days.forEach((day) => {
     const working = roster.filter((n) => !day.filledNames.has(n));
     const reasons = [];
-    coverageGroups.forEach(({ label, names }) => {
+    coverageGroups.concat(softGroups).forEach(({ label, names }) => {
       if (names.length > 0 && !working.some((n) => names.includes(n))) {
         reasons.push(`${label}0人`);
       }
     });
-    if (femaleNames.length > 0 && !working.some((n) => femaleNames.includes(n))) {
-      reasons.push('女性スタッフ0人');
-    }
-    if (newPatientNames.length > 0 && !working.some((n) => newPatientNames.includes(n))) {
-      reasons.push('新患対応スタッフ0人');
-    }
     if (reasons.length) existingViolations.push(`${day.date}日(${reasons.join('/')})`);
   });
 
@@ -809,8 +813,7 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
         days,
         roster,
         coverageGroups,
-        femaleNames,
-        newPatientNames,
+        softGroups,
         directorNames,
         directorEarlyWeekCount
       );
@@ -882,7 +885,8 @@ function autoFillStoreCore(sheet, values, fontColors, topRow, storeIndex, roster
     msg += `\n※連勤(${MAX_CONSECUTIVE_WORK_DAYS}日超)の解消に関する警告:\n${streakWarnings.join('\n')}`;
   }
   if (coverageNotes.length) {
-    msg += `\n※やむを得ず女性/新患対応のカバレッジが崩れた割り当て:\n${coverageNotes.join('\n')}`;
+    msg += `\n※やむを得ずソフト制約（女性/新患対応、または保持者が1人しかいない資格・ピラティス）の` +
+      `カバレッジが0人になった割り当て:\n${coverageNotes.join('\n')}`;
   }
   if (consecutiveNotes.length) {
     msg += `\n※やむを得ず連休になった割り当て:\n${consecutiveNotes.join('\n')}`;
@@ -955,14 +959,15 @@ function wouldViolateConsecutiveOff(days, dayIndex, staffName) {
 }
 
 // staffName を休みにできる日の中から、資格/ピラティスカバレッジ・院長ルール(ハード制約)を守った上で、
-// 連休にならない日を最優先候補とし、その中で「その時点で最も休みが少ない日」を優先して選ぶ
+// 連休にならない日を最優先候補とし、その中で「その時点で最も休みが少ない日」を優先して選ぶ。
+// softGroups（女性スタッフ・新患対応・保持者1人しかいない資格など）は、0人になる日をできるだけ
+// 避けるソフト制約として扱う（ハード制約ではないので、避けられない場合はそのまま許容する）。
 function pickDayForStaff(
   staffName,
   days,
   roster,
   coverageGroups,
-  femaleNames,
-  newPatientNames,
+  softGroups,
   directorNames,
   directorEarlyWeekCount
 ) {
@@ -974,12 +979,11 @@ function pickDayForStaff(
 
     const workingNames = roster.filter((n) => !day.filledNames.has(n) && n !== staffName);
     const reasons = [];
-    if (femaleNames.length > 0 && !workingNames.some((n) => femaleNames.includes(n))) {
-      reasons.push('女性スタッフ0人');
-    }
-    if (newPatientNames.length > 0 && !workingNames.some((n) => newPatientNames.includes(n))) {
-      reasons.push('新患対応スタッフ0人');
-    }
+    softGroups.forEach(({ label, names }) => {
+      if (names.length > 0 && !workingNames.some((n) => names.includes(n))) {
+        reasons.push(`${label}0人`);
+      }
+    });
     const consecutive = wouldViolateConsecutiveOff(days, index, staffName);
     if (consecutive) reasons.push('連休になります');
 
