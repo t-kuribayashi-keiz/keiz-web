@@ -357,21 +357,22 @@ function createMonthlySheets() {
   const year = parseInt(m[1], 10);
   const month = parseInt(m[2], 10);
 
-  const quotas = {};
-  for (const store of STORES) {
-    const quotaRes = ui.prompt(
-      '月次シート作成',
-      `${store.label}の${month}月の公休数（取得可能日数）を入力してください（例: 10）`,
-      ui.ButtonSet.OK_CANCEL
-    );
-    if (quotaRes.getSelectedButton() !== ui.Button.OK) return;
-    const quota = parseInt(quotaRes.getResponseText().trim(), 10);
-    if (isNaN(quota)) {
-      ui.alert('公休数は数値で入力してください。');
-      return;
-    }
-    quotas[store.label] = quota;
+  // 公休数はどの店舗も同じ運用のため、1回だけ入力して全店舗に適用する
+  const quotaRes = ui.prompt(
+    '月次シート作成',
+    `${month}月の公休数（取得可能日数）を入力してください（全店舗共通。例: 10）`,
+    ui.ButtonSet.OK_CANCEL
+  );
+  if (quotaRes.getSelectedButton() !== ui.Button.OK) return;
+  const commonQuota = parseInt(quotaRes.getResponseText().trim(), 10);
+  if (isNaN(commonQuota)) {
+    ui.alert('公休数は数値で入力してください。');
+    return;
   }
+  const quotas = {};
+  STORES.forEach((store) => {
+    quotas[store.label] = commonQuota;
+  });
 
   const result = createMonthlySheetCore(ss, year, month, quotas);
   ui.alert(result.ok ? '月次シート作成 完了' : '月次シート作成 エラー', result.message, ui.ButtonSet.OK);
