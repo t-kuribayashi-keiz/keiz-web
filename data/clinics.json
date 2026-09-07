@@ -3230,13 +3230,13 @@
       "area": "東京都杉並区",
       "address": "",
       "phone": "",
-      "website": "",
+      "website": "https://refresh-relax.com/koenji/",
       "email": "",
       "opened_at": "2026-07",
       "status": "active",
       "type": "relaxation_salon",
       "acquisition_channels": [],
-      "notes": "2026年7月開店。広告費シートに金額があるのに院マスタに無く、店舗数の集計が止まったことで発覚したため、突き合わせが通るよう先に登録した。住所・電話・自社サイトURLは未取得(docs/backlog.md の情報待ち)。"
+      "notes": "2026年7月開店。広告費シートに金額があるのに院マスタに無く、店舗数の集計が止まったことで発覚したため、突き合わせが通るよう先に登録した。自社サイトURLは2026-09-07に栗林さんから回答あり登録済み。住所・電話は未取得(docs/backlog.md の情報待ち)。"
     }
   ]
 }
