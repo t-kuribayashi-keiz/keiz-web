@@ -90,11 +90,30 @@ Same convention as `hpb-salonboard-update`: append anything newly learned to
 (a new browser-automation/Colab-UI quirk) rather than letting it live only in a
 conversation transcript.
 
+**If any other session might be running this skill at the same time (e.g. someone else is
+doing the weekly M/N pass while you're debugging K/L, or two people are each triaging
+different shops), do not edit `references/known-bugs.md` or `references/colab-editing-gotchas.md`
+directly.** Editing either is read → modify → write, so a concurrent edit from another
+session can silently drop yours. Instead drop a new file in
+`learnings/<日時>_<セッションIDの先頭8桁>.md` and let a later single-writer pass fold it
+into the right reference file. Read `learnings/` before starting a task — unmerged notes are
+already valid. Full mechanics (naming, consolidation) are in the sibling skill's
+`hpb-salonboard-update/references/concurrent-sessions.md` — this skill has no differences
+from that procedure, it just targets `known-bugs.md`/`colab-editing-gotchas.md` instead of
+`coupon-editing.md`. Same applies to the "K,L履歴"/M-N-check narrative additions to this
+SKILL.md file itself (e.g. new M/N category findings) — those go in `learnings/` too while
+other sessions may be running, not straight into this file.
+
 ## K/L is now fully automated; M/N stays manual-trigger, AI-driven (2026-09-03 decision)
 
 `scripts/hpb_slot_check.py` is the K/L scraper (this notebook's `main_process` logic,
-ported 1:1) and runs daily at 13:00 JST via `.github/workflows/hpb-reservation-slot-check.yml`
-— no one needs to open the Colab notebook for this anymore. Auth reuses the existing
+ported 1:1) and runs daily at 13:07 JST via `.github/workflows/hpb-reservation-slot-check.yml`
+— no one needs to open the Colab notebook for this anymore. **The schedule, the one-off
+date-range inputs, how to read a run's log, and what ○/✕/? actually mean now live in
+`references/github-actions-ops.md` — read that before touching the cron or judging a run's
+output.** The three traps documented there that keep costing time: a cron on the top of the
+hour silently never fires, a `*_half` input without its matching date is silently ignored,
+and ✕ counts are not comparable between windows of different width. Auth reuses the existing
 `GCP_KPI_WRITER_KEY` write-capable service account from `functions/kpi-aggregation`
 (`chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`) — share the
 "HPB予約枠確認" spreadsheet with it as Editor; no new key/secret needed. Check window is a
@@ -159,6 +178,26 @@ real salonboard.com schedule pages via `mcp__claude-in-chrome__javascript_tool`)
 | ✕ | 予定あり(枠ブロック) | `.todoTitle` text contains "予定あり" (covers both the スタッフ予定 and ベッド/設備予定 sub-cases the user distinguished — `.scheduleToDo.staffTask` vs `.scheduleToDo.equipmentTask` — both collapse to the same simple label per the user's own choice) |
 | ✕ | 一括停止(警告) | least-validated category: `.scheduleTimeTableReserveCount` all "0"/"-" AND page text contains "一括停止". Only ever confirmed on one real shop (上板橋駅前) via screenshot, never against the live DOM — spot-check this one specifically before trusting `--apply` |
 | 要確認 | 要確認 | anything not clearly matching the above — the deliberate safe fallback, not a bug |
+
+Note that 定休日 is judged **from the page** ("休業日です"), never from a master list, and it
+has to stay that way for now: **`data/clinics.json` holds no 診療時間 and no 定休日 columns**
+(verified 2026-09-04 — all 204 entries carry the same 14 keys, none of them hours-related).
+The confusing part is that the spreadsheet those entries were imported from is itself
+*named* 「診療時間」 (ID `1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8`), so it is easy to
+assume the hours came along; only 院名/住所/電話/URL/メール類 did. Business hours for the K/L
+judgment come from the sheet's own per-shop 平日/土日祝 columns, not from clinics.json. When
+someone asks where 定休日 lives, the answer is that master spreadsheet (its 「AIチェック用」
+sheet already has a 定休日 column in 「木曜・日曜・第4木曜」 form) — **do not write any
+judgment that depends on a 定休日 master until those columns are actually imported**; that
+import is tracked in `docs/backlog.md`.
+
+**Status as of 2026-09-04: `salonboard_root_cause.py` is frozen, not pending.** Since the
+standing decision above is that M/N stays a human-triggered visual check, nothing in the
+daily automation calls this script, and `--mode verify-login` has deliberately never been
+run. Leave it that way. The paragraph below is the condition for *un*freezing it — it is
+not an outstanding task, and no one should run `verify-login` against the production 本部
+account just to tick it off. Reviving this script needs a fresh decision from 栗林さん
+first, because it means unattended code holding the SalonBoard password again.
 
 **Before ever running `--mode apply` for real**: `--mode verify-login` must be run once,
 manually, and confirmed working. The login step (`SALONBOARD_LOGIN_URL` /

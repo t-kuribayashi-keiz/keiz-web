@@ -13,6 +13,7 @@
 | 分析・施策担当 | [analyst.md](.claude/agents/analyst.md) | KPI・音声データ等を分析し、施策案を `/data/proposals/` に出力 |
 | 実装担当 | [implementer.md](.claude/agents/implementer.md) | 施策案を受け取り、コード・自動化スクリプト(GAS等)として実装 |
 | 効果計測担当 | [measurer.md](.claude/agents/measurer.md) | 実装後のKPI変化を `/data/kpi-history/` に記録し、分析担当へフィードバック |
+| 日次運用モニター | [daily-ops-monitor.md](.claude/agents/daily-ops-monitor.md) | 定期実行された自動化(予約枠K/Lチェック等)の結果を日次で見て、異常だけを拾い担当に渡す(ブランド非依存) |
 | SalonBoard操作担当 | [salonboard-operator.md](.claude/agents/salonboard-operator.md) | HotPepper Beauty SalonBoard(salonboard.com)の定型更新・反映作業(ブランド非依存、要ローカル実行環境) |
 | スマイル マーケティング参謀 | [smile-marketing-strategist.md](.claude/agents/smile-marketing-strategist.md) | スマイルブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドで同様の役割が必要になれば同じ型で追加する) |
 | グッド マーケティング参謀 | [good-marketing-strategist.md](.claude/agents/good-marketing-strategist.md) | グッドブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。スマイルと同型だが、店舗ステータス区分・広告実額等のグッド固有ファクトは未確認のまま複製していない) |
@@ -59,6 +60,18 @@ Skillとして実装します。1業務=1Skillを原則とし、疎結合に保�
    - 複数院・複数ブランドで再利用できる施策/Skillはないか
    - 重複作業や、まだ手作業のまま残っている業務はないか
    - 判断結果は [docs/org-review-log.md](docs/org-review-log.md) に記録する(=組織図の変更履歴)
+
+上の1〜4は**施策のサイクル**(月次〜四半期で回るもの)。これとは別に、**運用のサイクル**が
+日次で回る:
+
+- **daily-ops-monitor** が定期実行された自動化の結果を見て、異常だけを拾い、
+  SalonBoard側の確認が必要なものは **salonboard-operator** へ、コード・ワークフローの
+  不具合は **implementer** へ渡す
+
+2つを混ぜないこと。measurerの「打った施策が効いたか」(月次)と、daily-ops-monitorの
+「自動化が今日ちゃんと動いて拾うべき異常が無いか」(日次)は別の仕事です。
+**自動化を作った時点では、結果を見る役割まで決まっていない**ことが多いので、
+新しい定期実行を本番に乗せたら daily-ops-monitor の対象表にも足す。
 
 ## KPI定義・命名規則
 
@@ -107,6 +120,29 @@ Skillとして実装します。1業務=1Skillを原則とし、疎結合に保�
 
 実例と具体的な手順:
 [`.claude/skills/hpb-salonboard-update/references/concurrent-sessions.md`](.claude/skills/hpb-salonboard-update/references/concurrent-sessions.md)
+
+### 栗林さん側の合言葉(この言い回しで来たら何を指すか)
+
+上のルールを日々の運用に落とすと、栗林さんが実際に口にするのは次の3つだけになる。
+**認識の齟齬を防ぐため、この言い回しで依頼が来たら以下の意味に解釈すること。**
+
+| 合言葉 | いつ | セッションがやること |
+|---|---|---|
+| 「最新にして」 | 新しいセッション・新しいPCで作業を始める前。全PC毎回 | `git pull` して最新の状態から始める |
+| (通常の作業依頼) | 作業中 | いつも通り作業し、学習は`learnings/`へ**新規ファイル**として残す |
+| 「learnings/の新しいファイルだけコミットしてGitHubに上げて」 | そのPCでの作業が一段落したとき。各PCが自分の分だけ | `learnings/`と`*_log.d/`の**パスを明示して**add→commit→push。`git add -A`は絶対に使わない |
+
+3番目が要る理由: `learnings/`のファイルはそのPCのディスクにあるだけで、pushしない限り
+統合する側からは見えない。**PCをまたいで学習を運ぶ唯一の手段がこの操作**であり、
+これを飛ばすとそのPCの学習は永久に反映されない。新規ファイルを足すだけなので、
+何台のPCが同時にやっても衝突しない。
+
+**統合(`learnings/`を`SKILL.md`へ畳む作業)は、毎週月曜04:47(日本時間)にクラウドのRoutine
+「週次: learnings統合(全Skill)」が自動実行する。** 栗林さんが手で頼む必要はない。
+矛盾する学習の突き合わせや、畳めなかったメモを残す判断もそのRoutineの責務。
+
+**明示的に「learnings/を統合して」と依頼された場合を除き、セッションが自発的に統合を
+始めないこと。** 週次Routineと同時に走ると、片方の書き込みが黙って消える。
 
 ## 認証情報の扱い(重要)
 

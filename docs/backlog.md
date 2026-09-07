@@ -118,6 +118,17 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 
 ## 設定・環境
 
+- **院マスタの診療時間・定休日を`data/clinics.json`に取り込む** — 現状204件すべて同じ14キーで、
+  時間の列も定休日の列も入っていない(2026-09-04に全件のキーを数えて確認)。取り込み元は
+  「診療時間」スプレッドシート(ID `1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8`)の
+  ブランド別タブと、同スプレッドシート内「AIチェック用」シートの定休日列
+  (「木曜・日曜・第4木曜」形式)。読み取り専用の`scripts/clinic_master.py --inspect`と
+  `.github/workflows/clinic-master.yml`は用意済みなので、手順は
+  inspectで列名と照合率を見る → `hours`/`closed_days`のキー設計を決める → applyで書き込む。
+  **これが済むまで、定休日を前提にした判定を書かないこと。** 予約枠✕の原因切り分け
+  (M/Nの「対象外/定休日」)に直結する。現状の定休日判定はページの「休業日です」を読む方式で、
+  マスタは見ていない(`.claude/skills/hpb-reservation-slot-check/SKILL.md`)
+
 ### サービスアカウントの鍵をGitHub Secretsに登録する ★分析の前提
 
 鍵がローカルPCにしか無いと、確認のたびにローカルセッションを経由することになり、分析が

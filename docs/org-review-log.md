@@ -1688,3 +1688,132 @@ cross-functionalエージェントによる棚卸し結果、および組織構�
 - `data/hpb-ribbon-config.json`: `master_ext_columns`(28)を追加。
 - tests: +3(col_letter / 拡張列とconfig整合 / P3「-」で比較店を拾わない)。全98件パス。
 - 2026年8月号の拡張データは手作業でMasterのT2024〜AU2163に反映済み(栗林さんが貼り付け)。
+
+---
+
+## 2026-09-04 予約枠の自動化を「作った」あと、結果を見る役割が空いていた
+
+きっかけは栗林さんの「これは組織図で言うとどこのこと?」という問い。9/2から続いていた
+セッション(salonboard-operator動作検証 → 予約枠K/Lチェックの自動化)で学んだことを
+Skillへ畳む作業をしていたが、それが組織図のどこの仕事なのかが誰も言えていなかった。
+
+- **見つかった事実:**
+  - 学習の統合(learnings → SKILL.md/references)・残課題の棚卸し・Skillの扱いの判断は、
+    どれも **cross-functional の責務**だった。にもかかわらず、判断を
+    `docs/org-review-log.md` に記録するというCLAUDE.mdのルールを守っておらず、
+    `docs/backlog.md` にしか書いていなかった(backlog自身が「経緯・判断理由は
+    org-review-logが正」と書いている)。**ルールを持っている側が守っていなかった**
+  - `skills/README.md` の `hpb-reservation-slot-check` の行が **Colab前提のまま古かった**。
+    実態は2026-09-03に`scripts/hpb_slot_check.py`+GitHub Actions(毎日13:07 JST)へ
+    移行済みで、Colabは日常運用では開かない
+  - **「毎日出た結果を見て✕を捌く」役割が組織図に存在しなかった。** K/Lを出すのは自動化済み、
+    ✕の原因をSalonBoardで見るのは salonboard-operator、しかしその間
+    (結果を読み、異常を判定し、担当に渡す)が空白で、**実際には栗林さんが人手で
+    橋渡しをしていた**(「今週分お願い」と声をかける運用)。measurerとは別物で、
+    measurerは「打った施策が効いたか」を月次で見る役割
+- **判断:**
+  - **役割を1つ追加する: `daily-ops-monitor`(日次運用モニター)。** 定期実行の結果を日次で
+    見て、異常だけを拾い、SalonBoard側は salonboard-operator、コード・ワークフローの
+    不具合は implementer へ渡す。ブランド非依存。読むだけの役割にするため
+    `Edit`・ブラウザ操作ツール・スプレッドシートへの書き込みは持たせない
+  - CLAUDE.mdの業務フローに **「施策のサイクル(月次)」と「運用のサイクル(日次)」は別**
+    と明記した。**自動化を作った時点では、結果を見る役割まで決まっていないことが多い**
+    ——これが今回の空白の原因なので、新しい定期実行を本番に乗せたら
+    daily-ops-monitor の対象表に足す、というルールにした
+  - `salonboard_root_cause.py`(M/N自動分類)は**「凍結」と明記**した。「`verify-login`が
+    未実施」という書き方だと、将来のセッションが消化のために本番の本部アカウントへ
+    自動ログインを試しうる。未対応タスクではなく凍結であり、解除には栗林さんの
+    再判断が必要と書いた
+- **対応状況:** 完了。変更したファイル: `.claude/agents/daily-ops-monitor.md`(新規)、
+  `CLAUDE.md`、`skills/README.md`、
+  `.claude/skills/hpb-reservation-slot-check/SKILL.md` および
+  `references/github-actions-ops.md`(新規)、
+  `.claude/skills/hpb-salonboard-update/SKILL.md`、`docs/backlog.md`。
+  `.claude/skills/hpb-salonboard-update/learnings/` は空(README のみ)になった
+
+---
+
+## 2026-09-06 「複数セッション同時実行」対応の棚卸し(全Skill横断)
+
+- きっかけ: CLAUDE.mdの「複数セッションの同時実行と、学習の蓄積」ルールを実際の仕組み
+  (`learnings/`フォルダ + `references/concurrent-sessions.md`)として実装しているのは
+  `hpb-salonboard-update`だけであることが判明していたため、他11 Skillそれぞれについて
+  「共有ファイル(SKILL.md/references/*.md/CSVログ)を読む→直す→書くパターンで自ら更新する
+  設計になっているか」を基準に要否を判断した
+- 判断基準: リスクの実体は「このリポジトリ内のローカルファイルを、複数セッションが
+  read-modify-writeする既存の指示がSKILL.md自身に書かれているか」であり、単に運用頻度が
+  高い(多店舗展開)だけでは対象にしなかった(ローカルPC側の成果物であってこのリポジトリの
+  Skillファイルではない場合はリスクの質が違うと判断)
+- 判断結果(Skill名 / 要否 / 理由):
+  1. **chatwork-integration**: 不要。書き込み先は`data/chatwork-outbox/<ISO日時>-*.json`
+     (元から1ファイル1件でファイル名衝突しない設計)と、GitHub Actions cron側だけが触る
+     `data/chatwork-watcher-state.json`。SKILL.md/referencesを自ら書き換える継続学習の
+     記述もない
+  2. **customer-acquisition-consulting**: 不要(現時点)。T&Dグループ1社向けの単独案件が
+     途中停止した状態で、同一Skillを複数セッションが並行して走らせる状況は現状想定しにくい。
+     複数クライアントを同時に抱えるようになった場合は再検討が必要
+  3. **dji-mic-auto-upload**: 不要。約150店舗への展開を前提としたSkillで並行実行の可能性は
+     高いが、実際に更新される成果物(`config.json`・`Upload-DjiMic.ps1`)は各店舗PC側の
+     ローカルファイルであり、このリポジトリの`SKILL.md`/`references/*.md`をセッションが
+     読む→直す→書くという指示はSKILL.mdに存在しない
+  4. **gdrive-store-staff-folders**: 不要。STATUSが「UNFINISHED」でGASコード未着手、
+     稼働後も月次1回のGASトリガー想定であり、複数Claudeセッションが同時に本Skillを
+     使う状況を想定していない
+  5. **hpb-crm-reconciliation**: **要・対応済み**。理由: `references/reconciliation-logic.md`
+     を「living spec; update it whenever a fix changes the actual rules」として自ら
+     書き換える指示がある。加えてLogging節が`hpb-salonboard-update`のCSVログ運用を
+     踏襲すると明記しつつ、並行実行時の`.d/`分離の仕組みだけコピーされていなかった。
+     ~150院共通のCRM×HPB突合という点でも複数セッションが別々の不具合を並行して
+     修正しうる
+  6. **hpb-reservation-slot-check**: **要・対応済み**。理由: SKILL.mdの「Continuous
+     learning」節が明示的に「Same convention as `hpb-salonboard-update`: append anything
+     newly learned to `references/known-bugs.md`」と書きながら、実際には`learnings/`
+     フォルダも並行実行時のガードもなく、"append"を直接指示していた(規約の看板と
+     実装が食い違っていた)。~142店舗の週次M/N確認・日次K/L運用で複数セッションが
+     並行しうる
+  7. **karte-demographics-chart**: 不要。「店舗別はいらない。全店舗を1グループとして見たい」
+     という明示的な設計方針で、そもそも店舗単位・案件単位の並行実行を想定していない
+     月次単発レポート。SKILL.md自身が自らのreferencesを書き換える継続学習の指示もない
+  8. **org-structure-artifact / 9. org-structure-table**: 不要(並行実行の観点では)。
+     いずれも一回性・低頻度の成果物作成Skillで、SKILL.md自身も「recurring cadenceは
+     確立されていない」と明記している。ただし**両Skillは互いに「マージが必要かもしれない」
+     と既に自己申告している重複候補**(組織図diagram派 vs ○×マトリクス派、同じ2026年8月
+     組織再編の別の切り口)であり、これは並行実行対応ではなく統合検討の対象として別途
+     残しておく(今回は変更していない)
+  10. **session-to-skill**: 不要(自分自身については)。このSkillが生成するのは
+      `~/.claude/skills/<新規skill名>/`という**別の新しいSkillのファイル**であり、
+      `session-to-skill`自身のSKILL.mdを複数セッションが競合編集する構造ではない。
+      なお本Skill自体が「並行実行時はlearnings/に逃がす」という組織共通ルールを
+      Ground rule 7としてhpb-salonboard-updateを参照する形で既に正しく記述しており、
+      変更不要
+  11. **shift-schedule-gas-automation**: 不要。将来的に店舗ごとに複製・拡張していく
+      前提はあるが、実際の成果物は各店舗のGoogle Apps Script(.gsファイル、手動貼り付け
+      納品)であり、このリポジトリの`references/*.md`をセッションが読む→直す→書く
+      という指示は存在しない。複製は「今の店舗の設定を元に新規ファイルを作る」作業で
+      構造的に衝突しにくい
+  12. **hpb-salonboard-update**: 対応済み(お手本)。今回は変更していない
+- 実際に変更したファイル:
+  - `.claude/skills/hpb-crm-reconciliation/learnings/README.md`(新規)
+  - `.claude/skills/hpb-crm-reconciliation/SKILL.md`(Logging節に、兄弟Skillと列構成が
+    違うため`hpb_crm_work_log.csv`/`hpb_crm_work_log.d/`という別名を使う旨、および
+    Reference files節の`reconciliation-logic.md`の説明に、並行実行中は直接編集せず
+    `learnings/`に逃がす旨を追記。詳細手順は複製せず`hpb-salonboard-update/references/
+    concurrent-sessions.md`への参照のみ)
+  - `.claude/skills/hpb-reservation-slot-check/learnings/README.md`(新規)
+  - `.claude/skills/hpb-reservation-slot-check/SKILL.md`(「Continuous learning」節に、
+    並行実行中は`references/known-bugs.md`/`colab-editing-gotchas.md`を直接編集せず
+    `learnings/`に逃がす旨を追記。詳細手順は同様に複製せず参照のみ)
+- 対応状況: 判断・対応済み(上記2 Skillへの`learnings/`追加とSKILL.md追記)。
+  gitコマンド(add/commit/push)は実行していない — コミットするかどうかは栗林さんが
+  内容を確認してから判断する
+  未対応として残っている論点:
+  - org-structure-artifact / org-structure-table の統合要否(両者が既に自己申告している
+    重複候補。マージするなら「診断diagram + ○×マトリクス」のどちらを正とするか、
+    あるいは両方の視点を1つのdeliverableに畳むかを栗林さんに確認する必要がある)
+  - customer-acquisition-consulting は現状「単独案件が並行実行される想定が薄い」ため
+    見送ったが、今後複数クライアントを同時に抱えるようになった場合は同じ基準で再判定が必要
+  - hpb-crm-reconciliationの`hpb_work_log.csv`は、SKILL.md上「working directoryに
+    append」としか書かれておらず、`hpb-salonboard-update`の同名ログと**同じ作業ディレクトリ
+    に置かれると列構成が異なるまま1ファイルに混ざるおそれ**があった(並行実行とは別の
+    潜在的な設計上の粗さ)。今回は`hpb_crm_work_log.csv`という別名を使う指示に修正することで
+    合わせて解消したが、実際にこれまで`hpb_work_log.csv`に混在した記録がないかは未確認

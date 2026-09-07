@@ -47,6 +47,12 @@ The headquarters account's salon list lives at `salonboard.com/CNC/groupTop/`. S
 
 Once inside a salon, the section URLs below can be reached by direct `navigate` — the salon context is held in the session, so there's no need to re-click through the nav each time.
 
+## 診療時間・定休日を聞かれたとき
+
+`data/clinics.json` には **診療時間も定休日も入っていません**(2026-09-04に全204件のキーを数えて確認)。取り込み元スプレッドシートのファイル名が「診療時間」(ID `1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8`)なので「渡してあるはず」と食い違いやすいのですが、実際に取り込んだのは院名・住所・電話・URL・メール類だけです。
+
+なので「定休日を扱う仕組みがリポジトリに無い」という回答自体は正しい。ただし**マスタ側にはある**ので、そこで話を止めないこと: 上記スプレッドシートのブランド別タブ、および同スプレッドシート内「AIチェック用」シートの定休日列(「木曜・日曜・第4木曜」形式)を見る。取り込み作業は `docs/backlog.md` で追跡中で、それが済むまで定休日を前提にした判定は書かない。
+
 ## Section-specific details
 
 Section URLs under `https://salonboard.com/`, confirmed 2026-09-02 — all reachable by direct `navigate` once inside a salon:
