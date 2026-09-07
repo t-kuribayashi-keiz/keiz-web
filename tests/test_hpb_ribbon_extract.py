@@ -131,6 +131,20 @@ class TestShukyakuJoin(unittest.TestCase):
         # 合計以降は入らない
         self.assertNotIn(wr.normalize_store_name("店舗数"), m)
 
+    def test_build_map_handles_unformatted_int_cells(self):
+        """get_valuesはvalueRenderOption=UNFORMATTED_VALUEで読むため、当月列の数値セルは
+        strではなくint/floatで返る(2026-09-07、実データに対するdry-runで実際にクラッシュして発覚:
+        AttributeError: 'int' object has no attribute 'strip')。"""
+        values = [
+            ["エリア", "", "…院名", "当月", "前月"],
+            ["関東", "", "たまプラーザ東急百貨店", 8, 9],
+            ["関東", "", "イオン入間店", 21.5, 16],
+            ["", "", "合計", 2607, ""],
+        ]
+        m = wr.build_shukyaku_map(values)
+        self.assertEqual(m[wr.normalize_store_name("たまプラーザ東急百貨店")][1], "8")
+        self.assertEqual(m[wr.normalize_store_name("イオン入間店")][1], "21.5")
+
     def test_twin_listing_not_double_counted(self):
         # 集客数側は「八幡宿駅西口接骨院」1件。抽出側に接骨院と鍼灸接骨院の2行。
         shu = {wr.normalize_store_name("八幡宿駅西口接骨院"): ("八幡宿駅西口接骨院", "24")}

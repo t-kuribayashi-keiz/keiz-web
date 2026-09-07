@@ -113,12 +113,12 @@ def find_block_header(values, marker, name_contains, count_exact, lookahead=5):
     """
     hits = []
     for i, row in enumerate(values):
-        if not any((c or "").strip() == marker for c in row):
+        if not any(str(c or "").strip() == marker for c in row):
             continue
         for j in range(i + 1, min(i + 1 + lookahead, len(values))):
             row_j = values[j]
-            if (any(name_contains in (c or "") for c in row_j)
-                    and any((c or "").strip() == count_exact for c in row_j)):
+            if (any(name_contains in str(c or "") for c in row_j)
+                    and any(str(c or "").strip() == count_exact for c in row_j)):
                 hits.append(j)
                 break
     if len(hits) != 1:
@@ -130,7 +130,7 @@ def find_block_header(values, marker, name_contains, count_exact, lookahead=5):
 
 def header_index(header_row, *, contains=None, exact=None):
     for i, cell in enumerate(header_row):
-        c = (cell or "").strip()
+        c = str(cell or "").strip()
         if exact is not None and c == exact:
             return i
         if contains is not None and contains in c:
@@ -159,7 +159,8 @@ def build_shukyaku_map(values, name_contains="院名", count_exact="当月",
         # 見出し行を探す(院名 と 当月 が同じ行にある)
         hdr_i = None
         for i, row in enumerate(values[:20]):
-            if any(name_contains in (c or "") for c in row) and any((c or "").strip() == count_exact for c in row):
+            if (any(name_contains in str(c or "") for c in row)
+                    and any(str(c or "").strip() == count_exact for c in row)):
                 hdr_i = i
                 break
         if hdr_i is None:
@@ -170,14 +171,15 @@ def build_shukyaku_map(values, name_contains="院名", count_exact="当月",
 
     raw = {}          # 正規化キー → (生の院名, 当月)
     for row in values[hdr_i + 1:]:
-        name = (row[ni] if ni < len(row) else "").strip()
+        # UNFORMATTED_VALUE で取得しているため、数値セルは str ではなく int/float で返る。
+        name = str(row[ni] if ni < len(row) else "").strip()
         if not name:
             continue
         if any(name.startswith(s) for s in stop_prefixes):
             break
         if any(s in name for s in stop_contains):
             break
-        count = (row[ci] if ci < len(row) else "").strip()
+        count = str(row[ci] if ci < len(row) else "").strip()
         raw[normalize_store_name(name)] = (name, count)
     return raw
 
