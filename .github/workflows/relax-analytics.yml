@@ -1,0 +1,60 @@
+name: Relax analytics discovery
+
+# リラックスの分析環境の疎通確認。サービスアカウント relax-reporter で
+# GA4(Admin API)と Search Console に何が見えているかを列挙し、GA4のプロパティを
+# 院マスタの店舗名に突き合わせる。
+#
+# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない。
+#
+# 鍵はリポジトリシークレット GCP_RELAX_KEY にのみ置く。Claudeのセッションには渡らない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      brand:
+        description: "院マスタのブランド名"
+        required: true
+        type: string
+        default: リラックス
+      scope:
+        description: "確認する対象"
+        required: true
+        type: choice
+        options:
+          - both
+          - ga4
+          - gsc
+        default: both
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        # jpholiday は hpb_slot_check.py の依存。このワークフローでは使わないが、
+        # 下のテスト実行が tests/ 全体を読むので、入っていないと import で落ちる。
+        run: pip install --quiet google-auth google-api-python-client jpholiday
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Discover
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          case "${{ inputs.scope }}" in
+            ga4) flag="--skip-gsc" ;;
+            gsc) flag="--skip-ga4" ;;
+            *)   flag="" ;;
+          esac
+          python3 scripts/analytics_discover.py --brand "${{ inputs.brand }}" $flag

@@ -52,3 +52,10 @@ Read `Upload-DjiMic.ps1` fully before editing (it's short, ~70 lines) — don't 
 - `references/architecture.md` — exact script internals: config.json schema, robocopy arguments and exit-code handling, lock-file mechanism, scheduled task trigger/settings, the encoding gotcha in detail.
 - `references/deployment-checklist.md` — printable-style step list for rolling this out to a new store, aimed at whoever is physically at the store PC (can be handed to non-technical staff).
 - `references/background.md` — narrative of how this system's design was decided (serial number vs. volume label debate, the store-migration question that settled it, what was and wasn't verified on real hardware).
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`を
+直接編集しない。学習は`learnings/`配下に新規ファイルとして置き、gitコマンド(`add`/`commit`/
+ブランチ切り替え)は実行しない。タスク開始前に`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。

@@ -7,7 +7,21 @@ description: Use this skill when the user asks to build, update, or redesign an 
 
 Builds a single polished HTML Artifact (plus print-ready PDF) that presents an organization's role structure and how current staff map onto it, sourced from a raw spreadsheet/CSV of who-does-what and how well each business unit is currently covered. Extracted from the session that produced "集客体制について" (2026年8月–9月, keizgroup's ~150-salon acquisition team reorg). See `references/background.md` for the full story of how the deliverable evolved.
 
-**Likely overlap:** a separate session titled "組織体制表の作成" (sessionId `local_60b195b4-917a-42f4-b78d-2240312f2bd2`) was processed into its own skill in parallel with this one and may cover the same underlying reorg/deliverable from a different angle (possibly the earlier step of building the source CSV/spreadsheet itself, or a duplicate pass at the same document). Check that skill before using both — they may need merging.
+**Verified 2026-09-03 (cross-functional review): this is a separate skill from `org-structure-table`, not a duplicate.** Both originate from the same August 2026 restructuring effort, but the deliverables and inputs differ:
+
+| | `org-structure-table` | `org-structure-artifact` (this skill) |
+|---|---|---|
+| Output | Google Sheets spreadsheet: 担当(row) × 法人/サービス(column) matrix, ○/×/△ cells | One polished HTML Artifact (+ optional print PDF): multi-section narrative (ideal structure → current-staff assignment → evaluation matrix) |
+| Input | A photographed whiteboard/handwritten meeting doc (+ optional audio) | An already-typed CSV/spreadsheet/pasted text the user provides |
+| Build tooling | PowerShell + Excel COM (this machine's `python` doesn't work) | `artifact-design` / `artifact-diagramming` skills, headless-Chrome PDF export |
+
+The only overlapping concept is this skill's "03 評価マトリクス" section, which is a similar
+○/×/△ coverage table — but it's one section inside a larger narrative document, not this
+skill's primary deliverable. **How to choose**: if the user wants a 組織体制表/マトリクス
+transcribed from a photo or handwritten source, use `org-structure-table`; if they want a
+組織図/役割分担 or a polished document/PDF built from data they already have in text form, use
+this skill. If genuinely ambiguous, ask which they mean (both skills' descriptions already say
+to do this at intake).
 
 ## Non-negotiable rules
 

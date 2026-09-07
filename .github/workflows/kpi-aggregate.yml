@@ -52,7 +52,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install --quiet google-auth google-api-python-client
+        # jpholiday は hpb_slot_check.py の依存。このワークフローでは使わないが、
+        # 下のテスト実行が tests/ 全体を読むので、入っていないと import で落ちる。
+        run: pip install --quiet google-auth google-api-python-client jpholiday
 
       - name: Check the parts that need no credentials
         run: python3 -m unittest discover -s tests

@@ -40,3 +40,10 @@ The founding request referred to "先月の...カルテ一覧" (last month's rec
 - `references/data-and-aggregation.md` — raw data column layout, age-bracket boundaries, and the exact COUNTIF/COUNTIFS formula patterns used.
 - `references/sheets-input-technique.md` — the clipboard-paste workaround for unstable Japanese text entry, and the chart-creation/title-setting/repositioning click path in Google Sheets via browser automation.
 - `references/background.md` — narrative of the source session: what was asked, in what order, and why each follow-up request was handled the way it was.
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`を
+直接編集しない。学習は`learnings/`配下に新規ファイルとして置き、gitコマンド(`add`/`commit`/
+ブランチ切り替え)は実行しない。タスク開始前に`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。

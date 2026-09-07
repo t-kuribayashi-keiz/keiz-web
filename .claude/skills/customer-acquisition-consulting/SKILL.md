@@ -57,3 +57,10 @@ When this session's tools have no ready-made GA4/GSC connector, the direct-API-v
 - `references/data-architecture.md` — full metric/source table, store list and URL-path mapping as specified for the originating client, and notes on the single-property-vs-per-store-property GA4 branch.
 - `references/ga4-gsc-service-account-setup.md` — the Google Cloud Console click-path (project → enable APIs → service account → key), the account-vs-property permission distinction, the curl+openssl JWT/OAuth technique with the actual working command shapes, and the credential-handling failure modes hit along the way.
 - `references/background.md` — narrative of the T&D Group engagement this skill was extracted from: the client, the back-and-forth that shaped the design, and exactly how far the technical setup got before the session went idle.
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`を
+直接編集しない。学習は`learnings/`配下に新規ファイルとして置き、gitコマンド(`add`/`commit`/
+ブランチ切り替え)は実行しない。タスク開始前に`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。
