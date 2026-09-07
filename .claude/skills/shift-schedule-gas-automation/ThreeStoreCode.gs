@@ -125,9 +125,9 @@ const HOLIDAY_ICS_URL =
   'https://calendar.google.com/calendar/ical/ja.japanese%23holiday%40group.v.calendar.google.com/public/basic.ics';
 
 // 院長ルール：月初 DIRECTOR_EARLY_WEEK_DAYS 日間は、希望休を含めて公休を
-// DIRECTOR_EARLY_WEEK_MAX 日までに制限する（ハード制約。店舗ごとに判定）
+// DIRECTOR_EARLY_WEEK_MAX 日までに制限する（ハード制約。店舗ごとに判定。0 = 月初は一切休ませない）
 const DIRECTOR_EARLY_WEEK_DAYS = 7;
-const DIRECTOR_EARLY_WEEK_MAX = 1;
+const DIRECTOR_EARLY_WEEK_MAX = 0;
 
 // 「全出勤日、最低1人は勤務している」ことを保証したい資格（スタッフマスターの「資格」欄の値）の一覧
 // （このリストにある資格を持つ人がその店舗のロスター内に1人もいない場合は、その資格の制約は
