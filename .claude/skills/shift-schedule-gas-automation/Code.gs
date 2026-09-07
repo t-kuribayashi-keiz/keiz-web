@@ -99,7 +99,8 @@ const TITLE_CELL = 'C1';
 // 「◯日：　日　◯日：　日　取得可能◯」のメモが入るセル
 const QUOTA_NOTE_CELL = 'P1';
 
-// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P5〜、Qは既存のCOUNTIF式）
+// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P5〜。
+// 名前・休暇数のどちらもスクリプトが直接書き込む）
 const ROSTER_SUMMARY_NAME_COL = 16; // P列
 const ROSTER_SUMMARY_START_ROW = 5;
 const ROSTER_SUMMARY_MAX_ROWS = 8;
@@ -279,25 +280,43 @@ function createMonthlySheetCore(ss, year, month, quota) {
   return { ok: true, message: completionMsg };
 }
 
-// P列(名前)にスタッフ名を記載する（Q列は既存のCOUNTIF式が自動で日数を数える）。
+// P列(名前)・Q列(休暇数)へ書き込む。名前ごとにQ列へCOUNTIF式(そのカレンダー範囲内での
+// 出現回数)を書き込むことで、常にダブルチェックとして機能するようにする。
+// 以前はQ列を手動作成済みのCOUNTIF式に頼っていたが、原本テンプレートによってはスタッフの
+// 人数分だけ数式が用意されておらず（後からスタッフを追加すると数式が無い行が空欄のままになる）、
+// 人数が増減しても必ず全員ぶんの数式が入るよう、スクリプト側で都度書き込む方式に変更した。
 // P/Q欄に入りきらなかったスタッフ名の配列を返す（入りきった場合は空配列）
 function writeRosterSummary(sheet, names) {
   const range = sheet.getRange(
     ROSTER_SUMMARY_START_ROW,
     ROSTER_SUMMARY_NAME_COL,
     ROSTER_SUMMARY_MAX_ROWS,
-    1
+    2
   );
   range.clearContent();
 
   const toWrite = names.slice(0, ROSTER_SUMMARY_MAX_ROWS);
-  if (toWrite.length) {
-    sheet
-      .getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 1)
-      .setValues(toWrite.map((n) => [n]));
-  }
+  const nameColLetter = columnToLetter(ROSTER_SUMMARY_NAME_COL);
+  const calendarRange = `$A$${DATE_ROWS[0]}:$N$${CALENDAR_BOTTOM_ROW}`;
+  toWrite.forEach((name, i) => {
+    const row = ROSTER_SUMMARY_START_ROW + i;
+    sheet.getRange(row, ROSTER_SUMMARY_NAME_COL).setValue(name);
+    sheet.getRange(row, ROSTER_SUMMARY_NAME_COL + 1).setFormula(`=COUNTIF(${calendarRange},${nameColLetter}${row})`);
+  });
 
   return names.slice(ROSTER_SUMMARY_MAX_ROWS);
+}
+
+// 列番号(1始まり)をスプレッドシートの列文字(A, B, ..., P, ...)に変換する
+function columnToLetter(col) {
+  let letter = '';
+  let n = col;
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    letter = String.fromCharCode(65 + rem) + letter;
+    n = Math.floor((n - 1) / 26);
+  }
+  return letter;
 }
 
 // 「取得可能」メモ欄（QUOTA_NOTE_CELL）の末尾の数値から、今月の公休数を読み取る
@@ -1026,7 +1045,8 @@ function autoFillRegularHolidaysCore(sheet, quota) {
     sheet.getRange(w.row, w.col).setValue(w.name).setFontColor('#000000');
   });
 
-  // ダブルチェック用に、P列へスタッフ名を記載（Q列は既存のCOUNTIF式が希望休+自動入力分をまとめて数える）
+  // ダブルチェック用に、P列へスタッフ名を記載（Q列には、希望休+自動入力分をまとめて数える
+  // COUNTIF式をスクリプトが直接書き込む）
   const summaryOverflow = writeRosterSummary(sheet, roster);
 
   const shortages = needs.filter((n) => n.need > 0);
