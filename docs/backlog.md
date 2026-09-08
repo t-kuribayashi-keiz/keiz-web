@@ -42,11 +42,17 @@
 - **これにより「`smile-good-reporter`という識別情報そのものが壊れている」という
   仮説がほぼ確定した**。同じGA4アカウント・同じGCPプロジェクトという条件を完全に
   揃えた上で、別名の新規SAは通り、`smile-good-reporter`だけが弾かれるため
-- `smile-good-reporter-2`のJSON鍵を作成し、ローカル(このセッションの実行環境。
-  ホスト名`DESKTOP-R0S2PB7`、ユーザー`Keizgroup319`)の`claude\keys\
-  smile-good-reporter-2.json`に保存した。**注意**: 下記の鍵管理表では鍵の実物は
-  「Keizgroup500」というマシンにあると記載されており、今回保存したマシンと
-  同一かどうかは未確認。次にこの鍵を使う際は保存先マシンを要確認
+- `smile-good-reporter-2`のJSON鍵を作成し、`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)の
+  `claude\keys\smile-good-reporter-2.json`に保存した。下記の鍵管理表では従来
+  「Keizgroup500」に鍵の実物があると記載されていたが、これは矛盾ではなく、各PC/
+  実行環境ごとにローカルの鍵ファイルを持つという組織のルール(ルート`CLAUDE.md`
+  「認証情報の扱い」)通りの状態。GitHub Secretsと異なりローカル鍵ファイルは
+  複数PCに存在して問題ない
+- **2026-09-08、`smile-good-reporter-2`を正式採用と決定(栗林さん判断)**:
+  GA4側は決定的な結果が出たため、「テスト用」ではなく本番のサービスアカウントとして
+  扱う方針となった。GCP上の説明欄も本番用の文言に更新済み。旧`smile-good-reporter`は
+  GCP上削除せずそのまま残し、GA4アカウント側への追加も試みない(同じエラーで
+  失敗する見込みのため無理に試さない)
 - **Search Console側の同テストは未実施(ブロック中)**: `https://chiryouin.biz/danbara/`
   (グッドのGSCプロパティの一つ)で試したところ、現在ログイン中のGoogleアカウント
   (`t-kuribayashi@keizgroup.jp`)が「プロパティの所有者ではない」と表示され、
@@ -54,14 +60,10 @@
   別アカウントがGSCの所有者になっている可能性があるが未確認。**GSCについては
   SA固有の問題という仮説はまだ検証できていない**
 
-**残っている論点(ユーザー判断待ち)**:
-1. 今後`smile-good-reporter`を正式に廃止し`smile-good-reporter-2`を採用するか
-   → GA4分は確認済みだが、GSCの検証ができるまでは`smile-good-reporter`を
-   完全に見捨てる判断は保留中
-2. テスト用に作った`smile-good-reporter-2`(GCP・GA4とも)を残すか削除するか
-   → 栗林さんに確認してから判断する方針(このセッションでは削除していない)
-3. GSCの所有者アカウントでの再テストが必要。所有者アカウント(`admin@keizgroup.jp`等)
-   でのログインが必要になる見込み
+**残っている論点**:
+1. GSCの所有者アカウントの特定と、そのアカウントでの`smile-good-reporter-2`追加
+   再テストが必要(このセクションが「解決済み」としてクローズできるかどうかの
+   最後の論点)
 
 この調査が終わるまで、グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
 経由)は着手不可。HPBリボンデータは栗林さんが別途手動で集計する方針のため影響なし。
@@ -261,7 +263,7 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
 | `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
-| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter-2.json`(2026-09-08、`smile-good-reporter`から切替。詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照。`smile-good-reporter.json`は旧鍵として残置、廃止確定ではない) |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter-2.json`。2026-09-08、`smile-good-reporter`の代替として**正式採用確定**(GA4側の切り分けテストで決定的な結果、詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照)。Keizgroup500に加え`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)にも同名で鍵が存在する(各PCローカルの鍵ファイルなので複数PCに存在して問題なし)。`smile-good-reporter.json`(旧鍵)はGCP上・ローカルとも削除せず残置 |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
