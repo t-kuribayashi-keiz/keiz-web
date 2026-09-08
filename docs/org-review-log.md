@@ -1817,3 +1817,111 @@ Skillへ畳む作業をしていたが、それが組織図のどこの仕事な
     に置かれると列構成が異なるまま1ファイルに混ざるおそれ**があった(並行実行とは別の
     潜在的な設計上の粗さ)。今回は`hpb_crm_work_log.csv`という別名を使う指示に修正することで
     合わせて解消したが、実際にこれまで`hpb_work_log.csv`に混在した記録がないかは未確認
+
+## 2026-09-08 LUNAブランド専属マーケティング参謀エージェントの新設
+
+- きっかけ: 直前の作業で「LUNA section background image」セッション
+  (session_01KuA5rbdBVGsh4mZYtnqUGy)が公開していた集客分析Artifact2本
+  (戸越銀座店チャネル別集客パフォーマンス分析・スマホ行動分析)を一次情報として
+  `brands/luna/CLAUDE.md`に漏れなく反映した直後、栗林さんから「keiz-webのAIエージェント
+  組織に組み込んでください」との依頼があった。ルートCLAUDE.mdの既定方針(「実際の運用
+  ファクトが`brands/<ブランド名>/CLAUDE.md`に集まってから新設する」)に照らすと、直前の
+  反映によりLUNAはスマイル・グッドに続く3ブランド目としてこの条件を満たしたと判断した
+
+### 1. `luna-marketing-strategist`エージェントの新設
+
+- 対応: `.claude/agents/good-marketing-strategist.md`を手本に
+  `.claude/agents/luna-marketing-strategist.md`を新設した。ただし単純な複製ではなく、
+  LUNAの前提がスマイル・グッドと根本的に異なる点を本文で正直に明記した:
+  - 業態がピラティススタジオでHPBを一切使わない(集客チャネルはホームページのみ)
+  - 店舗が戸越銀座店1店舗のみで、他ブランドのような院間比較という発想が成立しない
+  - **最大の違い**: グッド・スマイルは「グッド・スマイル月次報告」シートへの
+    Sheets API直接アクセス手段(サービスアカウント`smile-good-reporter`)を持つが、
+    LUNAにはこのリポジトリ側のGA4/GSC/Clarity直接アクセス手段が無い。実データは
+    既存の運用専用Claude Codeセッション(`session_01KuA5rbdBVGsh4mZYtnqUGy`、
+    environment `env_014Wg7aVXEn5DVaZcYKadVr4`)が独自に取得・分析しArtifactとして
+    公開したものを、このリポジトリ側が事後的に読み込んで`brands/luna/CLAUDE.md`へ
+    転記する運用であり、このエージェント自身がAPIを叩くことはできない
+  - このため「メインミッション」冒頭のガードレールに、新しい数値が必要な場合は
+    推測せず運用セッション側の更新を待つ/依頼する旨を明記し、「やらないこと」に
+    「GA4/GSC/ClarityへのAPI直接アクセス(鍵が無く技術的に不可能)」を追加した
+- `brands/luna/CLAUDE.md`記載の主要論点(予約完了数5週連続減少、Meta広告Threads/
+  Audience Network配置の未対応、hacomono予約枠選択画面の離脱、シンプソンのパラドックス
+  の注意喚起等)をエージェント本文に要約として転記し、初回起動時にすぐ状況を把握できる
+  ようにした(詳細は`brands/luna/CLAUDE.md`参照という形で複製は最小限に留めた)
+- 対応状況: 対応済み。変更したファイル: `.claude/agents/luna-marketing-strategist.md`
+  (新規)
+
+### 2. ルートCLAUDE.mdへの反映
+
+- 「組織構成」表に`LUNA マーケティング参謀`の行を追加し、スマイル・グッドとの違い
+  (HPB不使用・データ基盤が運用セッション経由)を一言で分かるように記載した
+- 「ブランド専属マーケティング参謀エージェントの追加方針」セクション末尾に、
+  LUNAが3ブランド目であること、および今後同型のエージェントを増やす際は前提の違いを
+  都度確認すべき旨(単純な使い回し禁止)を追記した
+- 対応状況: 対応済み。変更したファイル: `CLAUDE.md`
+
+### 全体の対応状況
+
+対応済み。未対応として残っている論点:
+- LUNAのGA4プロパティID・GSCプロパティURLは依然このリポジトリに未記載(運用セッション側
+  での確認が必要、`brands/luna/CLAUDE.md`に記載済み)
+- 直営・サンズミライ・心身堂・リラックスの4ブランドは引き続き実データが揃うまで
+  同型エージェントの新設を見送り中(変更なし)
+
+## 2026-09-08 グッド・スマイルGA4/Search Console招待失敗の原因判明・解決
+
+- 背景: グッド・スマイルのGA4/GSCへ直接API接続用のサービスアカウント
+  `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com`を追加しようと
+  したところ、「このメールアドレスはGoogleアカウントと一致しません」のエラーで
+  追加できなかった。原因調査は本セッション(クラウド)と複数回のローカル
+  Claude Codeセッションにまたがり、当初は多くの仮説(コピペ崩れ、権限不足、
+  外部事業者制限、サービスアカウント固有の問題、GA4 Admin API未有効化)を
+  順に検証したがいずれも棄却され、いったん「原因不明」として`docs/backlog.md`に
+  タスク登録した経緯がある
+
+### 決定的な切り分けと解決
+
+- 同じGA4アカウント(「M&A」)・同じGCPプロジェクト(`keizgroup-automation`)内の
+  別サービスアカウント`chokuei-sunsumirai-kpi-writer`は問題なく追加できることが
+  実機で確認され、「keizgroup.jp/このプロジェクトは一律ブロックされている」という
+  仮説が棄却された。これを受け、`smile-good-reporter`とは別名の新規サービス
+  アカウント`smile-good-reporter-2`を作成して同じGA4アカウントへの追加を試した
+  ところ、エラーなく成功。**`smile-good-reporter`というサービスアカウントの
+  識別情報そのものに固有の問題**であることがほぼ確定した(内部的な原因は最後まで
+  特定できていない。削除→同名再作成時の内部ID不整合等が推測されるが未確認のため
+  断定はしていない)
+- Search Console側は別の壁があった: ログイン中の`t-kuribayashi@keizgroup.jp`が
+  そのGSCプロパティ(`chiryouin.biz/danbara/`)の「確認済み所有者」ではなく、
+  フル権限を持っていてもユーザー管理画面自体を開けなかった(GSCのユーザー管理は
+  確認済み所有者のみ操作可能という、GA4とは別の制約)。確認済み所有者
+  `admin@keizgroup.jp`でログインし直したところ、`smile-good-reporter-2`の追加は
+  ここでもエラーなく成功し、GA4・GSC双方で同じ結論に至った
+- 副次的な発見: 旧`smile-good-reporter`はGoogle Driveのスプレッドシート共有では
+  以前から問題なく機能していた(Master共有設定で確認)。「メールアドレスが
+  Googleアカウントと一致しません」というエラーはGA4/GSCのユーザー管理機能に
+  固有で、Google Workspace/Driveの共有機能全般には及んでいなかった
+
+### 対応
+
+- `smile-good-reporter-2`を正式なサービスアカウントとして採用(栗林さん判断)。
+  GCP上の説明欄を本番用に更新。旧`smile-good-reporter`はGCP上・GA4とも触らず
+  残置し、以後は使用しない方針
+- `smile-good-reporter-2`のJSON鍵をGitHub Secrets `GCP_SMILE_GOOD_KEY`として
+  登録(鍵の中身はチャット・ログに一切表示せず、ファイルから直接読み込む形で実行)
+- Master(「HPB_スマイル・グッド_KPI一括集計結果」相当)スプレッドシートの共有が
+  旧SAにしかなかったため、新SAにも同じ権限(writer)で共有を追加
+- スクラッチのスモークテストスクリプトでSheets APIの疎通を確認(2シートとも
+  取得成功)
+- `docs/backlog.md`の鍵管理表(`GCP_SMILE_GOOD_KEY`行)を「登録済み」に更新し、
+  鍵の保管場所(`DESKTOP-R0S2PB7`/`Keizgroup319`にも同名鍵が存在)を整理して記載
+
+### 対応状況
+
+対応済み・解決。`docs/backlog.md`の「調査待ち」セクションからは本件を削除した
+(このログが正の記録)。未対応として残っている論点:
+- `hpb-ribbon-kpi.yml --profile smile-good --mode inspect`はまだ未実行
+  (`data/hpb-ribbon/`にグッド・スマイル向けの抽出済みCSVがまだ無いため)。
+  本格運用の組み立ては別タスク
+- `smile-good-reporter`が具体的に何故GA4/GSCのユーザー管理でだけ識別不能になって
+  いたかの内部的な原因は未解明のまま(実害が無くなったため深追いはしていない)

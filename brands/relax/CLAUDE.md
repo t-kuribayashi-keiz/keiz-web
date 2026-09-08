@@ -277,6 +277,23 @@ GA4にもSearch Consoleにもリポジトリにも書き込まない。スコー
 
 **推測で埋めない。** それらしい数字が入ると誰も気づかないままKPIの傾向判断が狂う。
 
+## 月次集客レポート(2026-09開始)
+
+25店舗の月次集客状況を単一HTMLアーティファクトにまとめる運用。手順・固定ルールは
+[.claude/skills/relax-monthly-report/SKILL.md](../../.claude/skills/relax-monthly-report/SKILL.md)
+が正。要点:
+
+- **直営・サンズミライのHPB Master/診断レポート(hpb-ribbon-kpiスキル)とは完全に別。
+  混同しないこと**(対象ブランドもArtifactも別)
+- データソース: HPBリボンCSV(人からの月次共有が起点。自動抽出パイプラインは未対応)、
+  GA4 Data API(新規ユーザー数=`newUsers`・コンバージョンユーザー数=`isKeyEvent`絞り込みの
+  `activeUsers`)、Search Console API、「リラックス新規客経路集計」シート
+- 表示は全指標「1店舗あたり」・時系列は暦月(1〜12月)で年度を重ねる
+  ([docs/chart-conventions.md](../../docs/chart-conventions.md)、全ブランド共通ルール)
+- 公開先(毎月同一URLを更新): https://claude.ai/code/artifact/4dfbe10f-fc8f-40ca-8a84-6221b4eb4096
+- 毎月のRoutineを2026-09-07に設定(月初、新規セッションを起動)。HPBリボンCSVは人からの
+  提供が前提のため、起動したセッションはまずCSVの有無を確認し、無ければ依頼する
+
 ## 既知の課題(未対応)
 
 - リラックスWordPress環境の実機調査が未着手(`docs/backlog.md`「★次にやる」)

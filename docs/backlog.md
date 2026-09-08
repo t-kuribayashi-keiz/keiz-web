@@ -202,7 +202,7 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
 | `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
-| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter.json` |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **登録済み**(2026-09-08) | `claude\keys\smile-good-reporter-2.json`。2026-09-08、`smile-good-reporter`の代替として**正式採用確定**(GA4・GSC双方の切り分けテストで決定的な結果、詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照)。Keizgroup500に加え`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)にも同名で鍵が存在する(各PCローカルの鍵ファイルなので複数PCに存在して問題なし)。`smile-good-reporter.json`(旧鍵)はGCP上・ローカルとも削除せず残置 |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
@@ -211,10 +211,22 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 ~~**`GCP_RELAX_KEY` の中身の確認**~~ → 2026-09-06に`relax-analytics.yml`を実行して解決。
 `relax-reporter@keizgroup-automation.iam.gserviceaccount.com`で正しい。再登録は不要だった。
 
-`GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
-`hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、
-以降は `inspect → dry-run → apply`)。他の前提(リボンPDF・専用Master・共有設定)は
-2026-09-06に片付いている。
+`GCP_SMILE_GOOD_KEY` は2026-09-08にSecrets登録済み。これで`hpb-ribbon-kpi.yml` を
+`--profile smile-good` で回せる(初回だけ `--mode init-master`、以降は
+`inspect → dry-run → apply`)。
+
+**2026-09-08、鍵切替に伴う共有設定の確認・修正**:
+- Master(`HPB_スマイル・グッド_KPI一括集計結果`)は旧`smile-good-reporter`にのみ
+  書き込み共有されており、新SA`smile-good-reporter-2`は未共有だったため、writer権限で
+  追加共有した
+- 集客数シート(`グッド・スマイル月次報告`)は「リンクを知っている全員が編集者」設定の
+  ため、追加共有は不要だった
+- ローカルでSheets APIへの疎通確認(使い捨てスクリプト、リポジトリには含めていない)を
+  行い、`smile-good-reporter-2`の鍵で上記2シートとも取得に成功。鍵が正しく機能すること
+  を確認済み
+- 実際の`hpb-ribbon-kpi.yml`(`--profile smile-good --mode inspect`)はまだ未実行。
+  `data/hpb-ribbon/`に抽出済みCSV(`--extract-csv`は必須引数)がまだ無いため。本格運用の
+  組み立ては別タスク
 
 鍵はリポジトリSecretに1つ登録すればよく、**PCごとに登録する必要はない**。Actionsの中で
 だけ復号されるので、どのPCから起動しても同じように動く(逆にローカル直実行ではSecretsを

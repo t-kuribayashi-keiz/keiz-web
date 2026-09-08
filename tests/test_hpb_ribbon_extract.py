@@ -115,6 +115,33 @@ class TestResolveTab(unittest.TestCase):
         self.assertEqual(wr.month_tab_keywords(["HPB", "速報値"], "2026年08月号"),
                          ["8月", "HPB", "速報値"])
 
+    def test_prior_year_tab_excluded_with_target_year(self):
+        # 実際に「グッド・スマイル月次報告」で発生したケース(2026-09-08):
+        # 過去年度のアーカイブタブが同じ月キーワードに当たり、キーワードだけでは
+        # 一意に決まらない。target_year を渡すと年プレフィックス違いを除外できる。
+        titles = ["2025年8月HP(速報値) ", "8月HP(速報値)"]
+        keywords = ["8月", "HP", "速報値"]
+        with self.assertRaises(ValueError):
+            wr.resolve_tab(titles, keywords)  # target_year無しなら従来どおり例外
+        self.assertEqual(wr.resolve_tab(titles, keywords, target_year="2026"),
+                         "8月HP(速報値)")
+
+    def test_matching_year_tab_preferred_over_unprefixed(self):
+        titles = ["2025年8月HP(速報値) ", "2026年8月HP(速報値)"]
+        keywords = ["8月", "HP", "速報値"]
+        self.assertEqual(wr.resolve_tab(titles, keywords, target_year="2026"),
+                         "2026年8月HP(速報値)")
+
+    def test_still_raises_when_ambiguous_after_year_filter(self):
+        titles = ["8月HP(速報値)旧", "8月HP(速報値)新"]
+        keywords = ["8月", "HP", "速報値"]
+        with self.assertRaises(ValueError):
+            wr.resolve_tab(titles, keywords, target_year="2026")
+
+    def test_month_label_year(self):
+        self.assertEqual(wr.month_label_year("2026年08月号"), "2026")
+        self.assertIsNone(wr.month_label_year("8月号"))
+
 
 class TestShukyakuJoin(unittest.TestCase):
     def test_build_map_stops_at_total(self):
