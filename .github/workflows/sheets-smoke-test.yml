@@ -61,7 +61,7 @@ jobs:
           python3 scripts/sheets_smoke_test.py "${args[@]}"
 
       - name: Upload results
-        if: ${{ inputs.upload_as_csv == 'true' }}
+        if: ${{ inputs.upload_as_csv }}
         uses: actions/upload-artifact@v4
         with:
           name: sheets-smoke-test-read
