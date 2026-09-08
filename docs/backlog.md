@@ -7,7 +7,14 @@
 
 ## 調査待ち(実機・外部環境の確認が必要)
 
-### グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない(GA4は原因特定済み、GSCは検証未了)
+### グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない(解決済み)
+
+**解決サマリー(2026-09-08)**: GA4・Search Console共に、`smile-good-reporter`という
+サービスアカウントの識別情報そのものに固有の問題であることが確定した。別名の新規
+サービスアカウント`smile-good-reporter-2@keizgroup-automation.iam.gserviceaccount.com`
+を作成したところ、GA4(M&Aアカウント)・Search Console(`chiryouin.biz`配下)いずれも
+エラーなく追加できた。`smile-good-reporter-2`を正式なサービスアカウントとして採用し、
+旧`smile-good-reporter`はGCP上に削除せず残置(使用しない方針)。以下は経緯。
 
 2026-09-08、GA4/GSCへのユーザー追加権限をサービスアカウント経由での直接API接続用に
 栗林さんへ依頼したところ、「このメールアドレスはGoogleアカウントと一致しません」の
@@ -53,20 +60,32 @@
   扱う方針となった。GCP上の説明欄も本番用の文言に更新済み。旧`smile-good-reporter`は
   GCP上削除せずそのまま残し、GA4アカウント側への追加も試みない(同じエラーで
   失敗する見込みのため無理に試さない)
-- **Search Console側の同テストは未実施(ブロック中)**: `https://chiryouin.biz/danbara/`
-  (グッドのGSCプロパティの一つ)で試したところ、現在ログイン中のGoogleアカウント
-  (`t-kuribayashi@keizgroup.jp`)が「プロパティの所有者ではない」と表示され、
-  ユーザーと権限の画面自体が開けなかった。GA4側の`admin@keizgroup.jp`のような
-  別アカウントがGSCの所有者になっている可能性があるが未確認。**GSCについては
-  SA固有の問題という仮説はまだ検証できていない**
+- **Search Console側も同じ切り分けテストを実施、成功(2026-09-08)**: グッドのGSC
+  プロパティ`https://chiryouin.biz/danbara/`で試したところ、現在ログイン中の
+  Googleアカウント(`t-kuribayashi@keizgroup.jp`)は「プロパティの所有者ではない」
+  と表示され、ユーザーと権限の画面を開けなかった。「所有権の確認」画面で
+  「あなたは確認済みの所有者ではありません。所有者から権限を付与されています」と
+  確認(GSCのユーザー管理は確認済み所有者のみ操作可能なため、`t-kuribayashi`は
+  フル権限を持っていても操作不可だった)。栗林さんに確認したところ、このプロパティの
+  確認済み所有者は`admin@keizgroup.jp`(実際に「所有権の確認」画面で「あなたは
+  確認済みの所有者です」と表示され確認)。`admin@keizgroup.jp`でログインし、
+  `smile-good-reporter-2@keizgroup-automation.iam.gserviceaccount.com`を「フル」
+  権限で追加したところ、**エラーなく追加できた**(ユーザー一覧が2件→3件に増加、
+  栗林さん本人が操作・スクリーンショットで確認)。これによりGA4・GSC両方で
+  `smile-good-reporter`固有の問題という仮説が確定した
+- 旧`smile-good-reporter`でのGSC側比較テスト(念のための追加確認、必須ではない)は
+  未実施
+- 補足事実: Master(スプレッドシート)の共有設定を確認したところ、**旧`smile-good-reporter`
+  も以前からwriter権限で共有済みだった**(Google Driveの共有はエラーなく成立していた)。
+  新SA`smile-good-reporter-2`の追加共有も同様にエラーなく成功した。「メールアドレスが
+  Googleアカウントと一致しません」というエラーはGA4/GSCのユーザー管理機能に固有で、
+  Google Workspace/Driveの共有機能全般には及んでいないことが分かった
 
-**残っている論点**:
-1. GSCの所有者アカウントの特定と、そのアカウントでの`smile-good-reporter-2`追加
-   再テストが必要(このセクションが「解決済み」としてクローズできるかどうかの
-   最後の論点)
+**残っている論点**: なし(2026-09-08時点)。後続作業(GitHub Secrets登録・疎通確認)は
+下記「設定・環境」セクションの`GCP_SMILE_GOOD_KEY`行を参照。
 
-この調査が終わるまで、グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
-経由)は着手不可。HPBリボンデータは栗林さんが別途手動で集計する方針のため影響なし。
+この調査は完了。グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
+経由)に着手可能になった。
 
 ### リラックス WordPress環境の実態調査 ★次にやる
 
@@ -263,7 +282,7 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
 | `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
-| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter-2.json`。2026-09-08、`smile-good-reporter`の代替として**正式採用確定**(GA4側の切り分けテストで決定的な結果、詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照)。Keizgroup500に加え`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)にも同名で鍵が存在する(各PCローカルの鍵ファイルなので複数PCに存在して問題なし)。`smile-good-reporter.json`(旧鍵)はGCP上・ローカルとも削除せず残置 |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **登録済み**(2026-09-08) | `claude\keys\smile-good-reporter-2.json`。2026-09-08、`smile-good-reporter`の代替として**正式採用確定**(GA4・GSC双方の切り分けテストで決定的な結果、詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照)。Keizgroup500に加え`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)にも同名で鍵が存在する(各PCローカルの鍵ファイルなので複数PCに存在して問題なし)。`smile-good-reporter.json`(旧鍵)はGCP上・ローカルとも削除せず残置 |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
@@ -272,10 +291,22 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 ~~**`GCP_RELAX_KEY` の中身の確認**~~ → 2026-09-06に`relax-analytics.yml`を実行して解決。
 `relax-reporter@keizgroup-automation.iam.gserviceaccount.com`で正しい。再登録は不要だった。
 
-`GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
-`hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、
-以降は `inspect → dry-run → apply`)。他の前提(リボンPDF・専用Master・共有設定)は
-2026-09-06に片付いている。
+`GCP_SMILE_GOOD_KEY` は2026-09-08にSecrets登録済み。これで`hpb-ribbon-kpi.yml` を
+`--profile smile-good` で回せる(初回だけ `--mode init-master`、以降は
+`inspect → dry-run → apply`)。
+
+**2026-09-08、鍵切替に伴う共有設定の確認・修正**:
+- Master(`HPB_スマイル・グッド_KPI一括集計結果`)は旧`smile-good-reporter`にのみ
+  書き込み共有されており、新SA`smile-good-reporter-2`は未共有だったため、writer権限で
+  追加共有した
+- 集客数シート(`グッド・スマイル月次報告`)は「リンクを知っている全員が編集者」設定の
+  ため、追加共有は不要だった
+- ローカルでSheets APIへの疎通確認(使い捨てスクリプト、リポジトリには含めていない)を
+  行い、`smile-good-reporter-2`の鍵で上記2シートとも取得に成功。鍵が正しく機能すること
+  を確認済み
+- 実際の`hpb-ribbon-kpi.yml`(`--profile smile-good --mode inspect`)はまだ未実行。
+  `data/hpb-ribbon/`に抽出済みCSV(`--extract-csv`は必須引数)がまだ無いため。本格運用の
+  組み立ては別タスク
 
 鍵はリポジトリSecretに1つ登録すればよく、**PCごとに登録する必要はない**。Actionsの中で
 だけ復号されるので、どのPCから起動しても同じように動く(逆にローカル直実行ではSecretsを
