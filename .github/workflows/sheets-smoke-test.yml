@@ -23,6 +23,11 @@ on:
         required: false
         type: string
         default: "A1:E5"
+      upload_as_csv:
+        description: "true にすると、読んだ範囲をログではなくworkflow ArtifactのCSVとして受け取る(get_job_logsの出力上限を超える大きな範囲を読むとき用)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -49,4 +54,17 @@ jobs:
           if [ -n "${{ inputs.tab }}" ]; then
             args+=(--tab "${{ inputs.tab }}" --range "${{ inputs.range }}")
           fi
+          if [ "${{ inputs.upload_as_csv }}" = "true" ]; then
+            mkdir -p out
+            args+=(--out-csv "out/sheet-read.csv")
+          fi
           python3 scripts/sheets_smoke_test.py "${args[@]}"
+
+      - name: Upload results
+        if: ${{ inputs.upload_as_csv == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sheets-smoke-test-read
+          path: out/sheet-read.csv
+          retention-days: 7
+          if-no-files-found: error

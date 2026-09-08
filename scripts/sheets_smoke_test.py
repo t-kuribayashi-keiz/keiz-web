@@ -42,6 +42,9 @@ def main() -> int:
     ap.add_argument("--sheet-id", required=True)
     ap.add_argument("--tab", help="読むタブ名。省略するとタブ一覧だけ出す")
     ap.add_argument("--range", default="A1:E5", help="タブ指定時に読む範囲(既定 A1:E5)")
+    ap.add_argument("--out-csv", help="省略可。指定するとログ表示に加えて範囲の内容をCSVとして書き出す"
+                                       "(get_job_logsの出力上限を超える大きな範囲を読むとき用。"
+                                       "actions/upload-artifactで拾う想定)")
     args = ap.parse_args()
 
     creds = credentials(args.key_env)
@@ -70,8 +73,14 @@ def main() -> int:
         spreadsheetId=args.sheet_id, range=f"'{args.tab}'!{args.range}"
     ).execute().get("values", [])
     print(f"\n'{args.tab}'!{args.range} の内容({len(values)}行):")
-    for row in values:
-        print(" ", row)
+    if args.out_csv:
+        import csv
+        with open(args.out_csv, "w", newline="", encoding="utf-8") as fh:
+            csv.writer(fh).writerows(values)
+        print(f"  -> {args.out_csv} に書き出し済み(ログには表示しない。行数が多いため)")
+    else:
+        for row in values:
+            print(" ", row)
     return 0
 
 
