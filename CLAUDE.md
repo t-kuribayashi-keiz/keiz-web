@@ -17,6 +17,7 @@
 | SalonBoard操作担当 | [salonboard-operator.md](.claude/agents/salonboard-operator.md) | HotPepper Beauty SalonBoard(salonboard.com)の定型更新・反映作業(ブランド非依存、要ローカル実行環境) |
 | スマイル マーケティング参謀 | [smile-marketing-strategist.md](.claude/agents/smile-marketing-strategist.md) | スマイルブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドで同様の役割が必要になれば同じ型で追加する) |
 | グッド マーケティング参謀 | [good-marketing-strategist.md](.claude/agents/good-marketing-strategist.md) | グッドブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。スマイルと同型だが、店舗ステータス区分・広告実額等のグッド固有ファクトは未確認のまま複製していない) |
+| LUNA マーケティング参謀 | [luna-marketing-strategist.md](.claude/agents/luna-marketing-strategist.md) | LUNAブランド専属(ピラティススタジオ・戸越銀座店1店舗)のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドと異なりHPBを使わず、GA4/GSC/Clarityが集客データ基盤。このリポジトリ側に直接API接続は無く、既存の運用専用Claude Codeセッションが公開するArtifactを一次情報として`brands/luna/CLAUDE.md`に転記する運用) |
 | コンテンツライター | [content-writer.md](.claude/agents/content-writer.md) | 承認済みの執筆指示書を、ブログ・広告文・口コミ返信等の完成コンテンツに仕上げる(ブランド非依存) |
 | 横断オーケストレーター | [cross-functional.md](.claude/agents/cross-functional.md) | 複数業務・複数院にまたがる重複/共通パターンを検出し、棚卸しを行う |
 
@@ -49,6 +50,14 @@ Skillとして実装します。1業務=1Skillを原則とし、疎結合に保�
 時点でこの型が存在するのはスマイル・グッドの2ブランドのみで、直営・サンズミライ・
 心身堂・リラックスの4ブランドは実データが揃うまで意図的に見送っている
 (`docs/backlog.md`の「設定・環境」セクションに未対応項目として記録)。
+
+2026-09-08、`brands/luna/CLAUDE.md`にLUNA(戸越銀座店)の週次推移・チャネル別ファネル・
+Meta広告内訳・スマホ行動分析等の実データが集まったことを受け、3ブランド目として
+`luna-marketing-strategist`を新設した。LUNAは他ブランドと異なりHPBを使わず1店舗のみ、
+かつこのリポジトリ側にGA4/GSC/Clarityへの直接API接続が無い(既存の運用専用Claude Code
+セッションが公開するArtifactを事後的に一次情報として取り込む運用)という点で、
+スマイル・グッドとは前提が異なる。この型のエージェントを増やす際は、都度この違いを
+確認してから複製すること(単純な使い回しは禁物)。
 
 ## 業務フロー(横串の刺し方)
 
