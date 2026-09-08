@@ -1868,3 +1868,60 @@ Skillへ畳む作業をしていたが、それが組織図のどこの仕事な
   での確認が必要、`brands/luna/CLAUDE.md`に記載済み)
 - 直営・サンズミライ・心身堂・リラックスの4ブランドは引き続き実データが揃うまで
   同型エージェントの新設を見送り中(変更なし)
+
+## 2026-09-08 グッド・スマイルGA4/Search Console招待失敗の原因判明・解決
+
+- 背景: グッド・スマイルのGA4/GSCへ直接API接続用のサービスアカウント
+  `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com`を追加しようと
+  したところ、「このメールアドレスはGoogleアカウントと一致しません」のエラーで
+  追加できなかった。原因調査は本セッション(クラウド)と複数回のローカル
+  Claude Codeセッションにまたがり、当初は多くの仮説(コピペ崩れ、権限不足、
+  外部事業者制限、サービスアカウント固有の問題、GA4 Admin API未有効化)を
+  順に検証したがいずれも棄却され、いったん「原因不明」として`docs/backlog.md`に
+  タスク登録した経緯がある
+
+### 決定的な切り分けと解決
+
+- 同じGA4アカウント(「M&A」)・同じGCPプロジェクト(`keizgroup-automation`)内の
+  別サービスアカウント`chokuei-sunsumirai-kpi-writer`は問題なく追加できることが
+  実機で確認され、「keizgroup.jp/このプロジェクトは一律ブロックされている」という
+  仮説が棄却された。これを受け、`smile-good-reporter`とは別名の新規サービス
+  アカウント`smile-good-reporter-2`を作成して同じGA4アカウントへの追加を試した
+  ところ、エラーなく成功。**`smile-good-reporter`というサービスアカウントの
+  識別情報そのものに固有の問題**であることがほぼ確定した(内部的な原因は最後まで
+  特定できていない。削除→同名再作成時の内部ID不整合等が推測されるが未確認のため
+  断定はしていない)
+- Search Console側は別の壁があった: ログイン中の`t-kuribayashi@keizgroup.jp`が
+  そのGSCプロパティ(`chiryouin.biz/danbara/`)の「確認済み所有者」ではなく、
+  フル権限を持っていてもユーザー管理画面自体を開けなかった(GSCのユーザー管理は
+  確認済み所有者のみ操作可能という、GA4とは別の制約)。確認済み所有者
+  `admin@keizgroup.jp`でログインし直したところ、`smile-good-reporter-2`の追加は
+  ここでもエラーなく成功し、GA4・GSC双方で同じ結論に至った
+- 副次的な発見: 旧`smile-good-reporter`はGoogle Driveのスプレッドシート共有では
+  以前から問題なく機能していた(Master共有設定で確認)。「メールアドレスが
+  Googleアカウントと一致しません」というエラーはGA4/GSCのユーザー管理機能に
+  固有で、Google Workspace/Driveの共有機能全般には及んでいなかった
+
+### 対応
+
+- `smile-good-reporter-2`を正式なサービスアカウントとして採用(栗林さん判断)。
+  GCP上の説明欄を本番用に更新。旧`smile-good-reporter`はGCP上・GA4とも触らず
+  残置し、以後は使用しない方針
+- `smile-good-reporter-2`のJSON鍵をGitHub Secrets `GCP_SMILE_GOOD_KEY`として
+  登録(鍵の中身はチャット・ログに一切表示せず、ファイルから直接読み込む形で実行)
+- Master(「HPB_スマイル・グッド_KPI一括集計結果」相当)スプレッドシートの共有が
+  旧SAにしかなかったため、新SAにも同じ権限(writer)で共有を追加
+- スクラッチのスモークテストスクリプトでSheets APIの疎通を確認(2シートとも
+  取得成功)
+- `docs/backlog.md`の鍵管理表(`GCP_SMILE_GOOD_KEY`行)を「登録済み」に更新し、
+  鍵の保管場所(`DESKTOP-R0S2PB7`/`Keizgroup319`にも同名鍵が存在)を整理して記載
+
+### 対応状況
+
+対応済み・解決。`docs/backlog.md`の「調査待ち」セクションからは本件を削除した
+(このログが正の記録)。未対応として残っている論点:
+- `hpb-ribbon-kpi.yml --profile smile-good --mode inspect`はまだ未実行
+  (`data/hpb-ribbon/`にグッド・スマイル向けの抽出済みCSVがまだ無いため)。
+  本格運用の組み立ては別タスク
+- `smile-good-reporter`が具体的に何故GA4/GSCのユーザー管理でだけ識別不能になって
+  いたかの内部的な原因は未解明のまま(実害が無くなったため深追いはしていない)
