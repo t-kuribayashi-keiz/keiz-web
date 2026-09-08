@@ -7,32 +7,53 @@
 
 ## 調査待ち(実機・外部環境の確認が必要)
 
-### グッド・スマイルのGA4/Search Consoleにkeizgroup.jpのアカウントを追加できない(原因未特定)
+### グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない(原因の絞り込み中)
 
 2026-09-08、GA4/GSCへのユーザー追加権限をサービスアカウント経由での直接API接続用に
 栗林さんへ依頼したところ、「このメールアドレスはGoogleアカウントと一致しません」の
-エラーで**keizgroup.jpドメインのどのアカウントも追加できない**ことが判明した。
+エラーで追加できないことが判明した。
 
 **確認済み(再検証不要)**:
-- サービスアカウント(`smile-good-reporter`想定)自体は実在し有効
+- サービスアカウント`smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com`
+  自体はGCP側では実在し有効(IAM画面で✅有効・キー作成日2026-09-02)
 - 関連する3つのAPI(GA4 Admin API等)はすべて有効化済み
-- 通常のkeizgroup.jpアカウント(編集者権限・管理者権限どちらでも)・別のkeizgroup.jp
-  アカウントでも同じエラーで失敗。GA4・Search Console両方で同様に失敗
-  (Search Consoleでは「メールアドレスが見つかりませんでした」)
-- このGA4アカウントは社内で作成されたもの
+- 通常のkeizgroup.jpアカウント(編集者権限・管理者権限どちらでも)でも同じエラーで
+  失敗。GA4・Search Console両方で同様に失敗(Search Consoleでは「メールアドレスが
+  見つかりませんでした」)
 - 無関係な外部アカウント(`claude-analytics-access2@claude-ga4-connection-504100.iam.gserviceaccount.com`)
-  は追加できた → keizgroup.jp側(Google Workspace)の設定に起因する可能性が高いが未確定
-- 同じプロジェクトの`relax-reporter`(リラックス向け)は既存の共有が問題なく機能している
-  (新規追加ではなく既存の共有関係なので、直接の比較にはならない)
+  は追加できた
+- **2026-09-08に決定的な追加確認: 同じ「グッド・スマイル」GA4アカウントに対して、
+  同じGCPプロジェクト(`keizgroup-automation`)内の別のサービスアカウント
+  `chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`は
+  問題なく追加できた**(実機で確認済み、スクリーンショットで検証)。これにより
+  「keizgroup.jp/このGCPプロジェクトのサービスアカウントは一律追加できない」
+  「このGA4アカウント/Workspace側が一律ブロックしている」という仮説はいずれも
+  棄却された。**問題は`smile-good-reporter`というサービスアカウントの識別情報
+  そのものに固有**という可能性が最も高くなった(同じGA4アカウント×同じGCP
+  プロジェクトという条件を完全に揃えた上で、あるSAは通り別のSAだけ弾かれるため)
 
-**未確認・次にやること(ローカルのClaude Code + claude-in-chromeが必要)**:
-1. GA4管理画面でユーザー追加を試した際の実際のAPI通信をNetworkタブで確認
-   (エラーの詳細なレスポンス内容を見る)
-2. Google Workspace管理コンソール(admin.google.com)の「ディレクトリの共有設定」を確認
-3. 同管理コンソールの「セキュリティ→API制限」を確認
-4. GA4アカウントの変更履歴と、Workspace側のポリシー変更時期に相関が無いか確認
-5. 上記で原因不明なら、Google Workspace管理者またはGoogleサポートへのエスカレーションが
-   唯一の残る手段
+**次にやること(最有力の切り分けテスト。ローカル環境があれば誰でも実行可)**:
+1. GCPで`smile-good-reporter`とは別名の新しいサービスアカウントを1つ作成する
+   (例: `smile-good-reporter-2`)。キーは作らなくても招待テストだけならメール
+   アドレスが分かれば良い
+2. その新しいSAのメールアドレスを、同じ「グッド・スマイル」GA4アカウントに
+   追加してみる
+   - **追加できた場合**: `smile-good-reporter`という識別情報そのものが壊れている
+     (作成→削除→同名で再作成した際にGoogle側の内部IDが不整合になった等)と
+     ほぼ確定する。対応は簡単で、今後は新しいSA(`smile-good-reporter-2`等)を
+     正式採用し、ローカルの鍵ファイル・GitHub Secretsもそちらに差し替えるだけで
+     解決する
+   - **それでも「メールアドレスと一致しません」で失敗する場合**: SA固有の問題
+     という仮説も外れることになり、`chokuei-sunsumirai-kpi-writer`だけがなぜか
+     通っている特殊要因(作成日・作成経緯の違い等)を再検討する必要がある。
+     その場合は下記の旧・未確認事項(Networkタブ確認、Workspace管理コンソール
+     確認等)に戻る
+3. (上記2で「新しいSAも失敗」だった場合のみ)GA4管理画面でユーザー追加を試した際の
+   実際のAPI通信をNetworkタブで確認、Workspace管理コンソール(admin.google.com)の
+   「ディレクトリの共有設定」「セキュリティ→API制限」を確認、GA4アカウントの変更
+   履歴とWorkspace側のポリシー変更時期の相関を確認
+4. それでも原因不明なら、Google Workspace管理者またはGoogleサポートへの
+   エスカレーションが残る手段
 
 この調査が終わるまで、グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
 経由)は着手不可。HPBリボンデータは栗林さんが別途手動で集計する方針のため影響なし。
