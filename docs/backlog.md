@@ -7,6 +7,36 @@
 
 ## 調査待ち(実機・外部環境の確認が必要)
 
+### グッド・スマイルのGA4/Search Consoleにkeizgroup.jpのアカウントを追加できない(原因未特定)
+
+2026-09-08、GA4/GSCへのユーザー追加権限をサービスアカウント経由での直接API接続用に
+栗林さんへ依頼したところ、「このメールアドレスはGoogleアカウントと一致しません」の
+エラーで**keizgroup.jpドメインのどのアカウントも追加できない**ことが判明した。
+
+**確認済み(再検証不要)**:
+- サービスアカウント(`smile-good-reporter`想定)自体は実在し有効
+- 関連する3つのAPI(GA4 Admin API等)はすべて有効化済み
+- 通常のkeizgroup.jpアカウント(編集者権限・管理者権限どちらでも)・別のkeizgroup.jp
+  アカウントでも同じエラーで失敗。GA4・Search Console両方で同様に失敗
+  (Search Consoleでは「メールアドレスが見つかりませんでした」)
+- このGA4アカウントは社内で作成されたもの
+- 無関係な外部アカウント(`claude-analytics-access2@claude-ga4-connection-504100.iam.gserviceaccount.com`)
+  は追加できた → keizgroup.jp側(Google Workspace)の設定に起因する可能性が高いが未確定
+- 同じプロジェクトの`relax-reporter`(リラックス向け)は既存の共有が問題なく機能している
+  (新規追加ではなく既存の共有関係なので、直接の比較にはならない)
+
+**未確認・次にやること(ローカルのClaude Code + claude-in-chromeが必要)**:
+1. GA4管理画面でユーザー追加を試した際の実際のAPI通信をNetworkタブで確認
+   (エラーの詳細なレスポンス内容を見る)
+2. Google Workspace管理コンソール(admin.google.com)の「ディレクトリの共有設定」を確認
+3. 同管理コンソールの「セキュリティ→API制限」を確認
+4. GA4アカウントの変更履歴と、Workspace側のポリシー変更時期に相関が無いか確認
+5. 上記で原因不明なら、Google Workspace管理者またはGoogleサポートへのエスカレーションが
+   唯一の残る手段
+
+この調査が終わるまで、グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
+経由)は着手不可。HPBリボンデータは栗林さんが別途手動で集計する方針のため影響なし。
+
 ### リラックス WordPress環境の実態調査 ★次にやる
 
 25店舗のWordPress編集をAI化するための設計を確定させたいが、推測で進めると事故るため実機確認が必要。
