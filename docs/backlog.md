@@ -7,7 +7,7 @@
 
 ## 調査待ち(実機・外部環境の確認が必要)
 
-### グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない(原因の絞り込み中)
+### グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない(GA4は原因特定済み、GSCは検証未了)
 
 2026-09-08、GA4/GSCへのユーザー追加権限をサービスアカウント経由での直接API接続用に
 栗林さんへ依頼したところ、「このメールアドレスはGoogleアカウントと一致しません」の
@@ -32,28 +32,36 @@
   そのものに固有**という可能性が最も高くなった(同じGA4アカウント×同じGCP
   プロジェクトという条件を完全に揃えた上で、あるSAは通り別のSAだけ弾かれるため)
 
-**次にやること(最有力の切り分けテスト。ローカル環境があれば誰でも実行可)**:
-1. GCPで`smile-good-reporter`とは別名の新しいサービスアカウントを1つ作成する
-   (例: `smile-good-reporter-2`)。キーは作らなくても招待テストだけならメール
-   アドレスが分かれば良い
-2. その新しいSAのメールアドレスを、同じ「グッド・スマイル」GA4アカウントに
-   追加してみる
-   - **追加できた場合**: `smile-good-reporter`という識別情報そのものが壊れている
-     (作成→削除→同名で再作成した際にGoogle側の内部IDが不整合になった等)と
-     ほぼ確定する。対応は簡単で、今後は新しいSA(`smile-good-reporter-2`等)を
-     正式採用し、ローカルの鍵ファイル・GitHub Secretsもそちらに差し替えるだけで
-     解決する
-   - **それでも「メールアドレスと一致しません」で失敗する場合**: SA固有の問題
-     という仮説も外れることになり、`chokuei-sunsumirai-kpi-writer`だけがなぜか
-     通っている特殊要因(作成日・作成経緯の違い等)を再検討する必要がある。
-     その場合は下記の旧・未確認事項(Networkタブ確認、Workspace管理コンソール
-     確認等)に戻る
-3. (上記2で「新しいSAも失敗」だった場合のみ)GA4管理画面でユーザー追加を試した際の
-   実際のAPI通信をNetworkタブで確認、Workspace管理コンソール(admin.google.com)の
-   「ディレクトリの共有設定」「セキュリティ→API制限」を確認、GA4アカウントの変更
-   履歴とWorkspace側のポリシー変更時期の相関を確認
-4. それでも原因不明なら、Google Workspace管理者またはGoogleサポートへの
-   エスカレーションが残る手段
+**2026-09-08 切り分けテストの結果(実機で確認済み・スクリーンショットあり)**:
+- GCPプロジェクト`keizgroup-automation`に新しいサービスアカウント
+  `smile-good-reporter-2@keizgroup-automation.iam.gserviceaccount.com`を作成
+  (説明欄に切り分けテスト用と明記。作成時点ではキーなし)
+- このメールアドレスを同じ「グッド・スマイル」GA4アカウント(M&A、アカウントID
+  229768383)の「アカウントのアクセス管理」から追加したところ、**エラーなく
+  「閲覧者」ロールで追加できた**(ユーザー一覧が24行→25行に増加したことを確認)
+- **これにより「`smile-good-reporter`という識別情報そのものが壊れている」という
+  仮説がほぼ確定した**。同じGA4アカウント・同じGCPプロジェクトという条件を完全に
+  揃えた上で、別名の新規SAは通り、`smile-good-reporter`だけが弾かれるため
+- `smile-good-reporter-2`のJSON鍵を作成し、ローカル(このセッションの実行環境。
+  ホスト名`DESKTOP-R0S2PB7`、ユーザー`Keizgroup319`)の`claude\keys\
+  smile-good-reporter-2.json`に保存した。**注意**: 下記の鍵管理表では鍵の実物は
+  「Keizgroup500」というマシンにあると記載されており、今回保存したマシンと
+  同一かどうかは未確認。次にこの鍵を使う際は保存先マシンを要確認
+- **Search Console側の同テストは未実施(ブロック中)**: `https://chiryouin.biz/danbara/`
+  (グッドのGSCプロパティの一つ)で試したところ、現在ログイン中のGoogleアカウント
+  (`t-kuribayashi@keizgroup.jp`)が「プロパティの所有者ではない」と表示され、
+  ユーザーと権限の画面自体が開けなかった。GA4側の`admin@keizgroup.jp`のような
+  別アカウントがGSCの所有者になっている可能性があるが未確認。**GSCについては
+  SA固有の問題という仮説はまだ検証できていない**
+
+**残っている論点(ユーザー判断待ち)**:
+1. 今後`smile-good-reporter`を正式に廃止し`smile-good-reporter-2`を採用するか
+   → GA4分は確認済みだが、GSCの検証ができるまでは`smile-good-reporter`を
+   完全に見捨てる判断は保留中
+2. テスト用に作った`smile-good-reporter-2`(GCP・GA4とも)を残すか削除するか
+   → 栗林さんに確認してから判断する方針(このセッションでは削除していない)
+3. GSCの所有者アカウントでの再テストが必要。所有者アカウント(`admin@keizgroup.jp`等)
+   でのログインが必要になる見込み
 
 この調査が終わるまで、グッド・スマイルのGA4/Search Console直接API接続(サービスアカウント
 経由)は着手不可。HPBリボンデータは栗林さんが別途手動で集計する方針のため影響なし。
@@ -253,7 +261,7 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
 | `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
-| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter.json` |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter-2.json`(2026-09-08、`smile-good-reporter`から切替。詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照。`smile-good-reporter.json`は旧鍵として残置、廃止確定ではない) |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
