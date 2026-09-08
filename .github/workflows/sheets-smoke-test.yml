@@ -24,10 +24,18 @@ on:
         type: string
         default: "A1:E5"
       upload_as_csv:
-        description: "true にすると、読んだ範囲をログではなくworkflow ArtifactのCSVとして受け取る(get_job_logsの出力上限を超える大きな範囲を読むとき用)"
+        description: "true にすると、読んだ範囲をログではなくworkflow ArtifactのCSVとして受け取る(get_job_logsの出力上限を超える大きな範囲を読むとき用。ただしArtifactのダウンロード先blob.core.windows.netに組織のプロキシ越しで到達できない実行環境があるので、その場合はgrep_colを使うこと)"
         required: false
         type: boolean
         default: false
+      grep_col:
+        description: "省略可。0始まりの列番号。指定すると、その列がgrep_valuesのいずれかと完全一致する行だけをログに出す(upload_as_csvがfalseのときのみ有効。大きな範囲をログに収まる行数まで絞り込みたいとき用)"
+        required: false
+        type: string
+      grep_values:
+        description: "grep_colとセットで使う。カンマ区切りの一致対象値"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -57,6 +65,8 @@ jobs:
           if [ "${{ inputs.upload_as_csv }}" = "true" ]; then
             mkdir -p out
             args+=(--out-csv "out/sheet-read.csv")
+          elif [ -n "${{ inputs.grep_col }}" ]; then
+            args+=(--grep-col "${{ inputs.grep_col }}" --grep-values "${{ inputs.grep_values }}")
           fi
           python3 scripts/sheets_smoke_test.py "${args[@]}"
 

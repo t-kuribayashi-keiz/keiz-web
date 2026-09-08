@@ -44,7 +44,15 @@ def main() -> int:
     ap.add_argument("--range", default="A1:E5", help="タブ指定時に読む範囲(既定 A1:E5)")
     ap.add_argument("--out-csv", help="省略可。指定するとログ表示に加えて範囲の内容をCSVとして書き出す"
                                        "(get_job_logsの出力上限を超える大きな範囲を読むとき用。"
-                                       "actions/upload-artifactで拾う想定)")
+                                       "actions/upload-artifactで拾う想定。ただしArtifactのダウンロード先が"
+                                       "blob.core.windows.netで、組織のプロキシ越しにそこへ到達できない"
+                                       "実行環境もある。その場合は--grep-colと組み合わせてログに収まる"
+                                       "行数まで絞り込むこと)")
+    ap.add_argument("--grep-col", type=int,
+                     help="省略可。0始まりの列番号を指定すると、その列が--grep-valuesのいずれかと"
+                          "完全一致する行だけに絞ってログへ出す(--out-csv未指定時のみ有効)。"
+                          "大きな範囲を、ログに収まる行数まで絞り込みたいときに使う")
+    ap.add_argument("--grep-values", help="--grep-colとセットで使う。カンマ区切りの一致対象値")
     args = ap.parse_args()
 
     creds = credentials(args.key_env)
@@ -78,6 +86,13 @@ def main() -> int:
         with open(args.out_csv, "w", newline="", encoding="utf-8") as fh:
             csv.writer(fh).writerows(values)
         print(f"  -> {args.out_csv} に書き出し済み(ログには表示しない。行数が多いため)")
+    elif args.grep_col is not None:
+        wanted = set(v.strip() for v in (args.grep_values or "").split(","))
+        matched = [row for row in values if len(row) > args.grep_col and row[args.grep_col] in wanted]
+        print(f"  絞り込み: 列{args.grep_col}が{sorted(wanted)}のいずれかに一致する行のみ"
+              f"({len(matched)}/{len(values)}行)")
+        for row in matched:
+            print(" ", row)
     else:
         for row in values:
             print(" ", row)
