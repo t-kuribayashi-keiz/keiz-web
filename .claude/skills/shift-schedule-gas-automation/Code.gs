@@ -99,10 +99,10 @@ const TITLE_CELL = 'C1';
 // 「◯日：　日　◯日：　日　取得可能◯」のメモが入るセル
 const QUOTA_NOTE_CELL = 'P1';
 
-// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P5〜。
-// 名前・休暇数のどちらもスクリプトが直接書き込む）
+// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P4〜、見出し行(P3)の
+// すぐ下から空白行を空けずに詰める。名前・休暇数のどちらもスクリプトが直接書き込む）
 const ROSTER_SUMMARY_NAME_COL = 16; // P列
-const ROSTER_SUMMARY_START_ROW = 5;
+const ROSTER_SUMMARY_START_ROW = 4;
 const ROSTER_SUMMARY_MAX_ROWS = 8;
 
 // カレンダー内で「その月に存在しない日」に使う背景色（テンプレートの黒塗りに合わせる）
@@ -310,12 +310,10 @@ function writeRosterSummary(sheet, names) {
     sheet.getRange(row, ROSTER_SUMMARY_NAME_COL + 1).setFormula(`=COUNTIF(${calendarRange},${nameColLetter}${row})`);
   });
 
-  // 原本テンプレートの手動の枠線・配置は、最初に作った人数ぶんしか用意されていないことがあるため
-  // (追加したスタッフの行が枠から外れる・中央揃えのまま残るなど)、実際に書き込んだ行数ぶんは
-  // 必ずスクリプト側で罫線・左揃えを統一する
+  // 原本テンプレートの手動の配置設定は、最初に作った人数ぶんしか用意されていないことがあるため
+  // (追加したスタッフの行だけ中央揃えのまま残るなど)、実際に書き込んだ行数ぶんは名前列の左揃えを
+  // 統一する。ただし枠線は原本テンプレートの見た目をそのまま活かすため、スクリプト側では変更しない
   if (toWrite.length) {
-    const writtenRange = sheet.getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 2);
-    writtenRange.setBorder(true, true, true, true, true, true);
     sheet
       .getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 1)
       .setHorizontalAlignment('left');
