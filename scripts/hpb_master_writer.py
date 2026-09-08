@@ -51,11 +51,18 @@ def load_config():
 
 # --- 純粋ロジック (Sheets非依存。テスト対象) -----------------------------------------------
 
-def resolve_tab(titles, keywords):
+def resolve_tab(titles, keywords, target_year=None):
     """タブ名の一覧から、keywordsを全部含むものを1つに絞る。
 
     `HP` は `HPB` の一部なので、英数字キーワードは前後の境界を見て取り違えを防ぐ
     (『8月HP(速報値)』を探すときに『8月HPB(速報値)』へ当たらないように)。
+
+    `target_year`(例 "2026")を渡すと、タブ名の先頭が『YYYY年』で明示的に始まり、
+    かつその年が target_year と異なるものは候補から除外する(過去年度のアーカイブ
+    タブが同じ月キーワードに当たってしまう対策。例:「2025年8月HP(速報値)」と
+    「8月HP(速報値)」が両方とも `8月`/`HP`/`速報値` を含むケース)。年プレフィックスの
+    無いタブ名(当年扱い)は除外しない。target_year未指定時はこの絞り込みをしない
+    (直営側などyear情報の無い呼び出しは従来どおり)。
     0件でも複数でも例外。
     """
     def contains(title, kw):
@@ -63,7 +70,13 @@ def resolve_tab(titles, keywords):
             return re.search(rf"(?<![0-9A-Za-z]){re.escape(kw)}(?![0-9A-Za-z])", title) is not None
         return kw in title
 
-    hits = [t for t in titles if all(contains(t, kw) for kw in keywords)]
+    def wrong_year(title):
+        if target_year is None:
+            return False
+        m = re.match(r"\s*(\d{4})年", title)
+        return m is not None and m.group(1) != target_year
+
+    hits = [t for t in titles if all(contains(t, kw) for kw in keywords) and not wrong_year(t)]
     if len(hits) != 1:
         raise ValueError(f"タブが一意に決まらない keywords={keywords} 候補={hits}")
     return hits[0]
@@ -75,6 +88,12 @@ def month_tab_keywords(base_keywords, month_label):
     if not m:
         return list(base_keywords)
     return [f"{int(m.group(1))}月"] + list(base_keywords)
+
+
+def month_label_year(month_label):
+    """『2026年08月号』→『2026』。年が無ければNone。"""
+    m = re.search(r"(\d{4})年", month_label)
+    return m.group(1) if m else None
 
 
 def profile_config(cfg, name):
@@ -451,7 +470,8 @@ def main(argv=None):
 
     # 1) 集客数タブ(◯月HPB速報値)を読む
     shu_titles = list_tab_titles(svc, shu_cfg["id"])
-    shu_tab = resolve_tab(shu_titles, month_tab_keywords(shu_cfg["tab_keywords"], args.month))
+    shu_tab = resolve_tab(shu_titles, month_tab_keywords(shu_cfg["tab_keywords"], args.month),
+                          target_year=month_label_year(args.month))
     shu_values = get_values(svc, shu_cfg["id"], f"'{shu_tab}'!A1:BZ400")
     shukyaku_map = build_shukyaku_map(
         shu_values,
