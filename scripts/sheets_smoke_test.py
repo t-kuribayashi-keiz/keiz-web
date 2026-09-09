@@ -56,6 +56,10 @@ def main() -> int:
                           "完全一致する行だけに絞ってログへ出す(--out-csv未指定時のみ有効)。"
                           "大きな範囲を、ログに収まる行数まで絞り込みたいときに使う")
     ap.add_argument("--grep-values", help="--grep-colとセットで使う。カンマ区切りの一致対象値")
+    ap.add_argument("--value-render-option", default="FORMATTED_VALUE",
+                     choices=["FORMATTED_VALUE", "UNFORMATTED_VALUE", "FORMULA"],
+                     help="省略時はFORMATTED_VALUE(表示値)。集計セルの元式を確認したい時は"
+                          "FORMULAを指定する(例: 「報告用」タブの傾向表がどう集計されているか調べる時)")
     args = ap.parse_args()
 
     creds = credentials(args.key_env)
@@ -92,7 +96,8 @@ def main() -> int:
         fail(f"タブ {args.tab!r} が見つかりません。上のタブ一覧から選んでください。")
 
     values = svc.spreadsheets().values().get(
-        spreadsheetId=args.sheet_id, range=f"'{args.tab}'!{args.range}"
+        spreadsheetId=args.sheet_id, range=f"'{args.tab}'!{args.range}",
+        valueRenderOption=args.value_render_option,
     ).execute().get("values", [])
     print(f"\n'{args.tab}'!{args.range} の内容({len(values)}行):")
     if args.out_csv:

@@ -40,6 +40,11 @@ on:
         description: "grep_colとセットで使う。カンマ区切りの一致対象値"
         required: false
         type: string
+      value_render_option:
+        description: "省略可。既定はFORMATTED_VALUE(表示値)。集計セルの元式を見たい時はFORMULAを指定"
+        required: false
+        type: string
+        default: "FORMATTED_VALUE"
 
 permissions:
   contents: read
@@ -73,6 +78,9 @@ jobs:
             args+=(--out-csv "out/sheet-read.csv")
           elif [ -n "${{ inputs.grep_col }}" ]; then
             args+=(--grep-col "${{ inputs.grep_col }}" --grep-values "${{ inputs.grep_values }}")
+          fi
+          if [ -n "${{ inputs.value_render_option }}" ]; then
+            args+=(--value-render-option "${{ inputs.value_render_option }}")
           fi
           python3 scripts/sheets_smoke_test.py "${args[@]}"
 
