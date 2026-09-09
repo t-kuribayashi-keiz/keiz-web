@@ -1,0 +1,119 @@
+name: HPB review/blog check (monthly)
+
+# 「口コミブログチェック表」の月次自動集計(scripts/hpb_review_blog_check.py)。
+# 各院のHPB公開ページから前月分の口コミ投稿総数・★5口コミ数・ブログ数(写真ありのみ)を
+# 取得し、スプレッドシートのG〜I列に書き込む。詳細は
+# .claude/skills/hpb-review-blog-check/SKILL.md 参照。
+#
+# 実行後は必ずマイチャット(Chatwork)へ結果を通知する(成功・失敗どちらも)。
+# 「本当に毎月動いているか」を栗林さんが確認できるようにするための仕組みで、2026-09-09に
+# 追加した。通知が来ない月がある場合、cron自体が発火していない可能性を疑うこと。
+#
+# 前提: 「口コミブログチェック表」スプレッドシートを、書き込み用サービスアカウント
+# (chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com、
+# functions/kpi-aggregation・hpb-reservation-slot-checkと共用)に編集者共有しておくこと。
+# 新規に鍵を作る必要はない。
+
+on:
+  schedule:
+    # 毎月1日 10:00 JST (01:00 UTC)。月初の実行なので前月分を対象にする。
+    - cron: "0 1 1 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "対象月 YYYYMM。省略時は前月分。"
+        type: string
+        required: false
+      mode:
+        description: "report=書き込み・通知なしで確認 / apply=本番書き込み+Chatwork通知"
+        type: choice
+        options:
+          - apply
+          - report
+        default: apply
+      tab_override:
+        description: "省略可。書き込み先タブ名を明示指定(複製したテスト用タブなど)。本番タブを書き換えずに疎通確認したい場合に使う。"
+        type: string
+        required: false
+
+concurrency:
+  group: hpb-review-blog-check
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install --quiet gspread google-auth playwright
+          playwright install --with-deps chromium
+
+      - name: Determine target month (前月)
+        id: month
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          if [ -n "${{ github.event.inputs.month }}" ]; then
+            echo "value=${{ github.event.inputs.month }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(date -d 'last month' +%Y%m)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run monthly review/blog check
+        id: run
+        env:
+          GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          set +e
+          mode="${{ github.event.inputs.mode || 'apply' }}"
+          month="${{ steps.month.outputs.value }}"
+          out="hpb_review_blog_${month}.csv"
+          echo "out=${out}" >> "$GITHUB_OUTPUT"
+          args=(--month "${month}" --mode "${mode}" --out "${out}")
+          if [ -n "${{ github.event.inputs.tab_override }}" ]; then
+            args+=(--tab "${{ github.event.inputs.tab_override }}")
+          fi
+          python3 scripts/hpb_review_blog_check.py "${args[@]}" 2>&1 | tee run.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -eq 0 ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
+      - name: Queue Chatwork status report
+        if: always() && (github.event.inputs.mode || 'apply') == 'apply'
+        run: |
+          if [ "${{ steps.run.outputs.status }}" = "success" ]; then
+            python3 scripts/notify_hpb_review_blog_check.py \
+              --month "${{ steps.month.outputs.value }}" \
+              --status success \
+              --csv "${{ steps.run.outputs.out }}"
+          else
+            python3 scripts/notify_hpb_review_blog_check.py \
+              --month "${{ steps.month.outputs.value }}" \
+              --status failure \
+              --log run.log
+          fi
+
+      - name: Send Chatwork status report
+        if: always() && (github.event.inputs.mode || 'apply') == 'apply'
+        env:
+          CHATWORK_API_TOKEN: ${{ secrets.CHATWORK_API_TOKEN }}
+        run: python3 scripts/chatwork_send.py
+
+      - name: Fail the job if the check itself failed
+        if: steps.run.outputs.status == 'failure'
+        run: exit 1

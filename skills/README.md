@@ -24,6 +24,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `hpb-ribbon-kpi` | HPBリボンデータ(店舗別PDF)の復号・KPI抽出 → HPB_145店舗KPI Masterへ反映 | implementer(抽出・転記) / measurer(月次KPI更新)。設計は `functions/hpb-ribbon-kpi/` |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
 | `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
+| `hpb-review-blog-check` | 「口コミブログチェック表」の月次集計(各院のHPB公開ページから口コミ投稿総数・★5口コミ数・ブログ数を自動集計しスプレッドシートに反映)。2026-09-09にGitHub Actions化(毎月1日 10:00 JST、`--mode apply`)+Chatwork(マイチャット)への実行結果通知まで実装済み。要: スプレッドシートを書き込み用サービスアカウントに編集者共有(未実施の場合は書き込み失敗) | implementer(スクリプト・院マスタ・ワークフロー保守) |
 
 `kpi-aggregation`は`.claude/skills/`配下にSkillフォルダを新設せず、既存の
 `functions/kpi-aggregation/CLAUDE.md`(実装は`scripts/kpi_aggregate.py`・
