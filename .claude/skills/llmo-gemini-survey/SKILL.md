@@ -1,0 +1,66 @@
+---
+name: llmo-gemini-survey
+description: Use this skill whenever the user asks to run, extend, or automate the in-house Gemini API survey that measures how often each 整骨院/接骨院 store appears in Gemini's AI-search answers (LLMO/AI検索対策の一環) — e.g. "Gemini調査をまた回して", "ダッシュボードを更新して", "全店舗展開のシステムを直して", or requests to add stores to the survey. Also trigger when the user wants to push new survey results into the LLMO dashboard Artifact. Brand-agnostic mechanism (any 整骨院/接骨院 store can be added to config/stores.*.json), currently piloted on 10 直営 stores. Do NOT use this for x3d社のChatGPT調査そのもの(外部委託分。参照のみ)や、SEO/MEO順位取得(GRC・MEOチェキは別契約・別ツール)。
+---
+
+# LLMO Gemini調査 & ダッシュボード
+
+Gemini API(検索グラウンディング)を使って「AIが各店舗をどれだけ検索結果に出すか」を
+月次で計測し、[ダッシュボードArtifact](https://claude.ai/code/artifact/79c438e1-8131-4220-9ec4-0733933a336d)に反映する仕組み。
+2026年9月にx3d社のChatGPT調査を自社で再現する形でパイロット構築し、直営10店舗・291応答で検証済み。
+
+背景・全社ルールは `CLAUDE.md` の「業務フロー」「複数セッションの同時実行」を参照。
+この調査自体はanalyst相当の定点観測作業に近いが、専用Skillとして独立させている
+(Gemini API呼び出し・パース・ダッシュボード反映という技術的に固有な工程が多いため)。
+
+## 現在の状態(2026年9月時点)
+
+- **パイロット10店舗のみ実データあり**(`config/stores.pilot.json`)。全店舗(直営135＋サンズミライ18=153店舗)への
+  展開は、店舗マスタに `kind`(station/roadside)と `place`(検索地域名=駅名 or 市区名)を
+  追加する作業が先に必要 — **これはまだ未着手**。`data/clinics.json` には `area`(住所の市区町名)は
+  あるが、プロンプトに差し込む「駅名 or 市区名」と「駅近/ロードサイド区分」は別途判断が要る
+- **月次自動実行はまだ組んでいない。** `db` への書き込みはArtifactツール(=Claudeセッション)経由でしか
+  できない仕様のため、GAS/cronで完結する自動化はできない。現実的な経路は「Claude Code Remoteの
+  月次トリガーがセッションを起こし、このSkillの手順を実行する」形 — トリガー自体は未作成
+- **`GEMINI_API_KEY` は環境変数として未設定。** 現状は都度AI Studioで発行したキーをセッション内に
+  貼り付けて使っている。自動実行するにはこの実行環境のシークレットとして登録する必要がある
+
+## 費用
+
+実測 **約¥1.05/回**(理論値の2.1倍。原因未特定)。詳細・無料枠・前払い方式の注意点は
+`references/cost-notes.md` を必ず読むこと。**月次利用上限を¥0にすると全リクエストが失敗する**
+(検証済みの既知の罠)。
+
+## 標準ワークフロー
+
+1. **店舗設定を確認。** `config/stores.pilot.json`(10店舗)を使うか、新しい店舗を追加する場合は
+   同じ形式(`kind`/`place`/`match`)で新規configファイルを作る。`match` は応答文中の自店舗検出用の
+   部分一致キーワード(表記ゆれ対応で複数指定可)
+2. **`GEMINI_API_KEY` を確認。** セッションの環境変数にあるか、無ければユーザーに聞く。
+   AI Studioの月次利用上限が非ゼロに設定されているか、想定コスト(店舗数×30回×¥1.05)が
+   その上限に収まるかを事前に伝える
+3. **調査実行**: `python3 scripts/run_survey.py --stores config/stores.pilot.json --out results/`
+   (既存の `results/<店舗>.json` があれば未取得分だけ追加取得する。429で打ち切られても再実行で続きから取れる)
+4. **順位パース**: `python3 scripts/parse_all.py --stores config/stores.pilot.json --results results/`
+5. **ダッシュボード用ペイロード生成**: `python3 scripts/aggregate_for_dashboard.py --stores config/stores.pilot.json --results results/ --round YYYY-MM --ranks <SEO/MEO順位JSON> --out dashboard_payload.json`
+   (`--ranks` は省略可。SEO/MEO順位はGRC/MEOチェキから別途取得したものをJSON化して渡す)
+6. **ダッシュボードへ反映**: `references/dashboard-schema.md` の手順どおり、Artifactツールの
+   `write_db`(`db_op: batch`)で `config/master`・`rounds/<round>`・`summary/latest` を書き込む
+7. **反映確認**: `read_db` で1件読み戻し、ダッシュボードURLを開いて表示を確認
+
+## 全店舗展開する場合の前提作業(未着手・次にやること)
+
+1. `data/clinics.json` の対象店舗(直営135＋サンズミライ18)に「検索地域名」「駅近/ロードサイド区分」を
+   追記する、または別途マッピングファイルを作る(これが無いとプロンプトが組み立てられない)
+2. `GEMINI_API_KEY` をこの実行環境のシークレットとして登録する(ユーザーに依頼)
+3. AI Studioの月次利用上限を、対象店舗数に応じて引き上げる(153店舗・毎月なら¥8,000程度を推奨。
+   統合レポートの「全店舗展開のAPI費用」セクション参照)
+4. 1回あたりの実行時間を実測し、GASの6分制限に当たるかを確認(`references/cost-notes.md` 参照)
+5. 月次トリガー(`create_trigger`)を設定し、このSkillのワークフローを自動実行させる
+
+## 関連ドキュメント
+
+- 統合レポート(分析結果の全体像): https://claude.ai/code/artifact/c2c85a2b-2a5c-4897-8178-086a02d1dd0b
+- ダッシュボード: https://claude.ai/code/artifact/79c438e1-8131-4220-9ec4-0733933a336d
+- `references/dashboard-schema.md` — DBスキーマと反映手順
+- `references/cost-notes.md` — 単価・無料枠・前払い方式の注意点

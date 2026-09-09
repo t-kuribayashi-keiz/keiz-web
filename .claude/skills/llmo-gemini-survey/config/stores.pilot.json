@@ -1,0 +1,15 @@
+{
+  "_comment": "パイロット10店舗(2026年9月調査で実測済み)。kind=station は駅名をプロンプトの{station}に、kind=roadside は市区名を{area}に差し込む。match はGeminiの応答テキストから自店舗を検出するための部分一致キーワード(表記ゆれ対応で複数指定可)。全店舗展開時はdata/clinics.jsonの店舗にこの3フィールド(kind/place/match)を追記してconfigを拡張する — README.mdの「全店舗展開のTODO」参照。",
+  "stores": {
+    "本八幡南口接骨院":     { "kind": "station",  "place": "本八幡",     "match": ["本八幡南口"] },
+    "池袋駅前接骨院":       { "kind": "station",  "place": "池袋",       "match": ["池袋駅前接骨院", "池袋駅前整体"] },
+    "西新中央商店街接骨院":  { "kind": "station",  "place": "西新",       "match": ["西新中央商店街"] },
+    "ハローズ花尻接骨院":    { "kind": "roadside", "place": "岡山市北区", "match": ["花尻"] },
+    "上板橋駅前接骨院":     { "kind": "station",  "place": "上板橋",     "match": ["上板橋駅前"] },
+    "下総中山駅前整骨院":    { "kind": "station",  "place": "下総中山",   "match": ["下総中山駅前"] },
+    "名取西口整骨院":       { "kind": "station",  "place": "名取",       "match": ["名取西口"] },
+    "倉敷インター接骨院":    { "kind": "roadside", "place": "倉敷市平田", "match": ["倉敷インター"] },
+    "市川げんき整骨院":     { "kind": "station",  "place": "市川",       "match": ["市川げんき", "げんき整骨院"] },
+    "成田富里接骨院":       { "kind": "roadside", "place": "富里市七栄", "match": ["成田富里", "富里接骨院"] }
+  }
+}

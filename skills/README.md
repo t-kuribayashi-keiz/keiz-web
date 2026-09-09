@@ -21,6 +21,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `customer-acquisition-consulting` | 集客のデータパイプライン・分析自動化 | analyst |
 | `session-to-skill` | 今の会話の作業手順をSkill化する | cross-functional(型化・再利用の判断) |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
+| `llmo-gemini-survey` | Gemini API調査(LLMO/AI検索露出計測)とダッシュボードへの反映 | analyst(定点観測) / implementer(パイプライン・自動化)。2026-09-09にこのリポジトリ内で新規構築(skill-kanri由来ではない) |
 
 ## 移設手順(skill-kanriリポジトリの更新をこちらに反映する場合)
 
