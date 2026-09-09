@@ -1,0 +1,48 @@
+name: Relax shukyaku pull
+
+# 「リラックス新規客経路集計」シート(タブ『集客数(新ルール6月〜)』)から、
+# 店舗×媒体×対象月の新患数を取得する。
+#
+# **読み取り専用。** シートにもリポジトリにも書き込まない(TSVはこのジョブのログにのみ出す)。
+#
+# 鍵はリポジトリシークレット GCP_RELAX_KEY にのみ置く。Claudeのセッションには渡らない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "対象年月号(例 2026年08月号)"
+        required: true
+        type: string
+      brand:
+        description: "院マスタのブランド名"
+        required: true
+        type: string
+        default: リラックス
+
+permissions:
+  contents: read
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client jpholiday
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Pull
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          python3 scripts/relax_shukyaku_pull.py --month "${{ inputs.month }}" \
+            --brand "${{ inputs.brand }}"

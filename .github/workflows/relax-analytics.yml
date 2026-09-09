@@ -1,10 +1,16 @@
-name: Relax analytics discovery
+name: Relax analytics
 
-# リラックスの分析環境の疎通確認。サービスアカウント relax-reporter で
-# GA4(Admin API)と Search Console に何が見えているかを列挙し、GA4のプロパティを
-# 院マスタの店舗名に突き合わせる。
+# リラックスの分析環境。サービスアカウント relax-reporter で GA4(Admin API / Data API)と
+# Search Console に何が見えているか・実際の指標値を取得する。
 #
-# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない。
+#   mode=discover … どのプロパティ/サイトが見えるかの疎通確認だけ(実指標は取らない)
+#   mode=pull     … 対象月のセッション数・表示回数等の実指標を取得し、TSVをログに出す
+#   mode=probe-metrics … GA4 Data APIで実際に使える指標名(apiName)をgetMetadataで確認する
+#                        (UI表示名とAPI名が一致しない指標を、記憶や検索結果で推測せずに選ぶため)
+#
+# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない
+# (TSVはこのジョブのログとワークフローの成果物(Artifact、7日で自動削除)にのみ出す。
+#  実データをリポジトリにコミットしない)。
 #
 # 鍵はリポジトリシークレット GCP_RELAX_KEY にのみ置く。Claudeのセッションには渡らない。
 
@@ -16,8 +22,22 @@ on:
         required: true
         type: string
         default: リラックス
+      mode:
+        description: "discover=疎通確認だけ / pull=対象月の実指標を取得 / probe-metrics=使える指標名の確認"
+        required: true
+        type: choice
+        options:
+          - discover
+          - pull
+          - probe-metrics
+        default: discover
+      metrics_grep:
+        description: "mode=probe-metricsのときだけ使う。カンマ区切りのキーワード(apiName/uiName/descriptionに部分一致)"
+        required: false
+        type: string
+        default: "user,conversion,key"
       scope:
-        description: "確認する対象"
+        description: "確認・取得する対象(discover/pull共通)"
         required: true
         type: choice
         options:
@@ -25,12 +45,27 @@ on:
           - ga4
           - gsc
         default: both
+      month:
+        description: "mode=pull のときだけ使う対象年月号(例 2026年08月号)。monthsを指定した場合はそちらが優先"
+        required: false
+        type: string
+        default: ""
+      months:
+        description: "mode=pullのときだけ使う。複数月を一括取得する場合にカンマ区切りで指定(例: 2025年08月号,2025年09月号,...)。結果はログではなくワークフローの成果物(Artifact)としてTSVを出力する(ログ出力には長さの上限があり、複数月・全店舗だと途中で切れるため)"
+        required: false
+        type: string
+        default: ""
+      stores:
+        description: "mode=pullのときだけ使う。カンマ区切りで店舗を絞る(省略時は全店。出力が大きくログが途中で切れるときの分割実行用)"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
-  discover:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +83,7 @@ jobs:
         run: python3 -m unittest discover -s tests
 
       - name: Discover
+        if: inputs.mode == 'discover'
         env:
           GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
           TZ: Asia/Tokyo
@@ -58,3 +94,52 @@ jobs:
             *)   flag="" ;;
           esac
           python3 scripts/analytics_discover.py --brand "${{ inputs.brand }}" $flag
+
+      - name: Pull
+        if: inputs.mode == 'pull'
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          MONTHS="${{ inputs.months }}"
+          if [ -z "$MONTHS" ]; then
+            MONTHS="${{ inputs.month }}"
+          fi
+          if [ -z "$MONTHS" ]; then
+            echo "mode=pull には month または months の指定が必要です(例: 2026年08月号)" >&2
+            exit 1
+          fi
+          case "${{ inputs.scope }}" in
+            ga4) flag="--skip-gsc" ;;
+            gsc) flag="--skip-ga4" ;;
+            *)   flag="" ;;
+          esac
+          mkdir -p out
+          IFS=',' read -ra MONTH_ARR <<< "$MONTHS"
+          for m in "${MONTH_ARR[@]}"; do
+            m_trimmed="$(echo "$m" | xargs)"
+            [ -z "$m_trimmed" ] && continue
+            echo "=== $m_trimmed ==="
+            python3 scripts/analytics_pull.py --brand "${{ inputs.brand }}" \
+              --month "$m_trimmed" --stores "${{ inputs.stores }}" $flag \
+              --out "out/${m_trimmed}.tsv"
+            cat "out/${m_trimmed}.tsv"
+          done
+
+      - name: Probe metrics
+        if: inputs.mode == 'probe-metrics'
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          TZ: Asia/Tokyo
+        run: |
+          python3 scripts/ga4_metrics_probe.py --brand "${{ inputs.brand }}" \
+            --grep "${{ inputs.metrics_grep }}"
+
+      - name: Upload results
+        if: inputs.mode == 'pull'
+        uses: actions/upload-artifact@v4
+        with:
+          name: relax-analytics-pull
+          path: out/
+          retention-days: 7
+          if-no-files-found: error

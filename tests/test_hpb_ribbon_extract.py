@@ -115,6 +115,33 @@ class TestResolveTab(unittest.TestCase):
         self.assertEqual(wr.month_tab_keywords(["HPB", "速報値"], "2026年08月号"),
                          ["8月", "HPB", "速報値"])
 
+    def test_prior_year_tab_excluded_with_target_year(self):
+        # 実際に「グッド・スマイル月次報告」で発生したケース(2026-09-08):
+        # 過去年度のアーカイブタブが同じ月キーワードに当たり、キーワードだけでは
+        # 一意に決まらない。target_year を渡すと年プレフィックス違いを除外できる。
+        titles = ["2025年8月HP(速報値) ", "8月HP(速報値)"]
+        keywords = ["8月", "HP", "速報値"]
+        with self.assertRaises(ValueError):
+            wr.resolve_tab(titles, keywords)  # target_year無しなら従来どおり例外
+        self.assertEqual(wr.resolve_tab(titles, keywords, target_year="2026"),
+                         "8月HP(速報値)")
+
+    def test_matching_year_tab_preferred_over_unprefixed(self):
+        titles = ["2025年8月HP(速報値) ", "2026年8月HP(速報値)"]
+        keywords = ["8月", "HP", "速報値"]
+        self.assertEqual(wr.resolve_tab(titles, keywords, target_year="2026"),
+                         "2026年8月HP(速報値)")
+
+    def test_still_raises_when_ambiguous_after_year_filter(self):
+        titles = ["8月HP(速報値)旧", "8月HP(速報値)新"]
+        keywords = ["8月", "HP", "速報値"]
+        with self.assertRaises(ValueError):
+            wr.resolve_tab(titles, keywords, target_year="2026")
+
+    def test_month_label_year(self):
+        self.assertEqual(wr.month_label_year("2026年08月号"), "2026")
+        self.assertIsNone(wr.month_label_year("8月号"))
+
 
 class TestShukyakuJoin(unittest.TestCase):
     def test_build_map_stops_at_total(self):
@@ -130,6 +157,20 @@ class TestShukyakuJoin(unittest.TestCase):
         self.assertEqual(m[wr.normalize_store_name("市川げんき整骨院")][1], "21")
         # 合計以降は入らない
         self.assertNotIn(wr.normalize_store_name("店舗数"), m)
+
+    def test_build_map_handles_unformatted_int_cells(self):
+        """get_valuesはvalueRenderOption=UNFORMATTED_VALUEで読むため、当月列の数値セルは
+        strではなくint/floatで返る(2026-09-07、実データに対するdry-runで実際にクラッシュして発覚:
+        AttributeError: 'int' object has no attribute 'strip')。"""
+        values = [
+            ["エリア", "", "…院名", "当月", "前月"],
+            ["関東", "", "たまプラーザ東急百貨店", 8, 9],
+            ["関東", "", "イオン入間店", 21.5, 16],
+            ["", "", "合計", 2607, ""],
+        ]
+        m = wr.build_shukyaku_map(values)
+        self.assertEqual(m[wr.normalize_store_name("たまプラーザ東急百貨店")][1], "8")
+        self.assertEqual(m[wr.normalize_store_name("イオン入間店")][1], "21.5")
 
     def test_twin_listing_not_double_counted(self):
         # 集客数側は「八幡宿駅西口接骨院」1件。抽出側に接骨院と鍼灸接骨院の2行。
@@ -215,9 +256,12 @@ class TestBrandProfiles(unittest.TestCase):
         self.assertEqual(wr.profile_config(self.cfg, "smile-good").get("brands"),
                          ["スマイル", "グッド"])
 
-    def test_chokuei_is_not_narrowed(self):
-        """直営側は従来どおり絞らない。ここに絞りを入れると過去と挙動が変わる。"""
-        self.assertIsNone(wr.profile_config(self.cfg, "chokuei").get("brands"))
+    def test_chokuei_is_limited_to_its_own_brands(self):
+        """『集客数』シートもMaster(HPB_145)も直営+サンズミライ専用(2026-09-07、栗林さんに確認)。
+        以前はbrands未設定(絞らない)だったため、リラックス等のリボンCSVをこのprofileで
+        流すと誤って直営のMasterに書き込まれ得た。smile-goodと同じくbrandsで明示的に絞る。"""
+        self.assertEqual(wr.profile_config(self.cfg, "chokuei").get("brands"),
+                         ["直営", "サンズミライ"])
 
     def test_an_unknown_profile_stops(self):
         with self.assertRaises(ValueError):

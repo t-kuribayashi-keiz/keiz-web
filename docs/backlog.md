@@ -71,25 +71,10 @@ XServerへのSSHが要るので、**ローカルのClaude Codeセッション**�
 
 - ~~**高円寺店の自社サイトURL**~~ → 2026-09-07に栗林さんから回答(`https://refresh-relax.com/koenji/`)、
   `data/clinics.json`に登録済み。住所・電話はまだ未取得
-- **★栗林さんの作業: リラックスGSCの残り11店舗への個別付与** — Search ConsoleはAPIでの
-  一括/個別付与ができないため(GA4のアカウント単位付与のような手段が無い)、
-  「設定→ユーザーと権限→ユーザーを追加」で`relax-reporter@keizgroup-automation.iam.gserviceaccount.com`
-  を「フル」で1店舗ずつ追加する必要がある。対象11店舗(チェックリストは
-  [サチコ権限付与チェックリスト](https://claude.ai/code/artifact/9e2ab330-b42f-48d2-ae14-b6ed84773648)):
-  水戸京成百貨店(https://refresh-relax.com/mito/)・
-  FKDインターパーク店(https://refresh-relax.com/fkd/)・
-  サクラス戸塚店(https://refresh-relax.com/totsuka/)・
-  下高井戸店(https://refresh-relax.com/shimotakaido/)・
-  浜田山店(https://refresh-relax.com/hamadayama/)・
-  笹塚店(https://refresh-relax.com/sasazuka/)・
-  西新宿店(https://refresh-relax.com/nishishinjuku/)・
-  祖師谷店(https://refresh-relax.com/soshigaya/)・
-  久我山店(https://refresh-relax.com/kugayama/)・
-  戸越銀座店(https://refresh-relax.com/togoshiginza/)・
-  高円寺店(https://refresh-relax.com/koenji/)。
-  `sc-domain:refresh-relax.com`のドメインプロパティが既にあれば1回の共有で済む可能性があり、
-  確認依頼中(2026-09-07)。終わったら`relax-analytics.yml`(scope=gsc)を再実行して
-  `sites.list`に11件増えることを確認する
+- ~~**★栗林さんの作業: リラックスGSCの残り11店舗への個別付与**~~ → 2026-09-07に完了。
+  `relax-analytics.yml`(scope=gsc)を再実行して確認したところ、URLプレフィックスサイトが
+  25件(25店舗全て)に到達していた。[サチコ権限付与チェックリスト](https://claude.ai/code/artifact/9e2ab330-b42f-48d2-ae14-b6ed84773648)
+  の11店舗を含め欠けなし。詳細は`brands/relax/CLAUDE.md`「`relax-analytics.yml`実行結果」参照
 - ~~**「リラックス新規客経路集計」シートの`relax-reporter`への共有**~~ → 2026-09-07に
   栗林さんが共有完了。同日`sheets-smoke-test.yml`で実データの読み取りにも成功
   (店舗名・媒体・新患合計等の実値を確認)。詳細は`brands/relax/CLAUDE.md`
@@ -217,7 +202,7 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 |---|---|---|---|
 | `GCP_KPI_WRITER_KEY` | 直営+サンズミライ | **登録済み**(2026-09-03) | `claude\keys\chokuei-sunsumirai-kpi-writer.json` |
 | `GCP_RELAX_KEY` | リラックス | **登録済み**(2026-09-05) | 中身は`relax-reporter@…`と確認済み(2026-09-06、`relax-analytics.yml`実行) |
-| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **未登録** | `claude\keys\smile-good-reporter.json` |
+| `GCP_SMILE_GOOD_KEY` | スマイル+グッド | **登録済み**(2026-09-08) | `claude\keys\smile-good-reporter-2.json`。2026-09-08、`smile-good-reporter`の代替として**正式採用確定**(GA4・GSC双方の切り分けテストで決定的な結果、詳細は上記「グッド・スマイルのGA4/Search Consoleに`smile-good-reporter`を追加できない」参照)。Keizgroup500に加え`DESKTOP-R0S2PB7`(ユーザー`Keizgroup319`)にも同名で鍵が存在する(各PCローカルの鍵ファイルなので複数PCに存在して問題なし)。`smile-good-reporter.json`(旧鍵)はGCP上・ローカルとも削除せず残置 |
 | `CHATWORK_API_TOKEN` | Chatwork連携 | 登録済み(2026-09-02) | — |
 
 `ad-spend-reporter.json` もKeizgroup500にあるが、対応するSecretは無い(広告費シートは
@@ -226,10 +211,22 @@ Claudeは**書き込みと検算**を担当する分担にする。ダウンロ�
 ~~**`GCP_RELAX_KEY` の中身の確認**~~ → 2026-09-06に`relax-analytics.yml`を実行して解決。
 `relax-reporter@keizgroup-automation.iam.gserviceaccount.com`で正しい。再登録は不要だった。
 
-`GCP_SMILE_GOOD_KEY` はスマイル・グッドのHPB分析の**唯一の残り**。これが入れば
-`hpb-ribbon-kpi.yml` を `--profile smile-good` で回せる(初回だけ `--mode init-master`、
-以降は `inspect → dry-run → apply`)。他の前提(リボンPDF・専用Master・共有設定)は
-2026-09-06に片付いている。
+`GCP_SMILE_GOOD_KEY` は2026-09-08にSecrets登録済み。これで`hpb-ribbon-kpi.yml` を
+`--profile smile-good` で回せる(初回だけ `--mode init-master`、以降は
+`inspect → dry-run → apply`)。
+
+**2026-09-08、鍵切替に伴う共有設定の確認・修正**:
+- Master(`HPB_スマイル・グッド_KPI一括集計結果`)は旧`smile-good-reporter`にのみ
+  書き込み共有されており、新SA`smile-good-reporter-2`は未共有だったため、writer権限で
+  追加共有した
+- 集客数シート(`グッド・スマイル月次報告`)は「リンクを知っている全員が編集者」設定の
+  ため、追加共有は不要だった
+- ローカルでSheets APIへの疎通確認(使い捨てスクリプト、リポジトリには含めていない)を
+  行い、`smile-good-reporter-2`の鍵で上記2シートとも取得に成功。鍵が正しく機能すること
+  を確認済み
+- 実際の`hpb-ribbon-kpi.yml`(`--profile smile-good --mode inspect`)はまだ未実行。
+  `data/hpb-ribbon/`に抽出済みCSV(`--extract-csv`は必須引数)がまだ無いため。本格運用の
+  組み立ては別タスク
 
 鍵はリポジトリSecretに1つ登録すればよく、**PCごとに登録する必要はない**。Actionsの中で
 だけ復号されるので、どのPCから起動しても同じように動く(逆にローカル直実行ではSecretsを
