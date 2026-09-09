@@ -1925,3 +1925,272 @@ Skillへ畳む作業をしていたが、それが組織図のどこの仕事な
   本格運用の組み立ては別タスク
 - `smile-good-reporter`が具体的に何故GA4/GSCのユーザー管理でだけ識別不能になって
   いたかの内部的な原因は未解明のまま(実害が無くなったため深追いはしていない)
+---
+
+## 2026-09-07 salonboard-operatorに「予約枠✕店舗の確認」タスクへのSkill参照漏れを発見・修正
+
+- きっかけ: 9/7に発生した実際の運用フロー。HPB予約枠K/Lチェックを手動実行(9/7PM〜9/10AM
+  の窓)し、✕/?の店舗を洗い出した後、大網駅前整骨院・八街駅前整骨院の2店舗についてSalonBoard
+  で原因確認を行ったが、このとき**`hpb-reservation-slot-check/SKILL.md`に既に書かれている
+  「M/N (SalonBoard-side root-cause check)」の確立済み手法(2026-09-03に別セッションが
+  実機19店舗で検証済みの、`javascript_tool`でDOM上の目印(`.scheduleReserveName`・
+  `.todoTitle`の「予定あり」・「一括停止」等)を機械的に判定する4分類)を使わず、
+  スクリーンショットの目視確認という自己流の手順で代替してしまった**。栗林さんから
+  「学習が反映されていない」「毎回自己流でやっていないか確認しないといけないのか」という
+  明確な指摘を受けた
+- 根本原因の特定: 該当の確立済み手法は`hpb-reservation-slot-check/SKILL.md`側にしか
+  書かれておらず、実際に「SalonBoardで実地確認する」役目を持つ`salonboard-operator`
+  エージェント自身の定義ファイル(`.claude/agents/salonboard-operator.md`)は
+  `hpb-salonboard-update`(クーポン・掲載情報の更新作業用のSkill)しか参照していなかった。
+  つまり「予約枠✕店舗のSalonBoard実地確認」というタスク自体には、確立済み手順への
+  導線が組織構造上どこにも張られておらず、実行するセッション(親セッションでもサブ
+  エージェントでも)が過去の会話文脈や偶然の記憶に頼らない限り再現できない状態だった。
+  「学習した内容が自動的に反映されるスキル」を謳うなら、この種の**タスク種別→参照すべき
+  Skillの対応付けそのものをファイルに固定する**必要があるという指摘は妥当と判断した
+- 対応内容:
+  - `.claude/agents/salonboard-operator.md`の「実務手順」節を、依頼の性質で分岐する
+    2区分に再構成した:
+    - **A. 予約枠K/Lチェックで✕/?になった店舗のSalonBoard実地確認・原因特定** →
+      `hpb-reservation-slot-check/SKILL.md`の「M/N」セクションの4分類手法に必ず従うこと、
+      スクリーンショット目視での自己流判定に差し替えないことを明記
+    - **B. クーポン・掲載情報の更新作業(登録・反映)** → 従来通り`hpb-salonboard-update`
+      を参照
+  - 実際に、既に起動していたサブエージェント(自己流の手順で22店舗を確認しようとしていた)
+    に対しても、上記の確立済み手法を使うよう指示を差し替えて再実行させた
+- 対応状況: 対応済み(ファイル修正)。変更したファイル:
+  `.claude/agents/salonboard-operator.md`、`docs/org-review-log.md`
+  未対応として残っている論点:
+  - 大網駅前整骨院(受付可能数が月間全日0)・八街駅前整骨院(受付可能数が平日ほぼ全コマ
+    1固定で常時満枠)の2店舗は、上記4分類のどれにも綺麗には当てはまらない特殊ケースだった。
+    今後同様のケースが増えるようなら、4分類に「受付可能数側の設定起因」のような5番目の
+    区分を追加すべきか、`hpb-reservation-slot-check/SKILL.md`側で再検討の余地がある
+  - 同種の「タスク種別→参照すべきSkill」の対応漏れが他のエージェント定義にも無いか、
+    次回のcross-functionalによる棚卸しで確認する価値がある(今回は栗林さんの指摘で
+    偶然見つかったが、体系的に洗い出したわけではない)
+
+---
+
+## 2026-09-07 全エージェント定義の「タスク種別→Skill参照」漏れを全数点検・修正
+
+- きっかけ: 直前の項(salonboard-operatorの参照漏れ)の末尾に残した宿題。「他のエージェントにも
+  同じ欠陥が無いか体系的に洗い出す」を実施した。点検対象は`.claude/agents/`の全9定義
+  (analyst / implementer / measurer / daily-ops-monitor / salonboard-operator /
+  smile-marketing-strategist / good-marketing-strategist / content-writer / cross-functional)と、
+  `.claude/skills/`の全13 SKILL.md + `functions/`配下6件のCLAUDE.md。
+  判定基準は「一応関係しそうな記述がある」ではなく、**そのタスクが来た時にどのファイルを
+  読むべきか機械的に一意に辿れるか**
+
+### 見つかった事実(欠陥5件)
+
+1. **analyst**: descriptionで「KPI・音声・CRM/カルテ・SalonBoard実績の分析」を受けると
+   謳っているのに、本文の参照は`CLAUDE.md`と`/data/`のみ。カルテ分析には
+   `karte-demographics-chart`(全店舗1グループ集計が既定・生数式で組む・日本語は
+   クリップボード貼り付け)、HPB店舗別分析には`hpb-ribbon-kpi`の「分析の固定ルール」
+   (対象140店・**CVR単体で喜ばない**・比較サロン平均を使わない)という確立済み手順が
+   あるのに、どこからも辿れなかった。**salonboard-operatorと完全に同型の欠陥**
+2. **measurer**: KPI推移を記録する役なのに、**数値の出どころが1つも書かれていなかった**
+   (`/data/kpi-history/`は記録先であって取得元ではない)。特に危険だったのが
+   `functions/kpi-aggregation/CLAUDE.md`の「同じ月の数字が中間値→速報値→確定値の順に
+   同じセルを上書きする」という性質で、これを知らずにbefore/afterを取ると**段階違いの
+   数字を施策効果として報告してしまう**(数字は自然に見えるので誰も気づけない)。
+   `hpb-ribbon-kpi`の「CVRとACRはセットで見る」も同様
+3. **implementer**: `daily-ops-monitor`側には「スクリプト/ワークフローの不具合は
+   implementerへ渡す」と明記されているのに、**受け取る側のimplementerには予約枠
+   スクレイパーの`references/github-actions-ops.md`・`known-bugs.md`への導線が無かった**。
+   受け渡しの片側だけが定義されている状態。`salonboard_root_cause.py`が凍結扱いである
+   ことも渡されておらず、将来のセッションが消化目的で本番アカウントに`verify-login`を
+   試しうる状態だった
+4. **daily-ops-monitor**: 「対象パイプライン」表に3行あるのに、**進め方が書かれていたのは
+   予約枠K/Lの1行だけ**。KPI集計とChatwork依頼検知は`functions/<名前>/`というフォルダ名
+   止まりで、判断手順に辿り着けなかった。しかもKPI集計は**cronが無い**(業務シートへの
+   無人書き込みを避けた設計判断)ため、他2件と同じ「今日発火したか」の見方をすると
+   「壊れている」と誤報告する構造だった
+5. **smile-marketing-strategist**: 「HPB掲載5院の枠確認時、〇判定でも備考欄の一部閉塞を
+   あぶり出す」と本文で指示しているのに、**その予約枠データがどこにあり誰が既に取って
+   いるのかへの参照が無かった**。自前でスクレイピングし直す・K/L列だけ見て時系列を
+   誤読する・窓幅の違う実行の✕件数を比較する、といった事故に直結する
+
+### 対応内容(ファイル修正)
+
+- **`.claude/agents/analyst.md`**: 「タスク種別 → 従うべき確立済み手順」表を新設(6行:
+  カルテ / HPBリボン / 月次集客KPI / CRM突合 / GA4・GSC・Sheets取得 / 予約枠)。各行に
+  ファイルパスと「そこにある確立済みの中身」を1行で明記。あわせて「やらないこと」に
+  スマイル・グッドはブランド専属参謀の担当であること、日次の異常振り分けは
+  daily-ops-monitorの担当であることを追記
+- **`.claude/agents/measurer.md`**: 「KPIの種類 → 数値の出どころと、既に確立している
+  読み方」表を新設(HPB店舗別 / 直営+サンズミライ月次 / 予約枠 / スマイル・グッド)。
+  各行に「これを知らないと誤る点」を明記。「やらないこと」にdaily-ops-monitorとの違いを追記
+- **`.claude/agents/implementer.md`**: 「タスク種別 → 従うべき確立済み手順」表を新設
+  (予約枠スクレイパー / KPI集計 / リボン抽出 / CRM突合GAS / シフトGAS / DJI Mic /
+  Driveフォルダ / Chatwork / SalonBoardは対象外)。進め方に「新しい定期実行を本番に
+  乗せたらdaily-ops-monitorの対象表に足す提案を出す」を追加(CLAUDE.mdにあるルールが
+  実行者側に書かれていなかったため)
+- **`.claude/agents/daily-ops-monitor.md`**: 対象パイプライン表の最終列を「詳細(フォルダ名)」
+  から「**結果を見る前に必ず読むファイル**」に変更し名指しに。KPI集計の実行欄を
+  「ワークフロー」から「**手動実行のみ(cronなし)**」に訂正。「進め方(KPI集計の場合)」
+  「進め方(Chatwork依頼検知の場合)」の2節を追加
+- **`.claude/agents/smile-marketing-strategist.md`**: 枠確認の項に
+  `hpb-reservation-slot-check/SKILL.md`への参照と、左=判定/右=備考・✕件数は窓幅が違う
+  実行同士で比較不可・`?`は満席ではない、を追記
+- **`.claude/agents/cross-functional.md`**: (a) 棚卸し手順に「2b. `.claude/agents/`の
+  タスク種別→Skill参照の点検」を再発防止として追加、(b) このエージェント自身が受け持つ
+  `org-structure-artifact` / `org-structure-table` / `session-to-skill`への参照表を追加
+  (自分の定義にも同じ欠陥があった)
+- **`.claude/skills/hpb-reservation-slot-check/learnings/2026-09-07_agent-ownership.md`**(新規):
+  Skill→エージェントの逆方向の対応表。**SKILL.md本体を直接編集しなかったのは意図的**で、
+  このファイルは並行セッションが触っている可能性が高い(直前の項の「4分類に5番目の区分を
+  足すか」という宿題が残っている)ため、CLAUDE.mdの1ファイル1ライター原則に従って
+  `learnings/`へ新規ファイルとして置いた。週次統合RoutineがSKILL.md冒頭へ畳む
+
+### 点検したが問題なしと判断したもの
+
+- **salonboard-operator**: 2026-09-07に修正済み(A/B分割)。今回は変更していない
+- **good-marketing-strategist**: 参照(`brands/good/CLAUDE.md`・`ad-spend-tracking`・
+  `ga4-gsc-service-account-setup.md`)は具体的なパスで張られており漏れなし。スマイルに
+  追加した予約枠の参照は**あえて足していない** — グッドがHPBを使っているか自体が未確認で、
+  推測でスマイルのファクトを持ち込まない、というこのエージェント自身のガードレールに反するため
+- **content-writer**: 執筆に関する確立済みSkillは存在せず(ブランド固有ルールは執筆指示書と
+  `brands/<name>/CLAUDE.md`に集約する設計)、参照漏れではない
+- **chatwork-integration / hpb-salonboard-update / session-to-skill**: SKILL.md側から
+  エージェント名(salonboard-operator / implementer / content-writer)が正しく名指しされており、
+  古い・矛盾する記述も無かった
+
+### 対応状況
+
+対応済み(ファイル修正のみ)。変更したファイル: `.claude/agents/analyst.md`、
+`.claude/agents/measurer.md`、`.claude/agents/implementer.md`、
+`.claude/agents/daily-ops-monitor.md`、`.claude/agents/smile-marketing-strategist.md`、
+`.claude/agents/cross-functional.md`、
+`.claude/skills/hpb-reservation-slot-check/learnings/2026-09-07_agent-ownership.md`(新規)、
+`docs/org-review-log.md`。gitコマンドは実行していない(コミットは栗林さんが内容を確認して判断)。
+
+未対応として残っている論点(**いずれも栗林さんの判断が要るため今回は変更していない**):
+
+1. **`analyst`の`tools:`に`Write`が無い。** 本文は「施策案は必ず
+   `/data/proposals/YYYY-MM-DD_<件名>.md` に出力する」と指示しているのに、
+   `tools: Read, Grep, Glob, WebSearch, WebFetch` にはファイル作成手段が無く、
+   **本来の成果物を出せない**。同型の役割である`smile-marketing-strategist`・
+   `good-marketing-strategist`には`Write`がある。参照漏れとは別種の欠陥だが、
+   「担当タスクを完遂できない」という意味では同じ根。ツール権限の変更は
+   エージェントの権限拡大にあたるため、承認をもらってから直したい
+2. **`karte-demographics-chart`の実行担当が実質不在。** 役割マッピング上はanalystだが、
+   この作業はGoogle Sheetsへのタブ追加・グラフ作成というブラウザ操作を伴い、analystの
+   `tools:`では実行できない(今回は「手順は確認し、実行は親セッションへ渡す」と
+   書き足して暫定運用にした)。同様に`org-structure-table`(PowerShell+Excel COM)・
+   `org-structure-artifact`(ブラウザ・PDF出力)もcross-functionalの`tools:`では
+   完結しない。**「読んで指示は出せるが自分では実行できないSkill」が3件ある**という
+   構造的な話なので、ツールを足すのか、実行は常に親セッションが担うと明文化するのかを
+   決めたい
+3. **PLAUD音声データの分析手順が未確立。** analystのdescriptionは音声文字起こしの分析を
+   受けると謳っているが、対応するSkillが存在しない(`dji-mic-auto-upload`は録音の
+   アップロードまでで分析は範囲外)。実際に依頼が来ているなら新規Skill化の候補、
+   来ていないならdescriptionから外す候補
+
+---
+
+## 2026-09-07 hpb-reservation-slot-checkのM/N判定基準を「DOM4分類」から「成田さんの
+   比率方式」に訂正
+
+- きっかけ: 大網駅前整骨院・八街駅前整骨院のSalonBoard確認を発端に、栗林さんが
+  現場のチェック担当・成田さんに「サロンボードチェックの○×判定基準」をChatworkで
+  直接確認した。その結果、実際の判定基準は以下の比率ベースの手順であることが判明した:
+  1. 単位は15分刻みのコマ数
+  2. 該当半日(AM/PM)の営業時間内で、黒塗り・ブロック(予定あり等)されている部分を
+     「真の閉鎖」候補とする
+  3. ただしその黒塗り部分に実際の客予約(実予約)が含まれるコマは「真の閉鎖」から
+     除外する(複数リソースがある場合、いずれか1つでも実予約があれば除外)
+  4. 真の閉鎖割合 = (実予約を除いた真の閉鎖コマ数) ÷ (その半日の総コマ数)
+  5. 100%なら完全に閉じている、50%以上100%未満なら引き続き問題として扱う、
+     50%未満なら実質問題なし(AIの✕判定は誤検知の可能性が高い)
+- 判明した問題: `hpb-reservation-slot-check/SKILL.md`には既に「M/N (SalonBoard-side
+  root-cause check)」として**別の判定方式**(DOM上の目印による4分類: 定休日/実予約あり
+  誤検知/予定あり枠ブロック/一括停止警告/要確認、2026-09-03に実機19店舗で検証済み)が
+  「確立済みの手法」として書かれていた。今回、栗林さんが成田さんに基準を確認する前に、
+  セッションはこの4分類の方をSKILL.mdの記載通りに使って22店舗のM/N判定を実施して
+  しまった。作業完了後、栗林さんから「先ほど決めた判定基準(比率方式)に基づいて判定
+  したか」と指摘を受け、2つの「確立済み手法」(比率方式と4分類)が矛盾したまま存在
+  していたことに気づいた。4分類は比率計算を経ずに作られた簡易近似であり、実際の
+  運用基準(成田さんの比率方式)とは異なっていた
+- 対応内容:
+  - `hpb-reservation-slot-check/SKILL.md`の「M/N」セクションに、比率方式を正しい基準
+    として明記し、4分類の表は「DOM目印の参考情報」として残しつつ、**最終判定として
+    使わないこと**を明記した
+  - 22店舗のM/N判定(4分類ベースで既にスプレッドシートに記載済みだったもの)を、
+    比率方式でのやり直しのため別セッション(salonboard-operator)に再依頼した。
+    結果が出次第、スプレッドシートのM/N列を上書きする
+- 対応状況: SKILL.md修正は対応済み。22店舗の再判定は実行中(未完了)。変更した
+  ファイル: `.claude/skills/hpb-reservation-slot-check/SKILL.md`、`docs/org-review-log.md`
+  未対応として残っている論点:
+  - 比率計算(複数リソースにまたがる15分コマ単位の集計)は目視では誤差が出やすく、
+    `javascript_tool`でのDOM直接集計を前提にしたが、実際にどのDOM構造で集計するのが
+    正確かは今回のやり直しで確立する必要がある。確立できたら`references/`配下に
+    具体的な集計ロジック(セレクタ・カウント方法)を切り出す価値がある
+  - 「4分類とDOM目印の対応表」自体は完全に無価値というわけではなく(黒塗り/実予約の
+    判別材料として比率計算の中でも使える)、比率方式のロジックを実装する際に統合的に
+    整理し直す余地がある
+
+---
+
+## 2026-09-08 グッド・スマイルのGA4/Search Console権限付与ができない問題の調査(未解決)
+
+- きっかけ: `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com` を
+  グッド・スマイルのGA4アカウント/Search Consoleに「閲覧者」として追加しようとすると、
+  両方とも「このメールアドレスはGoogleアカウントと一致しません」「メールアドレスが
+  見つかりませんでした」というエラーで追加できないという相談を受けた。クラウド側の
+  セッションでは実ブラウザ操作ができず切り分けができなかったため、栗林さんのローカルPC・
+  実Chrome(`claude-in-chrome` MCP、ログイン済み `t-kuribayashi@keizgroup.jp`)で
+  ブラウザ操作による切り分けを行った
+- **確認できた事実(推測なし)**:
+  1. GA4管理画面で、GA4アカウント「M&A」(アカウントID `229768383`、配下に
+     グッドフォーチュン・スマイル鍼灸接骨院東きしわだ院を含む)の
+     「アカウントのアクセス管理」→「+」→「ユーザーを追加」で、実際に
+     `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com` を
+     閲覧者権限で追加する操作を、Networkログを取得しながら再現した。結果:
+     - UI上のエラーは報告どおり「このメールアドレスは Google アカウントと
+       一致しません」
+     - **「追加」クリック時に、GA4のユーザー追加API(バックエンド)へのリクエストは
+       一切発生していない**。Networkログに残ったのは全てGoogleアナリティクス自身の
+       自己計測用トラッキングピクセル(`google-analytics.com/g/collect`等)のみで、
+       ユーザー追加のリクエスト・レスポンスは存在しなかった
+     - つまりこの拒否は、GA4のバックエンド(Admin API側)がリクエストを受けて
+       権限やドメイン制限で弾いているのではなく、**フロントエンドの入力検証の
+       段階で(サーバーに問い合わせる前に)拒否されている**ことが確認できた
+  2. GA4アカウント「リラックス」(アカウントID `257787268`)の
+     「アカウントの変更履歴」を全期間(過去2年)で検索したところ、
+     `relax-reporter@keizgroup-automation.iam.gserviceaccount.com` の
+     アクセス「作成」は**2026年9月4日18:47:07 GMT+9の1件のみ**で、
+     変更者は `t-kuribayashi@keizgroup.jp` だった。つまりrelax-reporterの追加は
+     「以前」ではなく**調査時点(2026-09-08)のわずか4日前**であり、
+     relax-reporter成功とsmile-good-reporter失敗の間の期間はごく短い
+  3. admin.google.com(Google Workspace管理コンソール)へのアクセスを試みたところ、
+     `t-kuribayashi@keizgroup.jp` でパスワード再認証を行っても
+     「管理者アカウントでログインしてください。admin.google.com にログインするには、
+     Google Workspace や Cloud Identity など、管理対象の Google サービスの
+     管理者アカウントを使用してください。」と表示され、**このアカウントは
+     Google Workspaceの管理者(admin.google.com)にはアクセスできない**ことを確認した。
+     GA4上で「管理者」ロールを持つことと、Workspaceの管理者コンソールに
+     アクセスできることは別の権限であることが今回判明した
+  4. Search Console(`search.google.com/search-console`)で、スマイルの1院
+     (`https://chiryouin.biz/kishiwada/`、東きしわだ院)の「設定 > ユーザーと権限」を
+     開いたところ「これらの設定を表示または変更するには、プロパティの所有者である
+     必要があります」と表示され、`t-kuribayashi@keizgroup.jp` はこのGSCプロパティの
+     所有者ではなく、GSC側でのユーザー追加操作の再現(Networkログ取得)はできなかった
+- **今回できなかったこと(栗林さんの判断でスキップ)**:
+  依頼のうち、admin.google.com側の確認(ディレクトリ共有設定、セキュリティ→API制御→
+  アプリへのアクセス制御)は、上記3の理由(このアカウントがWorkspace管理者ではない)で
+  実施できなかった。実施するにはWorkspace管理者権限を持つ別アカウントでのログインが必要
+- **原因についての推測(未確定、事実ではない)**: 上記1の「バックエンドに一切
+  リクエストが飛んでいない」という事実は、GA4フロントエンドがメールアドレス入力時に
+  Google People/ディレクトリのオートコンプリート候補と照合し、候補に出てこない
+  アドレスはサーバーに送る前に拒否する、という挙動を示唆する。これが事実だとすれば
+  admin.google.com側のディレクトリ共有設定(依頼2番の項目)が有力な調査対象になるが、
+  これはあくまで推測であり、今回は確認できていない
+- 対応状況: 未解決。原因は特定できていない。変更したファイル: `docs/org-review-log.md`
+  (調査記録の追記のみ、その他のファイルは変更していない)
+  未対応として残っている論点:
+  1. admin.google.com側(ディレクトリ共有設定・API制御)の確認そのもの
+     (Workspace管理者アカウントでの再ログインが必要)
+  2. Search Console側での同様のNetworkログ再現(GSCプロパティ所有者権限を持つ
+     アカウントでの再ログインが必要)
+  3. 原因が特定できない場合の、Google Workspaceサポートへの問い合わせ文面の作成
+     (未着手)
