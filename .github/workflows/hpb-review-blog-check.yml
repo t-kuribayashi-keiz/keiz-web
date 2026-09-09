@@ -13,6 +13,10 @@ name: HPB review/blog check (monthly)
 # (chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com、
 # functions/kpi-aggregation・hpb-reservation-slot-checkと共用)に編集者共有しておくこと。
 # 新規に鍵を作る必要はない。
+#
+# 対象月のタブ(例:「2609月分」)は基本的に手動で用意される運用。無い場合は前月のタブを
+# 複製して自動作成するフォールバックがある(scripts/hpb_review_blog_check.pyの
+# ensure_tab_exists、2026-09-09追加)。詳細はSKILL.mdの「自動化」セクション参照。
 
 on:
   schedule:
