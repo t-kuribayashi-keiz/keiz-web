@@ -36,6 +36,18 @@
         "依頼"
       ],
       "notes": "2026-09-02に最初の監視対象として設定し、同日の初回実行でroom_id=297116486として解決・API疎通確認済み(参考情報。IDは実行時に名前から解決するのでここに書く必要はない)。ブランドコンテキストは brands/relax/CLAUDE.md。"
+    },
+    {
+      "room_name": "マイチャット",
+      "brand": null,
+      "purpose": "栗林さん個人のマイチャット。定期実行される自動化(月次のHPB口コミ・ブログ集計など)が「本当に動いたか」を確認するための実行結果通知の送り先。監視(watcher)対象ではなく送信専用。",
+      "require_mention": false,
+      "_allow_auto_hearing_comment": "マイチャットはwatcherの監視対象ではないため、kind: hearing は使わない想定(falseのままでよい)。",
+      "allow_auto_hearing": false,
+      "_allow_auto_status_report_comment": "true = 定期実行automation(GitHub Actionsのcronジョブ)からの実行結果報告(kind: status_report)を、栗林さんの都度承認なしに自動投稿してよいルーム。2026-09-09、hpb-review-blog-checkの月次自動化の実行確認のために合意。通常の「完了報告は都度承認」の原則の例外だが、対象は『定期ジョブが動いたかどうかの事実確認』に限られ、業務判断や対応の約束は含まれない。",
+      "allow_auto_status_report": true,
+      "watch_keywords": [],
+      "notes": "2026-09-09、hpb-review-blog-check(口コミブログチェック表の月次自動集計)の実行結果通知先として追加。room_id=284517272(参考情報。実行時に名前から解決する)。"
     }
   ]
 }
