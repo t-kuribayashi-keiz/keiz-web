@@ -277,6 +277,48 @@ def build_spreadsheet():
     return gc.open_by_key(SHEET_ID)
 
 
+# 現在の「口コミブログチェック表」の実データ行範囲(2026-09-09時点)。
+# リクルート担当34院(行3-36)・アンビション担当131院(行40-170)。院の追加/削除で
+# 実際の行数が変わったら、ここも合わせて更新すること(ensure_tab_existsのクリア範囲にのみ
+# 使う。書き込み対象行の特定自体は名前一致で行うため、この定数がズレても既存タブへの
+# 書き込みには影響しない)。
+DATA_ROW_RANGES = [(3, 36), (40, 170)]
+
+
+def ensure_tab_exists(spreadsheet, tab_name: str, year: int, month: int):
+    """対象タブが無ければ、前月のタブを複製して作る(2026-09-09、栗林さん合意の運用)。
+
+    基本的にはタブは手動で用意される想定。無い場合のフォールバックとして、前月分の
+    タブをそのまま複製し、B〜I列(手動集計値・自動集計値の両方)を全データ行で空にする。
+    列A(院名)とヘッダー行(1-2, 39-40付近)はそのまま残る — ただしヘッダーの月表記
+    (「8月」「7月」等の文言)は前月のまま残るので、フォールバックが発火した場合は
+    後で手動修正が必要になる場合がある。
+    """
+    try:
+        return spreadsheet.worksheet(tab_name)
+    except Exception:
+        pass
+
+    prev_year, prev_month = (year, month - 1) if month > 1 else (year - 1, 12)
+    prev_tab_name = month_tab_name(prev_year, prev_month)
+    try:
+        prev_worksheet = spreadsheet.worksheet(prev_tab_name)
+    except Exception:
+        fail(
+            f"タブ「{tab_name}」が見つからず、複製元となる前月のタブ「{prev_tab_name}」も"
+            f"見つかりません。どちらかのタブを手動で用意してください。"
+        )
+
+    print(f"タブ「{tab_name}」が無いため、「{prev_tab_name}」を複製して作成します。", flush=True)
+    new_worksheet = prev_worksheet.duplicate(
+        insert_sheet_index=prev_worksheet.index + 1, new_sheet_name=tab_name
+    )
+    clear_ranges = [f"B{start}:I{end}" for start, end in DATA_ROW_RANGES]
+    new_worksheet.batch_clear(clear_ranges)
+    print(f"タブ「{tab_name}」を作成し、手動集計欄(B〜F列)・実測欄(G〜I列)を空にしました。", flush=True)
+    return new_worksheet
+
+
 def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str | None = None) -> None:
     """対象タブのG/H/I列(口コミ投稿総数・★5の口コミ数・ブログ数)に書き込む。
     列A(院名)が一致する行だけを対象にする。列が用意されていないセクション
@@ -284,16 +326,20 @@ def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str
 
     tab_override: 通常は対象月から自動計算したタブ名(例: 202608 -> "2608月分")に書き込むが、
     テスト目的で複製したタブなど、別のタブ名を明示的に指定したい場合に使う
-    (本番タブを書き換えずに --mode apply の疎通確認をしたいときなど)。
+    (本番タブを書き換えずに --mode apply の疎通確認をしたいときなど)。tab_override指定時は
+    タブが無くても自動作成しない(テスト用タブは明示的に用意されている前提のため)。
     """
     import unicodedata
 
     tab_name = tab_override or month_tab_name(year, month)
     spreadsheet = build_spreadsheet()
-    try:
-        worksheet = spreadsheet.worksheet(tab_name)
-    except Exception:
-        fail(f"タブ「{tab_name}」が見つかりません。対象月のタブが存在するか確認してください。")
+    if tab_override:
+        try:
+            worksheet = spreadsheet.worksheet(tab_name)
+        except Exception:
+            fail(f"タブ「{tab_name}」が見つかりません。対象月のタブが存在するか確認してください。")
+    else:
+        worksheet = ensure_tab_exists(spreadsheet, tab_name, year, month)
 
     all_values = worksheet.get_all_values()
     name_to_row = {}
