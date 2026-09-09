@@ -41,6 +41,9 @@ def main() -> int:
     ap.add_argument("--key-env", required=True)
     ap.add_argument("--sheet-id", required=True)
     ap.add_argument("--tab", help="読むタブ名。省略するとタブ一覧だけ出す")
+    ap.add_argument("--gid", type=int,
+                     help="--tabの代わりにgid(スプレッドシートURLの#gid=以降の数値)でタブを指定する。"
+                          "--tabと同時指定時は--tabを優先")
     ap.add_argument("--range", default="A1:E5", help="タブ指定時に読む範囲(既定 A1:E5)")
     ap.add_argument("--out-csv", help="省略可。指定するとログ表示に加えて範囲の内容をCSVとして書き出す"
                                        "(get_job_logsの出力上限を超える大きな範囲を読むとき用。"
@@ -67,12 +70,23 @@ def main() -> int:
 
     title = meta["properties"]["title"]
     tabs = [s["properties"]["title"] for s in meta["sheets"]]
+    gid_by_title = {s["properties"]["title"]: s["properties"]["sheetId"] for s in meta["sheets"]}
     print(f"シート: {title!r}")
     print(f"タブ({len(tabs)}件): {tabs}")
+    print(f"gid対応: {gid_by_title}")
 
-    if not args.tab:
-        print("\n--tab を指定すると、そのタブの先頭を読んで内容も確認します。")
+    tab = args.tab
+    if not tab and args.gid is not None:
+        title_by_gid = {v: k for k, v in gid_by_title.items()}
+        tab = title_by_gid.get(args.gid)
+        if tab is None:
+            fail(f"gid={args.gid} が見つかりません。上のgid対応から選んでください。")
+        print(f"gid={args.gid} -> タブ {tab!r}")
+
+    if not tab:
+        print("\n--tab か --gid を指定すると、そのタブの先頭を読んで内容も確認します。")
         return 0
+    args.tab = tab
 
     if args.tab not in tabs:
         fail(f"タブ {args.tab!r} が見つかりません。上のタブ一覧から選んでください。")

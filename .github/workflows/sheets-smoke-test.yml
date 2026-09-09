@@ -18,6 +18,10 @@ on:
         description: "省略可。読むタブ名(省略するとタブ一覧だけ出す)"
         required: false
         type: string
+      gid:
+        description: "省略可。--tabの代わりにgid(シートURLの#gid=以降の数値)でタブを指定する"
+        required: false
+        type: string
       range:
         description: "省略可。--tab指定時に読む範囲(既定 A1:E5)"
         required: false
@@ -61,6 +65,8 @@ jobs:
           args=(--key-env "${{ inputs.key_env }}" --sheet-id "${{ inputs.sheet_id }}")
           if [ -n "${{ inputs.tab }}" ]; then
             args+=(--tab "${{ inputs.tab }}" --range "${{ inputs.range }}")
+          elif [ -n "${{ inputs.gid }}" ]; then
+            args+=(--gid "${{ inputs.gid }}" --range "${{ inputs.range }}")
           fi
           if [ "${{ inputs.upload_as_csv }}" = "true" ]; then
             mkdir -p out
