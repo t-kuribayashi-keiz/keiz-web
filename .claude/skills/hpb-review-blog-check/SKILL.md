@@ -39,6 +39,12 @@ description: Use this skill for the monthly「口コミブログチェック表�
 **編集者として共有**しておく必要がある。共有手順: スプレッドシート右上の「共有」→上記の
 メールアドレスを追加→権限「編集者」→送信。
 
+**GitHub Actionsのログ確認・手動実行を行う前に、必ず`gh auth status`を先に確認すること。**
+未認証(セッション開始直後によくある。認証はセッションスコープでディスクに永続化されない
+— `hpb-reservation-slot-check/references/github-actions-ops.md`で確認済みの挙動と同じ)
+なら、そこで止まって栗林さんに`gh auth login`の実行を依頼する。以前のセッションで
+認証できていたことを前提にしない。
+
 手動で任意の月を再実行・確認したい場合は、GitHub Actionsの「HPB review/blog check (monthly)」
 ワークフローを`workflow_dispatch`で手動実行できる(対象月・mode(apply/report)を指定可能)。
 ローカルで直接実行する場合は以下(Chatwork通知は行われない):
@@ -78,13 +84,18 @@ Chatworkの通知の仕組み自体(`kind: "status_report"`という新しい種
 受けて判明)。「掲載エラー」と確認した院は、店舗名でHPBジャンル検索(駅名×業種で絞り込み)
 をかけて、同じ院名の別store_idが無いか確認する一手間を追加すること。
 
-## スプレッドシートへの書き込み
+## スプレッドシートへの書き込み(フォールバック手順)
 
-現状はサービスアカウントを未設定のため、`claude-in-chrome`(利用者の実ブラウザ、ログイン
-済み)でスプレッドシートを開き、Name Box(名前ボックス)でセル範囲を選択して値を
-クリップボード経由で貼り付ける方法を使っている。**行番号の取得元によっては、実際の
-シート行と2行分ズレる罠がある**(Google Sheets自体のバグではなく、`read_file_content`が
-返すMarkdown変換に起因する。詳細は
+**現在の正規の書き込み経路は上記「自動化」節のとおり `GCP_KPI_WRITER_KEY` サービス
+アカウント経由(`--mode apply`)で、これはすでに動いている(2026-09-09〜)。** 以下は
+サービスアカウントの鍵が使えない環境(例: 鍵が無いローカルPC)でのフォールバックとして
+残してある手順で、「現状の標準手順」ではない。まずは`--mode apply`かGitHub Actionsの
+`workflow_dispatch`を試し、鍵が無い・失敗する等でどうしても使えない場合にのみ以下を使う。
+
+`claude-in-chrome`(利用者の実ブラウザ、ログイン済み)でスプレッドシートを開き、
+Name Box(名前ボックス)でセル範囲を選択して値をクリップボード経由で貼り付ける方法。
+**行番号の取得元によっては、実際のシート行と2行分ズレる罠がある**(Google Sheets自体の
+バグではなく、`read_file_content`が返すMarkdown変換に起因する。詳細は
 [references/id-matching-pitfalls.md](references/id-matching-pitfalls.md) の1.5、
 回避手順は[references/sheet-write-back.md](references/sheet-write-back.md) を必ず
 参照すること)。これを見落として直接大きな範囲に貼り付けると、既存データを誤った位置に
