@@ -43,7 +43,7 @@ margin before 15:00 — if the cron ever moves later, keep that margin intact.
 
 `workflow_dispatch` takes optional `start_date` / `start_half` / `end_date` / `end_half`, so
 a single ad-hoc window can be checked **without touching the permanent rolling default**
-(`default_date_window()` = 当日PM〜2日後PM). Use these for "今日だけこの範囲で見て" asks
+(`default_date_window()` = 当日PM〜3日後AM). Use these for "今日だけこの範囲で見て" asks
 instead of editing the script or the cron.
 
 ```

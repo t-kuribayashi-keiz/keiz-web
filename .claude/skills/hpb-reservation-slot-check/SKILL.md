@@ -117,7 +117,7 @@ and ✕ counts are not comparable between windows of different width. Auth reuse
 `GCP_KPI_WRITER_KEY` write-capable service account from `functions/kpi-aggregation`
 (`chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`) — share the
 "HPB予約枠確認" spreadsheet with it as Editor; no new key/secret needed. Check window is a
-daily-rolling "当日PM〜2日後PM" (`default_date_window()`), per the user's own spec.
+daily-rolling "当日PM〜3日後AM" (`default_date_window()`), per the user's own spec.
 
 **Target tab is "AIチェック用ver.2", not "AIチェック用".** The user duplicated the original
 tab so their existing manual workflow on "AIチェック用" keeps working untouched while this
