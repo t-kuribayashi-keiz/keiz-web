@@ -28,6 +28,65 @@ Every salon trades until 13:00, breaks, and reopens at 15:00 for the 午後の�
 same day. A full run over ~142 shops takes 15–20 minutes, so a 13:07 start leaves ample
 margin before 15:00 — if the cron ever moves later, keep that margin intact.
 
+## `schedule` is currently disabled (2026-09-11) — do not re-enable without reading this
+
+Despite the `7 4 * * *` cron (04:07 UTC = 13:07 JST), actual runs kept landing 4–5 hours
+late (17:30–18:15 JST) for at least a week straight (2026-09-05 through 2026-09-11) — this
+is a *different* problem from the original top-of-the-hour issue above (already fixed by
+the `:07` offset) and has never been diagnosed; GitHub Actions schedule delays of a few
+minutes are normal, but a consistent multi-hour delay every single day is not something
+the "avoid :00" advice explains. On 2026-09-11 that lateness stopped being just "misses the
+15:00 margin"
+and turned into **active data corruption**: a run that fired at 17:52 JST overwrote a
+correct 13:23 JST run's K/L results (○111/✕26/?5) with a massively inflated false-positive
+set (○16/✕121/?5).
+
+**Working theory**: `default_date_window()` starts the window at 当日PM. A run that
+executes late in the day re-evaluates the *current* day's PM slots after much of that
+afternoon has already elapsed — and the public calendar shows an elapsed time slot as
+unavailable regardless of whether it was ever actually blocked, so the scraper reads it as
+✕. The later the run, the more of today's PM has "already happened" and gets swept into
+the ✕ count. A 13:07 run only has ~10 minutes of elapsed PM to misread; a 17:52 run has
+almost 5 hours of it.
+
+**Current state**: the `schedule:` trigger was removed from this workflow entirely
+(2026-09-11) — `workflow_dispatch` still works, so manual/on-demand runs are unaffected.
+`daily-ops-monitor` has been told this is intentional and not to report "no schedule event
+today" as an anomaly for this workflow (see its own `.md`).
+
+**Before re-enabling `schedule`**, both of these need to actually be resolved, not just the
+chronic-late-firing symptom:
+1. Why the firing is chronically 4-5h late in the first place (never diagnosed — the
+   "avoid the top of the hour" fix from 2026-09-04 didn't touch this; `04:07 UTC` is not an
+   on-the-hour minute).
+2. Whether `default_date_window()`'s elapsed-same-day-PM problem needs a design fix
+   independent of #1 (e.g. excluding already-past half-days from judgment) — a fix to #1
+   alone reduces the *size* of the elapsed window on a future correctly-timed run, but
+   doesn't make the false-positive mechanism itself go away, so a late run (for whatever
+   reason, e.g. Actions congestion on a given day) would still corrupt the sheet the same way.
+
+Tracked in `docs/backlog.md`.
+
+## Restoring K/L after a bad run (worked example, 2026-09-11)
+
+If a run's K/L output turns out to be wrong (the false-positive bug above, or the
+zero-shops-processed bug in `known-bugs.md`), and you have a *previous* run's log that was
+confirmed correct:
+
+1. `gh run view <good-run-id> --log` and save it.
+2. Parse the `🔍 解析中 (i/142): 店舗名` / `  -> 結果: 判定 (詳細)` line pairs into a
+   142-row `K列詳細\tL列判定` TSV **with a script**, not by hand — see
+   "Don't hand-transcribe bulk tabular data" in `references/sheet-writing-notes.md` for why
+   a manual re-transcription of >100 rows is dangerous here (a real near-miss: 8 rows
+   silently dropped out of 142 when done by hand, which would have shifted every subsequent
+   row onto the wrong shop).
+3. Set the OS clipboard directly from that TSV file (PowerShell: `Set-Clipboard -Value
+   (Get-Content -Raw -Encoding UTF8 <file>)`) rather than routing it through the browser's
+   own clipboard APIs, then paste into `K3` on `AIチェック用ver.2` in one shot.
+4. Verify a couple of spot-check cells (e.g. the first and last row) before trusting it —
+   see `references/sheet-writing-notes.md` for why a full re-paste still needs verification
+   even though the source was "known good".
+
 ## Scheduled run vs. manual dispatch
 
 - **A scheduled run writes for real.** `schedule` passes no inputs, and the workflow reads
@@ -43,7 +102,7 @@ margin before 15:00 — if the cron ever moves later, keep that margin intact.
 
 `workflow_dispatch` takes optional `start_date` / `start_half` / `end_date` / `end_half`, so
 a single ad-hoc window can be checked **without touching the permanent rolling default**
-(`default_date_window()` = 当日PM〜2日後PM). Use these for "今日だけこの範囲で見て" asks
+(`default_date_window()` = 当日PM〜3日後AM). Use these for "今日だけこの範囲で見て" asks
 instead of editing the script or the cron.
 
 ```

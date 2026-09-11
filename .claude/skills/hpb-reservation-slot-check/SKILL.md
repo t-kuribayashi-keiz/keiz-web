@@ -86,9 +86,11 @@ checks first:
 ## Continuous learning
 
 Same convention as `hpb-salonboard-update`: append anything newly learned to
-`references/known-bugs.md` (a new root-cause class) or `references/colab-editing-gotchas.md`
-(a new browser-automation/Colab-UI quirk) rather than letting it live only in a
-conversation transcript.
+`references/known-bugs.md` (a new root-cause class), `references/colab-editing-gotchas.md`
+(a new browser-automation/Colab-UI quirk), `references/github-actions-ops.md` (the daily
+workflow's own operational behavior), or `references/sheet-writing-notes.md` (writing M/N
+or restoring K/L into the sheet via a live browser session) rather than letting it live only
+in a conversation transcript.
 
 **If any other session might be running this skill at the same time (e.g. someone else is
 doing the weekly M/N pass while you're debugging K/L, or two people are each triaging
@@ -117,7 +119,7 @@ and ✕ counts are not comparable between windows of different width. Auth reuse
 `GCP_KPI_WRITER_KEY` write-capable service account from `functions/kpi-aggregation`
 (`chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`) — share the
 "HPB予約枠確認" spreadsheet with it as Editor; no new key/secret needed. Check window is a
-daily-rolling "当日PM〜2日後PM" (`default_date_window()`), per the user's own spec.
+daily-rolling "当日PM〜3日後AM" (`default_date_window()`), per the user's own spec.
 
 **Target tab is "AIチェック用ver.2", not "AIチェック用".** The user duplicated the original
 tab so their existing manual workflow on "AIチェック用" keeps working untouched while this
@@ -156,6 +158,31 @@ Chrome (`mcp__claude-in-chrome__*`, never the sandboxed browser — see
 `hpb-salonboard-update/SKILL.md` rule 1) and judge each ✕ shop's schedule screen directly,
 the same way this session did for the first 19 shops.
 
+**Getting into each ✕ shop from `CNC/groupTop/`**: use `javascript_tool`'s `element.click()`
+on the matched salon-name `<a>`, not a coordinate/ref click — see
+`hpb-salonboard-update/SKILL.md`'s "Before any browser action" section for why (coordinate/ref
+clicks were confirmed to stop working partway through a multi-salon run in this exact M/N
+workflow, 2026-09-11). Once inside a salon, jump straight to
+`https://salonboard.com/KLP/schedule/salonSchedule/?date=YYYYMMDD` (no dashes in the date)
+for each target date — no need to click through the UI tabs. **That page renders its grid
+via Ajax after load; `wait` ~1.5s after `navigate` before reading it**, or `get_page_text`
+can come back with the page chrome but an empty schedule grid.
+
+**Writing the confirmed M/N result back to the sheet** (either the "K,L履歴" tab per-date
+rows, or the `AIチェック用ver.2` M/N columns) hits the same ✕/○-character and row-lookup
+pitfalls as any other sheet write from a browser session — see
+`references/sheet-writing-notes.md` before doing this by hand for more than a couple of
+shops.
+
+**Don't skip the actual visual/DOM check and rely purely on re-implementing the 4-category
+logic below programmatically for shops you haven't looked at.** On 2026-09-11, 22 of 26 ✕
+shops were classified by a from-scratch reimplementation of this same logic (checking page
+text for the same signals) without a human ever looking at the resulting screenshot —
+which defeats the reason M/N is manual in the first place (see the ✕/一括停止 caveat below),
+and specifically skips the same kind of same-day-elapsed-time risk the K/L side just got
+bitten by (a check run late in the day may be reading "already past" slots the same way).
+Tracked as an open follow-up in `docs/backlog.md`.
+
 **Why not a GitHub-event-triggered cloud routine instead of a manual message, then?**
 Investigated 2026-09-03: the mechanism exists (`RemoteTrigger`'s `create_webhook_trigger`,
 already used by this repo's Chatwork-request routine to fire off a GitHub Issue). But that
@@ -176,7 +203,7 @@ real salonboard.com schedule pages via `mcp__claude-in-chrome__javascript_tool`)
 | 対象外 | 定休日 | page text contains "休業日です" |
 | ○ | 実予約あり(誤検知) | `.scheduleReserveName` element present (a real customer reservation; deliberately not reading its text — that's PII) |
 | ✕ | 予定あり(枠ブロック) | `.todoTitle` text contains "予定あり" (covers both the スタッフ予定 and ベッド/設備予定 sub-cases the user distinguished — `.scheduleToDo.staffTask` vs `.scheduleToDo.equipmentTask` — both collapse to the same simple label per the user's own choice) |
-| ✕ | 一括停止(警告) | least-validated category: `.scheduleTimeTableReserveCount` all "0"/"-" AND page text contains "一括停止". Only ever confirmed on one real shop (上板橋駅前) via screenshot, never against the live DOM — spot-check this one specifically before trusting `--apply` |
+| ✕ | 一括停止(警告) | least-validated category: `.scheduleTimeTableReserveCount` all "0"/"-" AND page text contains "一括停止". Confirmed via screenshot on 上板橋駅前 (2026-09-03) and via live DOM/`get_page_text` on やまもと鍼灸接骨院さかいし院 (2026-09-11) — still the softest signal of the four (a bulk-stop banner + all-zero counts is plausible but not verified against every possible legitimate reason a shop shows this), spot-check new occurrences rather than trusting a from-scratch reimplementation blind (see the caveat above about the 2026-09-11 22-shop batch) |
 | 要確認 | 要確認 | anything not clearly matching the above — the deliberate safe fallback, not a bug |
 
 Note that 定休日 is judged **from the page** ("休業日です"), never from a master list, and it

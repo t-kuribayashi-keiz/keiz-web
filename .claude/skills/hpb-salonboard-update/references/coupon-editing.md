@@ -8,7 +8,9 @@ Fastest path: from anywhere inside the salon, `navigate` straight to `https://sa
 
 The long way, for reference: from a salon's SalonBoard TOP page click 掲載管理 in the top nav (a dropdown, `javascript:void(0)` href) → 掲載管理TOP → the クーポン tab in the sub-nav → `CNK/draft/couponList`.
 
-Getting *into* the salon from `CNC/groupTop/` is the awkward part: those salon-name links are also `javascript:void(0);`, and **clicking them by element ref silently fails** — the tool reports `Clicked on element ref_N` but the page never leaves `CNC/groupTop/`. Click by screenshot coordinate, and confirm the URL changed afterwards.
+Getting *into* the salon from `CNC/groupTop/` is the awkward part: those salon-name links are `javascript:void(0);`, and clicking them by element ref *or* screenshot coordinate can both silently fail partway through a multi-salon task (see SKILL.md's "Before any browser action" for the confirmed fix: `javascript_tool` calling `element.click()` on the matched `<a>` directly). Confirm the URL changed afterwards either way.
+
+Once inside a salon, **don't `navigate` straight to `couponList`/`couponEdit`** the very first time you enter — that transition alone has produced `ユーザエラー: サロンが選択されていません` a few times even right after a correct salon-TOP landing (confirmed 2026-09-10, 3/5 direct-navigates failed this way, 0/3 UI-click-throughs did). Click 掲載管理→クーポン through the on-screen nav for that first hop into the section; direct `navigate` is fine for subsequent hops once you're already inside `CNK/draft/*`.
 
 The **反映** ("クーポン掲載情報を反映する") button that actually publishes staged changes lives on 掲載管理TOP (`CNK/reflect/reflectTop`), not on the coupon list or edit pages. After any 登録 (save), a yellow banner on the list page reminds you it's not live yet.
 
@@ -27,6 +29,8 @@ There is also a **チェック column** with values `OK` and `要確認` (the la
 ## Do not touch these controls
 
 Each row's 非掲載にする / 掲載にする button has a **削除する button roughly 20px directly below it.** A coordinate click that drifts a few pixels lands on delete. Treat that whole column as off-limits: never coordinate-click it, and never change a coupon's published state unless the user asked for exactly that.
+
+**Clicking 非掲載にする can freeze the tab for 30–45s and, on repeat, time out the whole session** (confirmed 2026-09-11, 2/2 on the same coupon across two separate attempts — once with another session confirmed active on the same account, once with none, so it isn't purely a concurrency artifact; it may be specific to a photo-less "要確認"-flagged new coupon, or to the button itself). If a click on this button hangs: don't retry/screenshot repeatedly — `wait` ~60s, then check `tabs_context_mcp`; if still unresponsive, close and reopen the tab at the same `couponList` URL and check the row's state (順番/background/button) before deciding whether the click had any effect (in both observed cases, it hadn't — no state change, nothing deleted). If it recurs on retry, stop and hand the specific row back to the user as a manual step rather than continuing to fight it.
 
 ## Opening a specific coupon
 
@@ -56,10 +60,38 @@ Via クーポン新規追加 (a button both above and below the list) rather tha
 
 - **ビビビ祭用クーポン設定** appears at the top and must be answered before the rest of the form is usable — pick **設定しない** for an ordinary coupon. Only pick "ビビビ祭用に設定する" if the task is explicitly about that campaign (see the news-feed notice about ビビビ祭 wording/compliance).
 - **写真 has no "reuse another salon's image" option** — 画像ID is a read-only label assigned after upload, not something you can type in to pull an existing image by ID. The only input is a local file (drag-and-drop or ファイルを選択, via the `file_upload` MCP tool with a ref to the `input[type=file]` — note the visible "ファイルを選択" element found by `find` is often the wrapping `<label>`, not the input itself; search more specifically (e.g. "input type file") to get the actual file input ref). If you're replicating a coupon that already exists at another salon and don't have the image as a local file, ask the user to send it rather than trying to fetch it from SalonBoard yourself.
+  - **The `input[type=file]` doesn't exist in the DOM until you click "画像をアップロードする" first** — `find`/`read_page` return zero matches before that click, and only find it after (confirmed 2026-09-10). Click the upload button, *then* `find` for the file input.
+  - **`file_upload` only accepts files under this session's own read-allowed paths** — a file in the OS scratchpad temp dir (`%TEMP%\claude\...\scratchpad\`) is rejected ("only files this session is allowed to read can be uploaded") even though Bash/Read can read it fine, both with the short and long path form. Copy the file into the repo working tree first, upload from there, then delete it afterward (check `git status` before committing so it doesn't get added).
+  - After upload, a preview modal appears with its own "登録する" button — **that has to be clicked too** (it's what actually assigns the 画像ID and updates the thumbnail); the form's outer 登録 button alone may not persist the image if this modal step gets skipped.
 - **アイコン用カテゴリ選択は別モーダルで、チェックボックスはDOM順が画面の見た目と一致しない.** `read_page` returns them as opaque `MC01`, `MC02`, … values with no adjacent label text, so you can't map a category name to a ref reliably. Take a screenshot of the open modal and click by coordinate instead, then re-screenshot to confirm the right boxes ended up checked before clicking the modal's own 登録.
 - All other fields (種別, クーポン名, クーポン内容, 提示条件, 利用条件, 有効期限, 検索用カテゴリ, 価格, 所要目安時間) behave the same as in the edit form described above.
 
 To replicate a coupon that already exists elsewhere: open that coupon's 詳細 on a salon that has it, screenshot the filled-in form to read every field's actual value (`get_page_text` shows character-count labels like `34/36` but not the field contents — you need a screenshot), then reproduce those values on the new salon's 新規追加 form.
+
+## 感謝祭クーポン: existing template wording (found 2026-09-10)
+
+When asked to add a "感謝祭" (thanksgiving-fair) coupon to a new salon, check whether it's
+just cloning an existing chain-wide template before writing new copy — 都賀駅前整骨院
+(H000523612) and 南柏駅前整骨院 (H000499467, same corporate group as 南流山駅前) both carry
+byte-identical クーポン内容:
+
+> `＼期間限定★無料体験会／●内容：指圧+骨格矯正●時間：計30分(カウンセリング込み)●価格：今だけ￥0！「肩こり・腰痛・疲れ」をプロの技でスッキリ♪この機会にご体感ください◎`
+
+クーポン名 follows one of two date patterns (the content field itself carries no date):
+- Single day: `【4/28(火)限定】★感謝祭★本格骨格矯正＋指圧etc(計30分)無料体験￥0` (day + weekday in
+  parens, no leading zero, no slash before the weekday)
+- Multi-day: `5/18・5/19限定★感謝祭★本格骨格矯正+指圧etc(計30分)無料体験¥0` (中黒 `・` between
+  dates, no weekday)
+
+提示条件: 予約時 / 利用条件: ご新規様限定 / 検索用カテゴリ: リラクゼーション：整体 / 価格: ¥0 /
+所要目安時間: 30分. 有効期限 is set to the last day the coupon runs. Only 2 salons were
+checked (both matched exactly), so treat this as "confirmed template within at least this
+corporate group," not "confirmed chain-wide."
+
+**The banner image is not reusable across salons** — each salon's version has its own
+画像ID with that salon's name/dates baked in (per SKILL.md's "no reuse another salon's
+image" constraint above), so a new salon needs its own banner even when the text is a
+straight clone.
 
 ## Publishing (反映)
 
