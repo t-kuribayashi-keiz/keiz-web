@@ -23,7 +23,7 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "四街道北口整骨院": {
+    "四街道北口接骨院": {
       "store_id": "H000485909",
       "matched_via": "四街道北口",
       "match_type": "fuzzy",
@@ -89,13 +89,13 @@
       "match_type": "exact",
       "source_sheet": "ミライ・サンズ"
     },
-    "たいよう鍼灸整骨院枚方公園": {
+    "たいよう鍼灸整骨院枚方公園院": {
       "store_id": "H000608932",
       "matched_via": "たいよう鍼灸整骨院 枚方公園院",
       "match_type": "fuzzy",
       "source_sheet": "ミライ・サンズ"
     },
-    "菊川駅前整体院": {
+    "菊川駅前接骨院": {
       "store_id": "H000783759",
       "matched_via": "菊川駅前",
       "match_type": "fuzzy",
@@ -239,7 +239,7 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "市川げんき整体院": {
+    "市川げんき整骨院": {
       "store_id": "H000523615",
       "matched_via": "市川げんき",
       "match_type": "fuzzy",
@@ -293,7 +293,7 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "二和向台駅前整体院": {
+    "二和向台駅前整骨院": {
       "store_id": "H000485915",
       "matched_via": "二和向台駅前",
       "match_type": "fuzzy",
@@ -539,7 +539,7 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "あやめ鍼灸整骨院 枚方長尾院": {
+    "あやめ鍼灸整骨院枚方長尾院": {
       "store_id": "H000619342",
       "matched_via": "あやめ鍼灸整骨院枚方長尾院",
       "match_type": "exact",
@@ -563,43 +563,43 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "弁慶はりきゅう整骨院 河内長野市310号線院": {
+    "弁慶はりきゅう整骨院河内長野市310号線院": {
       "store_id": "H000662397",
       "matched_via": "弁慶はりきゅう整骨院 河内長野市310号線院",
       "match_type": "exact",
       "source_sheet": "ミライ・サンズ"
     },
-    "勝田台北口整体院": {
+    "勝田台北口接骨院": {
       "store_id": "H000663156",
       "matched_via": "勝田台北口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "志木駅前整体院": {
+    "志木駅前接骨院": {
       "store_id": "H000666441",
       "matched_via": "志木駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "和歌山駅東口整体院": {
+    "和歌山駅東口接骨院": {
       "store_id": "H000678040",
       "matched_via": "和歌山駅東口接骨院",
       "match_type": "fuzzy",
       "source_sheet": "ミライ・サンズ"
     },
-    "五井駅東口整体院": {
+    "五井駅東口接骨院": {
       "store_id": "H000682433",
       "matched_via": "五井駅東口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "長町南駅前整体院": {
+    "長町南駅前接骨院": {
       "store_id": "H000684006",
       "matched_via": "長町南駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "谷町四丁目整体院": {
+    "谷町四丁目接骨院": {
       "store_id": "H000696758",
       "matched_via": "谷町四丁目",
       "match_type": "fuzzy",
@@ -617,19 +617,19 @@
       "match_type": "exact",
       "source_sheet": "ミライ・サンズ"
     },
-    "弁慶はりきゅう整骨院 大津市整骨院": {
+    "弁慶はりきゅう整骨院大津市整骨院": {
       "store_id": "H000719166",
       "matched_via": "弁慶はりきゅう整骨院 大津市整骨院",
       "match_type": "exact",
       "source_sheet": "ミライ・サンズ"
     },
-    "我孫子駅前整体院": {
+    "我孫子駅前整骨院": {
       "store_id": "H000721767",
       "matched_via": "我孫子駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "二条駅前整体院": {
+    "二条駅前整骨院": {
       "store_id": "H000724184",
       "matched_via": "二条駅前",
       "match_type": "fuzzy",
@@ -647,49 +647,49 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "中村公園駅前整体院": {
+    "中村公園駅前接骨院": {
       "store_id": "H000728337",
       "matched_via": "中村公園駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "南平岸駅前整体院": {
+    "南平岸駅前接骨院": {
       "store_id": "H000734214",
       "matched_via": "南平岸駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "新道東駅整体院": {
+    "新道東駅接骨院": {
       "store_id": "H000739492",
       "matched_via": "新道東駅",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "下総中山駅北口整体院": {
+    "下総中山駅北口整骨院": {
       "store_id": "H000739495",
       "matched_via": "下総中山駅北口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "山本接骨院 なかもず院": {
+    "山本接骨院なかもず院": {
       "store_id": "H000739483",
       "matched_via": "山本接骨院なかもず院",
       "match_type": "exact",
       "source_sheet": "子会社"
     },
-    "やまもと鍼灸接骨院 さかいし院": {
+    "やまもと鍼灸接骨院さかいし院": {
       "store_id": "H000739485",
       "matched_via": "やまもと鍼灸接骨院さかいし院",
       "match_type": "exact",
       "source_sheet": "子会社"
     },
-    "すまいる針灸接骨院 六甲道院": {
+    "すまいる針灸接骨院六甲道院": {
       "store_id": "H000739488",
       "matched_via": "すまいる針灸接骨院六甲道院",
       "match_type": "exact",
       "source_sheet": "子会社"
     },
-    "すまいる針灸接骨院 甲南山手院": {
+    "すまいる針灸接骨院甲南山手院": {
       "store_id": "H000739489",
       "matched_via": "すまいる針灸接骨院甲南山手院",
       "match_type": "exact",
@@ -701,85 +701,85 @@
       "match_type": "exact",
       "source_sheet": "子会社"
     },
-    "すまいる鍼灸接骨院 ながよし院": {
+    "すまいる鍼灸接骨院ながよし院": {
       "store_id": "H000739486",
       "matched_via": "すまいる鍼灸接骨院ながよし院",
       "match_type": "exact",
       "source_sheet": "子会社"
     },
-    "千歳駅南整体院": {
+    "千歳駅南接骨院": {
       "store_id": "H000748761",
       "matched_via": "千歳駅南",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "恵庭駅前整体院": {
+    "恵庭駅前接骨院": {
       "store_id": "H000748757",
       "matched_via": "恵庭駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "四街道もねの里整体院": {
+    "四街道もねの里接骨院": {
       "store_id": "H000749775",
       "matched_via": "四街道もねの里",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "新潟亀田大通り整体院": {
+    "新潟亀田大通り接骨院": {
       "store_id": "H000752703",
       "matched_via": "新潟亀田大通り",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "市川さくら整体院": {
+    "市川さくら整骨院": {
       "store_id": "H000754941",
       "matched_via": "市川さくら",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "川西能勢口駅西口": {
+    "川西能勢口駅西口接骨院": {
       "store_id": "H000762039",
       "matched_via": "川西能勢口駅西口",
       "match_type": "exact",
       "source_sheet": "直営"
     },
-    "小平南口整体院": {
+    "小平南口接骨院": {
       "store_id": "H000764532",
       "matched_via": "小平南口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "流山おおたかの森西口整体院": {
+    "流山おおたかの森西口接骨院": {
       "store_id": "H000764540",
       "matched_via": "流山おおたかの森西口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "手稲駅北口整体院": {
+    "手稲駅北口接骨院": {
       "store_id": "H000772763",
       "matched_via": "手稲駅北口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "郡山駅西口整体院": {
+    "郡山駅西口接骨院": {
       "store_id": "H000773044",
       "matched_via": "郡山駅西口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "姉ヶ崎駅前整体院": {
+    "姉ヶ崎駅前接骨院": {
       "store_id": "H000777735",
       "matched_via": "姉ヶ崎駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "川越クレアモール": {
+    "川越クレアモール接骨院": {
       "store_id": "H000780705",
       "matched_via": "川越クレアモール",
       "match_type": "exact",
       "source_sheet": "直営"
     },
-    "北仙台駅前整体院": {
+    "北仙台駅前接骨院": {
       "store_id": "H000785147",
       "matched_via": "北仙台駅前",
       "match_type": "fuzzy",
@@ -791,31 +791,31 @@
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "武蔵境駅北口整体院": {
+    "武蔵境駅北口接骨院": {
       "store_id": "H000791712",
       "matched_via": "武蔵境駅北口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "千種本山整体院": {
+    "千種本山接骨院": {
       "store_id": "H000796855",
       "matched_via": "千種本山",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "みらい平駅前整体院": {
+    "みらい平駅前接骨院": {
       "store_id": "H000816834",
       "matched_via": "みらい平駅前",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "みずほ台駅東口整体院": {
+    "みずほ台駅東口接骨院": {
       "store_id": "H000822372",
       "matched_via": "みずほ台駅東口",
       "match_type": "fuzzy",
       "source_sheet": "直営"
     },
-    "本八幡南口整体院": {
+    "本八幡南口接骨院": {
       "store_id": "H000489321",
       "matched_via": "本八幡南口",
       "match_type": "verified_by_live_data",
@@ -827,7 +827,7 @@
       "match_type": "verified_by_live_data",
       "source_sheet": "直営(曖昧な同名ペアのため実測値で照合)"
     },
-    "新潟関屋整体院": {
+    "新潟関屋整骨院": {
       "store_id": "H000485247",
       "matched_via": "新潟関屋",
       "match_type": "verified_by_live_data",
@@ -839,7 +839,7 @@
       "match_type": "verified_by_live_data",
       "source_sheet": "直営(曖昧な同名ペアのため実測値で照合)"
     },
-    "八幡宿駅西口整体院": {
+    "八幡宿駅西口接骨院": {
       "store_id": "H000757073",
       "matched_via": "八幡宿駅西口",
       "match_type": "verified_by_live_data",
@@ -851,37 +851,37 @@
       "match_type": "fuzzy_anywhere",
       "source_sheet": "直営/ミライ・サンズ(部分一致・接尾辞が院名の途中に埋め込まれたパターン)"
     },
-    "弁慶はりきゅう整体院 西大津院": {
+    "弁慶はりきゅう整骨院西大津院": {
       "store_id": "H000678039",
       "matched_via": "弁慶はりきゅう整骨院 西大津院",
       "match_type": "fuzzy_anywhere",
       "source_sheet": "直営/ミライ・サンズ(部分一致・接尾辞が院名の途中に埋め込まれたパターン)"
     },
-    "弁慶はりきゅう整体院 富田林旧170号線院": {
+    "弁慶はりきゅう整骨院富田林旧170号線院": {
       "store_id": "H000678035",
       "matched_via": "弁慶はりきゅう整骨院 富田林旧170号線院",
       "match_type": "fuzzy_anywhere",
       "source_sheet": "直営/ミライ・サンズ(部分一致・接尾辞が院名の途中に埋め込まれたパターン)"
     },
-    "弁慶はりきゅう整体院 大津市石山整体院": {
+    "弁慶はりきゅう整骨院大津市石山整骨院": {
       "store_id": "H000737724",
       "matched_via": "弁慶はりきゅう整骨院大津市石山整骨院",
       "match_type": "fuzzy_anywhere",
       "source_sheet": "直営/ミライ・サンズ(部分一致・接尾辞が院名の途中に埋め込まれたパターン)"
     },
-    "弁慶はりきゅう整体院 和歌山市有本院": {
+    "弁慶はりきゅう整骨院和歌山市有本院": {
       "store_id": "H000737726",
       "matched_via": "弁慶はりきゅう整骨院和歌山市有本院",
       "match_type": "fuzzy_anywhere",
       "source_sheet": "直営/ミライ・サンズ(部分一致・接尾辞が院名の途中に埋め込まれたパターン)"
     },
-    "おかだ鍼灸整骨院御殿山": {
+    "おかだ鍼灸整骨院（御殿山）": {
       "store_id": "H000553137",
       "matched_via": "おかだ鍼灸整骨院（御殿山）",
       "match_type": "fuzzy_parenthesis",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "堺市美原区院": {
+    "堺市美原区骨盤整体×salon": {
       "store_id": "H000498653",
       "matched_via": "堺市美原区 骨盤整体×salon",
       "match_type": "verified_by_alias_file",
@@ -899,19 +899,19 @@
       "match_type": "verified_by_live_data",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "北小金南口駅前整体院": {
+    "北小金南口駅前接骨院": {
       "store_id": "H000756754",
       "matched_via": "北小金南口駅前整体院(タイトル確認)",
       "match_type": "verified_by_live_data",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "天王台駅前整体院": {
+    "天王台駅前整骨院": {
       "store_id": "H000762114",
       "matched_via": "天王台駅前整体院(タイトル確認)",
       "match_type": "verified_by_live_data",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "西新中央商店街整体院": {
+    "西新中央商店街接骨院": {
       "store_id": "H000707131",
       "matched_via": "西新中央商店街整体院(タイトル確認)",
       "match_type": "verified_by_live_data",
@@ -929,25 +929,25 @@
       "match_type": "verified_by_live_data",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "川越霞ヶ関駅前整体院": {
+    "川越霞ヶ関駅前接骨院": {
       "store_id": "H000598473",
       "matched_via": "川越霞ヶ関駅前接骨院(タイトル確認、実測値0/0/0で一致)",
       "match_type": "verified_by_live_data",
       "source_sheet": "直営/ミライ・サンズ"
     },
-    "池袋駅前整体院": {
+    "池袋駅前接骨院": {
       "store_id": "H000742962",
       "matched_via": "user_provided_2026-09-08",
       "match_type": "verified_by_live_data",
       "source_sheet": "栗林さんから直接URL提供(旧storeIdは掲載終了/未特定だったが、新しいstoreIdで再掲載されていた)"
     },
-    "新松戸クラシオン整体院": {
+    "新松戸クラシオン整骨院": {
       "store_id": "H000767230",
       "matched_via": "user_provided_2026-09-08",
       "match_type": "verified_by_live_data",
       "source_sheet": "栗林さんから直接URL提供(旧storeIdは掲載終了/未特定だったが、新しいstoreIdで再掲載されていた)"
     },
-    "クラシオン整体院MEGAドン・キホーテ長野高田": {
+    "クラシオン接骨院MEGAドン・キホーテ長野高田院": {
       "store_id": "H000684008",
       "matched_via": "user_provided_2026-09-08",
       "match_type": "verified_by_live_data",
@@ -1001,5 +1001,6 @@
       "store_id": "H000817872",
       "status": "2026-09-09、栗林さん確認: あはき柔整プランへ完全切り替え済み。旧「整体院」単独の店舗ページはもう無く、全ての活動は郡山若葉町鍼灸接骨院(既にclinicsに収録・計測済み)に統合されている。この院単独で追加計測すべき対象は無い。"
     }
-  }
+  },
+  "_rename_2026-09-11_comment": "2026-09-11、専用の新スプレッドシート「HPB口コミ・ブログチェック」導入に伴い、58院分の院名(このJSONのキー)を新シートのA列表記に合わせて更新した(store_idは無変更)。HPB実ページのサロン名は旧表記(例:整体院)のままであることを確認済みで、変更は新シートとの行照合キーを合わせるためのみ。新シートに該当行が見つからなかった8院(新潟こうど接骨院・浦添宮城接骨院・淵野辺駅北口接骨院・狭山ヶ丘駅前接骨院・薬園台駅東口整体院・すまいる針灸接骨院 春木院・たいよう鍼灸整骨院深江橋・京都中央整骨院 四条烏丸院)は今回は未対応のまま保留(栗林さんに確認予定)。"
 }
