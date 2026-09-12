@@ -26,6 +26,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
 | `hpb-review-blog-check` | 「口コミブログチェック表」の月次集計(各院のHPB公開ページから口コミ投稿総数・★5口コミ数・ブログ数を自動集計しスプレッドシートに反映)。2026-09-09にGitHub Actions化(毎月1日 10:00 JST、`--mode apply`)+Chatwork(マイチャット)への実行結果通知まで実装済み。要: スプレッドシートを書き込み用サービスアカウントに編集者共有(未実施の場合は書き込み失敗) | implementer(スクリプト・院マスタ・ワークフロー保守) |
 | `shinkyu-staff-check` | あはき柔整プラン5院に女性の鍼灸有資格者が在籍しているかの月次確認。HPB「雰囲気・メニューなど」の「女性鍼灸師在籍」バナーの出し下げ判断に使う。名簿が写真込みの巨大xlsxでテキスト抽出が旧版を返すため、**ブラウザで開いて顔写真ごと目視**する方式(要ローカルPC) | salonboard-operator(確認とバナー取り下げ) |
+| `hpb-ahaki-blog-rotation` | ライトプラン・あはき柔整プラン並行運用5院の、あはき柔整側ブログ投稿ローテーション。郡山若葉町鍼灸接骨院の投稿から精査した鍼灸専用テンプレート8種を店舗別に自動で差し替え、`hpb-salonboard-update`経由で投稿する(2026-09-12新設、ブログ投稿UIの実クリック手順は未検証)。 | salonboard-operator(投稿の実行、要ローカルのログイン済みChrome) |
 
 `kpi-aggregation`は`.claude/skills/`配下にSkillフォルダを新設せず、既存の
 `functions/kpi-aggregation/CLAUDE.md`(実装は`scripts/kpi_aggregate.py`・

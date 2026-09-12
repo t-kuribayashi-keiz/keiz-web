@@ -95,6 +95,19 @@ Detailed, field-level notes (exact click paths, character limits, quirks of spec
 
 - `references/coupon-editing.md` — クーポン (coupon) tab.
 - `references/menu-and-reflect-management.md` — メニュー掲載情報の無変更再登録、および掲載管理TOP(`reflectTop`)の反映申請ボタンの束ね方・有効/無効判定。
+- `references/salon-profile-editing.md` — サロン基本情報(サロンの一言・サロントップ画像・サブコピー・フリーワード)の欄の区別と文字数制限。
+
+直営135院のうち、ライトプラン側ページとあはき柔整プラン側ページの両方を今も現役で運用している
+店舗は本八幡南口・ライフガーデン茂原・新潟関屋・新静岡駅前・八幡宿駅西口の5院だけで(他は未対応、
+または完全切り替え済みでライト側ページが廃止済み)、集客の多いライト側に押されてあはき柔整側の
+口コミ・ブログ・写真が「0か1」で放置されがちという構造的課題がある。この5院向けの施策一式(院別の
+現状ベース差分編集案、画像方針、競合分析)は`data/proposals/2026-09-10_あはき柔整プランページ
+ブラッシュアップ.md`と`data/proposals/ahaki-page-copy/`にまとまっているので、この5院のページ内容
+(クーポン・フォトギャラリー・トップ画像・こだわり・キャッチコピー等)を触るタスクではまずそちらを参照する。
+
+ブログ(`KLP/blog/blogList`)であはき柔整プラン5院向けの投稿を作業する場合は、`../hpb-ahaki-blog-rotation/`が
+本文テンプレート・店舗別ローテーションを担当する(2026-09-12新設)。このSkill側では
+実際のクリック手順(未検証)を`references/blog-posting.md`として書き残す役割を担う。
 
 If a task touches a section without a reference file yet (スタッフ, メニュー, フォトギャラリー, こだわり, 特集, ブログ, 口コミ), work it out live, then **write a new reference file capturing what you learned** (structure, gotchas, field names/limits) so the next task in that section skips the rediscovery. Follow the same shape as `coupon-editing.md`.
 
