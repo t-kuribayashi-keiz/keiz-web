@@ -61,24 +61,24 @@ claude-in-chrome経由でXServerサーバーパネル・WP管理画面を直接�
 セレクタ一覧は[brands/relax/CLAUDE.md](../brands/relax/CLAUDE.md)参照。セレクタは「契約」
 として扱うこと。
 
-### relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント、起点ディレクトリの是正待ち
+### relax-hpリポジトリ: FTPアカウントは全店舗共有方針で確定(2026-09-15)
 
 栗林さんがFTPアカウント`claude@refresh-relax.com`(サーバー`sv14437.xserver.jp`)を作成し
-GitHub Secrets/Environmentへの登録も完了、`pull`ワークフローを実行したところ、
-**このアカウントの起点ディレクトリが浜田山店のテーマフォルダではなく、サーバーアカウント
-全体になっている**ことが判明した(`ls -la .`で`refresh-relax.com`だけでなく
-`luna-pilates.com`=別ブランドLUNAのサイト、`Maildir.3`=メール、`ssl`等が同列に見える状態)。
+GitHub Secrets/Environmentへの登録も完了、`pull`ワークフローを実行したところ、このアカウントの
+起点ディレクトリが浜田山店のテーマフォルダではなくサーバーアカウント全体(`luna-pilates.com`=
+LUNAのサイト、`Maildir.3`=メール等も同列に見える状態)になっていることが判明した。
 
-ミラー転送の前段にある安全確認ステップ(ファイル数の閾値チェック)で検知し、**実際のファイル
-転送は実行していない**。このままではLUNAのサイトやメールまで自動デプロイの影響範囲に入って
-しまうため、転送は保留中。
+これについて栗林さんに確認したところ、**意図的な設計であり社内確認済み**との回答だった:
+「リラックスの全部のアカウントを今後管理していく前提でそのディレクトリまですべて範囲として
+管理できるFTPを作っている。今後はLUNAに関してもアカウントを一元化したい」。
 
-**再開に必要な対応**: XServerサーバーパネルで`claude@refresh-relax.com`の起点ディレクトリを
-`refresh-relax.com/public_html/hamadayama/wp-content/themes/hamadayama/`に限定するよう
-編集(またはこの起点で作り直す)。手順は
-[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#セットアップ手順店舗を追加するたびに繰り返す)
-参照。是正後、パスワードを変更していなければSecretsの再登録は不要(起点ディレクトリの変更は
-XServer側の設定のみ)。
+これを受けてrelaxリポジトリ側の設計を変更した: FTPアカウントの権限(起点ディレクトリ)には
+頼らず、**ワークフロー(`pull.yml`/`deploy.yml`)側で対象パスを明示的に固定**する
+(`refresh-relax.com/public_html/<store>/wp-content/themes/<store>`のみをmirror対象にし、
+転送前に対象パスの存在確認・ファイル数上限チェックを行う)。GitHub Secrets/Environmentも
+店舗ごとではなく共通の`relax`1つに統一した。詳細は
+[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#設計-共有ftpアカウント1つワークフロー側で対象パスを明示的に絞る2026-09-15改訂)
+参照。
 
 ### salonboard-operatorの非交渉ルール2(登録の一括承認≠反映の承認)の実地検証
 
