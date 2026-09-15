@@ -141,14 +141,14 @@ def judge_occupancy_rate(slots, start_min, end_min, b_start, b_end, is_am):
 
 
 def default_date_window():
-    """明示指定がない場合の既定ウィンドウ: 当日PM〜2日後PM(2026-09-03、栗林さん指定)。
+    """明示指定がない場合の既定ウィンドウ: 当日PM〜3日後AM(2026-09-11、栗林さん指定)。
 
     毎日13:00 JSTに実行する前提(ワークフロー側のcronと対応)。実行時点で当日AMは既に
-    過ぎているので、当日PMから2日後PMまでを判定対象にする。
+    過ぎているので、当日PMから3日後AMまでを判定対象にする。
     """
     today = datetime.datetime.now()
-    end = today + datetime.timedelta(days=2)
-    return today.strftime("%Y-%m-%d"), "PM", end.strftime("%Y-%m-%d"), "PM"
+    end = today + datetime.timedelta(days=3)
+    return today.strftime("%Y-%m-%d"), "PM", end.strftime("%Y-%m-%d"), "AM"
 
 
 HISTORY_WORKSHEET_NAME = "K,L履歴"
@@ -184,8 +184,8 @@ def build_spreadsheet():
 def get_or_create_history_worksheet(spreadsheet):
     """K/L列は毎回上書きなので、判定結果を対象日・区分ごとに別タブへ積み上げて残す。
 
-    チェック窓は「当日PM〜2日後PM」のローリングウィンドウで毎日実行するため、同じ対象日が
-    複数回(最大3回)の実行にまたがって評価される。これを1回の実行につき1行(複数日を
+    チェック窓は「当日PM〜3日後AM」のローリングウィンドウで毎日実行するため、同じ対象日が
+    複数回(最大4回)の実行にまたがって評価される。これを1回の実行につき1行(複数日を
     " | "で連結した文字列)にまとめてしまうと、「その対象日が正確にいつ✕に変わったか」が
     追えなくなる。なので対象日・区分(AM/PM)ごとに1行、判定が○であっても毎回記録する
     (栗林さん指定: 「重複している日の確認結果もそれぞれ残しておきたい」)。

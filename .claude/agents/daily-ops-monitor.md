@@ -16,7 +16,7 @@ tools: Read, Write, Grep, Glob, Bash
 
 | 対象 | 実行 | 結果の置き場 | 詳細 |
 |---|---|---|---|
-| 予約枠K/Lチェック | 毎日13:07 JST | 「HPB予約枠確認」の`AIチェック用ver.2`のK/L列と「K,L履歴」タブ | `.claude/skills/hpb-reservation-slot-check/` |
+| 予約枠K/Lチェック | **2026-09-11停止中**(手動実行のみ。詳細は下記) | 「HPB予約枠確認」の`AIチェック用ver.2`のK/L列と「K,L履歴」タブ | `.claude/skills/hpb-reservation-slot-check/` |
 | KPI集計 | ワークフロー | 「【2026年_月次報告】集客数」 | `functions/kpi-aggregation/` |
 | Chatwork依頼検知 | ワークフロー | GitHub Issue | `functions/chatwork-integration/` |
 
@@ -33,14 +33,19 @@ tools: Read, Write, Grep, Glob, Bash
 2. **そもそも発火したかを確認する。** 定期実行が来ていないときにコードを疑うのは順番が逆。
    `gh api "repos/t-kuribayashi-keiz/keiz-web/actions/workflows/<id>/runs?event=schedule"`
    で当日の行があるかを見る。無ければ「未発火」であって「失敗」ではない
+   — **ただし2026-09-11以降、この予約枠K/Lチェックに限っては`schedule`トリガー自体を
+   意図的に削除している(遅延実行が当日PMの経過済み枠を大量誤検知する実害が出たため。
+   `.claude/skills/hpb-reservation-slot-check/learnings/2026-09-11T1900_cron-false-positive-and-sheets-technique.md`)。
+   したがって「今日もscheduleイベントが無い」のは異常ではなく想定通り。この状態を
+   異常として報告しないこと。再開判断は`docs/backlog.md`の該当項目を参照。**
 3. **結果の内訳を読む。** `gh run view <id> --log` して `内訳` と `-> 結果:` をgrepする
 4. **異常かどうかを判定する。** ここがこの役割の本体で、機械的な件数比較ではありません:
    - **✕の件数は、チェック窓の幅が違う実行同士では比較できない**。✕は窓内の
      どれか1コマでも✕なら✕になるOR判定なので、窓を広げれば機械的に増える。
-     比較するなら同じ幅の実行同士(既定は当日PM〜2日後PMの6コマ)
+     比較するなら同じ幅の実行同士(既定は当日PM〜3日後AMの6コマ)
    - **`?` は「満席」ではなく「データが1件も取れなかった」**。スクレイピングか
      掲載URLの問題なので、✕とは別に扱い、続くようなら **implementer案件**
-   - 「K,L履歴」タブには同じ対象日が最大3回、別々の実行から記録されている。
+   - 「K,L履歴」タブには同じ対象日が最大4回、別々の実行から記録されている。
      連続する実行の判定を並べれば **「いつ枠が閉じたか」** が特定できる。
      昨日○で今日✕の店舗は、今日新しく塞がったということ
 5. **渡す。** ✕/`?`の店舗リスト(店舗名・対象日・区分)を作り、

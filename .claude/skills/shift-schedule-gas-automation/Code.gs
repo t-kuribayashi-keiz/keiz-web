@@ -8,6 +8,8 @@
  *   ② 公休を自動入力（希望休(赤字)を除いた残り日数を、以下のルールで自動割り振り）
  *        ・各資格（柔道整復師/鍼灸師など）を持つスタッフ、およびピラティス対応スタッフが、
  *          全出勤日で最低1人は勤務（ハード制約）
+ *        ・1日あたりの出勤者がMIN_WORKING_STAFF_PER_DAY人を下回らないようにする（ワンオペ防止。
+ *          ハード制約）
  *        ・院長は月初1〜7日間、希望休を含めて公休1日まで（ハード制約）
  *        ・同じスタッフに公休を2日以上連続させない（原則禁止。避けられない場合のみ警告の上で許容）
  *        ・同じスタッフを6日以上連続で勤務させない（MAX_CONSECUTIVE_WORK_DAYSを超える手前で公休を差し込む）
@@ -97,9 +99,10 @@ const TITLE_CELL = 'C1';
 // 「◯日：　日　◯日：　日　取得可能◯」のメモが入るセル
 const QUOTA_NOTE_CELL = 'P1';
 
-// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P5〜、Qは既存のCOUNTIF式）
+// P列・Q列にある「名前／休暇数」のダブルチェック欄（原本テンプレート固定：P4〜、見出し行(P3)の
+// すぐ下から空白行を空けずに詰める。名前・休暇数のどちらもスクリプトが直接書き込む）
 const ROSTER_SUMMARY_NAME_COL = 16; // P列
-const ROSTER_SUMMARY_START_ROW = 5;
+const ROSTER_SUMMARY_START_ROW = 4;
 const ROSTER_SUMMARY_MAX_ROWS = 8;
 
 // カレンダー内で「その月に存在しない日」に使う背景色（テンプレートの黒塗りに合わせる）
@@ -138,6 +141,11 @@ const MAX_CONSECUTIVE_OFF_DAYS = 1;
 // 同じスタッフを連続で勤務させてよい日数の上限（これを超える手前で公休を優先的に差し込む）
 const MAX_CONSECUTIVE_WORK_DAYS = 5;
 
+// 1日あたり最低限出勤しているべき人数（ワンオペ防止のハード制約。例: 4人配属で3人が同じ日に
+// 休むと1人勤務になってしまうケースを防ぐ）。資格/ピラティスカバレッジと同じ扱いで、通常は必ず
+// 守るが、連勤解消の最終手段でどうしても他に方法が無い場合にのみ上書きを許容する。
+const MIN_WORKING_STAFF_PER_DAY = 2;
+
 // 「実行用」シート名（スマホ/iPad向け）。カスタムメニューの代わりに、このシート上の図形(ボタン)に
 // スクリプトを割り当てて実行できるようにするための入力欄・結果欄のセル位置。
 const RUN_SHEET_NAME = '実行用';
@@ -145,21 +153,27 @@ const RUN_CREATE_YEAR_CELL = 'B4';
 const RUN_CREATE_MONTH_CELL = 'B5';
 const RUN_CREATE_QUOTA_CELL = 'B6';
 const RUN_CREATE_RESULT_CELL = 'B9';
-const RUN_FILL_TARGET_CELL = 'B13';
-const RUN_FILL_QUOTA_CELL = 'B14';
-const RUN_FILL_RESULT_CELL = 'B17';
+const RUN_FILL_TARGET_CELL = 'B14';
+const RUN_FILL_QUOTA_CELL = 'B15';
+const RUN_FILL_RESULT_CELL = 'B18';
 
 /** ===== メニュー ===== */
+// 日常運用（月次シート作成・公休自動入力）と、初期設定・不具合対応用のメニューを分けて、
+// 毎月の操作と一度きりの操作が混ざって迷わないようにしている。
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('休暇シート自動化')
+  const ui = SpreadsheetApp.getUi();
+
+  const setupMenu = ui
+    .createMenu('初期設定・メンテナンス')
+    .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
+    .addItem('行事欄をテンプレートに追加（初回のみ）', 'insertEventRowIntoTemplate')
+    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate');
+
+  ui.createMenu('休暇シート自動化')
     .addItem('① 月次シートを作成', 'createMonthlySheets')
     .addItem('② 公休を自動入力（このシート）', 'autoFillRegularHolidays')
     .addSeparator()
-    .addItem('スタッフマスターの雛形を作成', 'createStaffMasterTemplate')
-    .addItem('行事欄をテンプレートに追加（初回のみ）', 'insertEventRowIntoTemplate')
-    .addSeparator()
-    .addItem('実行用シートを作成（スマホ/iPad向け・初回のみ）', 'createRunSheetTemplate')
+    .addSubMenu(setupMenu)
     .addToUi();
 }
 
@@ -272,25 +286,52 @@ function createMonthlySheetCore(ss, year, month, quota) {
   return { ok: true, message: completionMsg };
 }
 
-// P列(名前)にスタッフ名を記載する（Q列は既存のCOUNTIF式が自動で日数を数える）。
+// P列(名前)・Q列(休暇数)へ書き込む。名前ごとにQ列へCOUNTIF式(そのカレンダー範囲内での
+// 出現回数)を書き込むことで、常にダブルチェックとして機能するようにする。
+// 以前はQ列を手動作成済みのCOUNTIF式に頼っていたが、原本テンプレートによってはスタッフの
+// 人数分だけ数式が用意されておらず（後からスタッフを追加すると数式が無い行が空欄のままになる）、
+// 人数が増減しても必ず全員ぶんの数式が入るよう、スクリプト側で都度書き込む方式に変更した。
 // P/Q欄に入りきらなかったスタッフ名の配列を返す（入りきった場合は空配列）
 function writeRosterSummary(sheet, names) {
   const range = sheet.getRange(
     ROSTER_SUMMARY_START_ROW,
     ROSTER_SUMMARY_NAME_COL,
     ROSTER_SUMMARY_MAX_ROWS,
-    1
+    2
   );
   range.clearContent();
 
   const toWrite = names.slice(0, ROSTER_SUMMARY_MAX_ROWS);
+  const nameColLetter = columnToLetter(ROSTER_SUMMARY_NAME_COL);
+  const calendarRange = `$A$${DATE_ROWS[0]}:$N$${CALENDAR_BOTTOM_ROW}`;
+  toWrite.forEach((name, i) => {
+    const row = ROSTER_SUMMARY_START_ROW + i;
+    sheet.getRange(row, ROSTER_SUMMARY_NAME_COL).setValue(name);
+    sheet.getRange(row, ROSTER_SUMMARY_NAME_COL + 1).setFormula(`=COUNTIF(${calendarRange},${nameColLetter}${row})`);
+  });
+
+  // 原本テンプレートの手動の配置設定は、最初に作った人数ぶんしか用意されていないことがあるため
+  // (追加したスタッフの行だけ中央揃えのまま残るなど)、実際に書き込んだ行数ぶんは名前列の左揃えを
+  // 統一する。ただし枠線は原本テンプレートの見た目をそのまま活かすため、スクリプト側では変更しない
   if (toWrite.length) {
     sheet
       .getRange(ROSTER_SUMMARY_START_ROW, ROSTER_SUMMARY_NAME_COL, toWrite.length, 1)
-      .setValues(toWrite.map((n) => [n]));
+      .setHorizontalAlignment('left');
   }
 
   return names.slice(ROSTER_SUMMARY_MAX_ROWS);
+}
+
+// 列番号(1始まり)をスプレッドシートの列文字(A, B, ..., P, ...)に変換する
+function columnToLetter(col) {
+  let letter = '';
+  let n = col;
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    letter = String.fromCharCode(65 + rem) + letter;
+    n = Math.floor((n - 1) / 26);
+  }
+  return letter;
 }
 
 // 「取得可能」メモ欄（QUOTA_NOTE_CELL）の末尾の数値から、今月の公休数を読み取る
@@ -310,35 +351,69 @@ function clearCalendarNames(sheet) {
   });
 }
 
+// 祝日ICSフィードの生テキストをキャッシュするためのキー・保持時間（CacheServiceの上限＝6時間）
+const HOLIDAY_ICS_CACHE_KEY = 'holiday_ics_text';
+const HOLIDAY_ICS_CACHE_SECONDS = 6 * 60 * 60;
+
+// 祝日ICSフィードの生テキストを取得する。スクリプトキャッシュにあればそれを使い、外部アクセスを
+// 減らす（同じセッション内で何度も月次シートを作るような操作でも、毎回は取得しに行かない）。
+// 429(レート制限)を受け取った場合は少し待って数回リトライする。
+// 戻り値: { text: string|null, error: string|null }
+function fetchHolidayIcsText() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get(HOLIDAY_ICS_CACHE_KEY);
+  if (cached) return { text: cached, error: null };
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = UrlFetchApp.fetch(HOLIDAY_ICS_URL, { muteHttpExceptions: true });
+      const code = res.getResponseCode();
+      if (code === 200) {
+        const text = res.getContentText();
+        try {
+          cache.put(HOLIDAY_ICS_CACHE_KEY, text, HOLIDAY_ICS_CACHE_SECONDS);
+        } catch (e) {
+          // キャッシュへの保存に失敗しても致命的ではないため無視（サイズ上限などの可能性）
+        }
+        return { text, error: null };
+      }
+      if (code === 429 && attempt < 2) {
+        Utilities.sleep(1500 * (attempt + 1)); // レート制限なので少し待ってからリトライ
+        continue;
+      }
+      return {
+        text: null,
+        error: `祝日カレンダーの取得に失敗しました（HTTP ${code}）。祝日の色分けは行われていません。`,
+      };
+    } catch (e) {
+      return {
+        text: null,
+        error: `祝日の取得に失敗しました: ${e}。祝日の色分けは行われていません。`,
+      };
+    }
+  }
+  return { text: null, error: '祝日カレンダーの取得に失敗しました（リトライ上限）。祝日の色分けは行われていません。' };
+}
+
 // 指定した年月の日本の祝日（日にちの数値の集合）を、公開ICSフィードから取得する。
 // 戻り値: { holidays: Set<number>, error: string|null }（取得・解析に失敗した場合は holidays は空、error にメッセージ）
 function getJapaneseHolidays(year, month) {
   const holidays = new Set();
   const monthPrefix = `${year}${('0' + month).slice(-2)}`;
-  try {
-    const res = UrlFetchApp.fetch(HOLIDAY_ICS_URL, { muteHttpExceptions: true });
-    if (res.getResponseCode() !== 200) {
-      return {
-        holidays,
-        error: `祝日カレンダーの取得に失敗しました（HTTP ${res.getResponseCode()}）。祝日の色分けは行われていません。`,
-      };
-    }
-    const text = res.getContentText();
-    const re = /DTSTART;VALUE=DATE:(\d{8})/g;
-    let match;
-    while ((match = re.exec(text)) !== null) {
-      const ymd = match[1];
-      if (ymd.slice(0, 6) === monthPrefix) {
-        holidays.add(parseInt(ymd.slice(6, 8), 10));
-      }
-    }
-    return { holidays, error: null };
-  } catch (e) {
-    return {
-      holidays,
-      error: `祝日の取得に失敗しました: ${e}。祝日の色分けは行われていません。`,
-    };
+  const fetchResult = fetchHolidayIcsText();
+  if (!fetchResult.text) {
+    return { holidays, error: fetchResult.error };
   }
+
+  const re = /DTSTART;VALUE=DATE:(\d{8})/g;
+  let match;
+  while ((match = re.exec(fetchResult.text)) !== null) {
+    const ymd = match[1];
+    if (ymd.slice(0, 6) === monthPrefix) {
+      holidays.add(parseInt(ymd.slice(6, 8), 10));
+    }
+  }
+  return { holidays, error: null };
 }
 
 // 指定した年月の日付をカレンダーに配置（曜日に応じた列に自動配置）。
@@ -843,11 +918,20 @@ function autoFillRegularHolidaysCore(sheet, quota) {
   const directorNames = roster.filter((n) => master[n].director);
   const pilatesNames = roster.filter((n) => master[n].pilates);
 
-  // 資格（柔道整復師/鍼灸師など）とピラティス対応を、同じ「全出勤日で最低1人」のハード制約として
-  // まとめて扱うためのグループ一覧（ピラティスは資格欄とは別の専用列で管理するため、ここで合流させる）
-  const coverageGroups = QUALIFICATIONS.map((q) => ({ label: q, names: qualifiedByQual[q] })).concat([
+  // 資格（柔道整復師/鍼灸師など）とピラティス対応を、「全出勤日で最低1人」の制約として扱うための
+  // グループ一覧（ピラティスは資格欄とは別の専用列で管理するため、ここで合流させる）。
+  // ただし保持者が1人しかいない資格は、その人が休むたびに必ず0人になってしまい、ハード制約として
+  // 扱うと無理な連勤強要や大量の警告を生むだけなので、女性/新患対応と同じ「できるだけ避けるソフト制約」
+  // に格下げする（保持者2人以上の資格だけをハード制約として残す）。
+  const qualityPairs = QUALIFICATIONS.map((q) => ({ label: q, names: qualifiedByQual[q] })).concat([
     { label: 'ピラティス', names: pilatesNames },
   ]);
+  const coverageGroups = qualityPairs.filter(({ names }) => names.length >= 2);
+  const soleCoverageGroups = qualityPairs.filter(({ names }) => names.length === 1);
+  const softGroups = [
+    { label: '女性スタッフ', names: femaleNames },
+    { label: '新患対応スタッフ', names: newPatientNames },
+  ].concat(soleCoverageGroups);
 
   // 院長ルール：月初DIRECTOR_EARLY_WEEK_DAYS日間の休み日数を、希望休の分も含めてカウント
   const directorEarlyWeekCount = {};
@@ -867,17 +951,14 @@ function autoFillRegularHolidaysCore(sheet, quota) {
   days.forEach((day) => {
     const working = roster.filter((n) => !day.filledNames.has(n));
     const reasons = [];
-    coverageGroups.forEach(({ label, names }) => {
+    if (working.length < MIN_WORKING_STAFF_PER_DAY) {
+      reasons.push(`出勤者${working.length}人(ワンオペ)`);
+    }
+    coverageGroups.concat(softGroups).forEach(({ label, names }) => {
       if (names.length > 0 && !working.some((n) => names.includes(n))) {
         reasons.push(`${label}0人`);
       }
     });
-    if (femaleNames.length > 0 && !working.some((n) => femaleNames.includes(n))) {
-      reasons.push('女性スタッフ0人');
-    }
-    if (newPatientNames.length > 0 && !working.some((n) => newPatientNames.includes(n))) {
-      reasons.push('新患対応スタッフ0人');
-    }
     if (reasons.length) existingViolations.push(`${day.date}日(${reasons.join('/')})`);
   });
 
@@ -940,8 +1021,7 @@ function autoFillRegularHolidaysCore(sheet, quota) {
         days,
         roster,
         coverageGroups,
-        femaleNames,
-        newPatientNames,
+        softGroups,
         directorNames,
         directorEarlyWeekCount
       );
@@ -980,7 +1060,8 @@ function autoFillRegularHolidaysCore(sheet, quota) {
     sheet.getRange(w.row, w.col).setValue(w.name).setFontColor('#000000');
   });
 
-  // ダブルチェック用に、P列へスタッフ名を記載（Q列は既存のCOUNTIF式が希望休+自動入力分をまとめて数える）
+  // ダブルチェック用に、P列へスタッフ名を記載（Q列には、希望休+自動入力分をまとめて数える
+  // COUNTIF式をスクリプトが直接書き込む）
   const summaryOverflow = writeRosterSummary(sheet, roster);
 
   const shortages = needs.filter((n) => n.need > 0);
@@ -999,7 +1080,7 @@ function autoFillRegularHolidaysCore(sheet, quota) {
       .join('、')}\n手動で調整してください。`;
   }
   if (existingViolations.length) {
-    msg += `\n\n※希望休の時点で既に女性/新患対応/資格のカバレッジが0人になっている日: ${existingViolations.join('、')}`;
+    msg += `\n\n※希望休の時点で既に最低出勤人数割れ、または女性/新患対応/資格のカバレッジが0人になっている日: ${existingViolations.join('、')}`;
   }
   if (directorWarnings.length) {
     msg += `\n\n※院長ルール（月初${DIRECTOR_EARLY_WEEK_DAYS}日間は公休${DIRECTOR_EARLY_WEEK_MAX}日まで）が希望休の時点で既に超過: ${directorWarnings.join(
@@ -1010,7 +1091,8 @@ function autoFillRegularHolidaysCore(sheet, quota) {
     msg += `\n\n※連勤(${MAX_CONSECUTIVE_WORK_DAYS}日超)の解消に関する警告:\n${streakWarnings.join('\n')}`;
   }
   if (coverageNotes.length) {
-    msg += `\n\n※やむを得ず女性/新患対応のカバレッジが崩れた割り当て:\n${coverageNotes.join('\n')}`;
+    msg += `\n\n※やむを得ずソフト制約（女性/新患対応、または保持者が1人しかいない資格・ピラティス）の` +
+      `カバレッジが0人になった割り当て:\n${coverageNotes.join('\n')}`;
   }
   if (consecutiveNotes.length) {
     msg += `\n\n※やむを得ず連休になった割り当て:\n${consecutiveNotes.join('\n')}`;
@@ -1053,6 +1135,14 @@ function hardConstraintReasons(day, staffName, roster, coverageGroups, directorN
   }
 
   const workingNames = roster.filter((n) => !day.filledNames.has(n) && n !== staffName);
+
+  // ワンオペ防止：staffNameも休ませると、その日の出勤者がMIN_WORKING_STAFF_PER_DAY人未満になる場合。
+  // ただしロスター自体がMIN_WORKING_STAFF_PER_DAY人以下（例:2人配属の店舗でMIN=2）の場合は、
+  // 誰にも一切休みを出せなくなってしまう（構造的に満たせない）ため、その場合はこの制約自体を適用しない
+  if (roster.length > MIN_WORKING_STAFF_PER_DAY && workingNames.length < MIN_WORKING_STAFF_PER_DAY) {
+    overridable.push(`最低出勤人数(${MIN_WORKING_STAFF_PER_DAY}人未満)`);
+  }
+
   coverageGroups.forEach(({ label, names }) => {
     if (!names || names.length === 0) return; // ロスターに該当者がいなければ制約なし
     if (!workingNames.some((n) => names.includes(n))) overridable.push(`資格カバレッジ(${label}が0人)`);
@@ -1088,6 +1178,8 @@ function wouldViolateConsecutiveOff(days, dayIndex, staffName) {
 
 // staffName を休みにできる日の中から、資格/ピラティスカバレッジ・院長ルール(ハード制約)を守った上で、
 // 連休(公休の連続)にならない日を最優先候補とし、その中で「その時点で最も休みが少ない日」を優先して選ぶ。
+// softGroups（女性スタッフ・新患対応・保持者1人しかいない資格など）は、0人になる日をできるだけ避ける
+// ソフト制約として扱う（ハード制約ではないので、避けられない場合はそのまま許容する）。
 // 同条件の候補が複数ある場合はランダムに選ぶ（月内でまんべんなく、かつ毎回同じパターンにならないようにするため）。
 // 連休を避けられる候補が1つも無い場合のみ、連休ありも候補に含めて選ぶ（その場合 reasons に「連休になります」が入る）
 function pickDayForStaff(
@@ -1095,8 +1187,7 @@ function pickDayForStaff(
   days,
   roster,
   coverageGroups,
-  femaleNames,
-  newPatientNames,
+  softGroups,
   directorNames,
   directorEarlyWeekCount
 ) {
@@ -1108,12 +1199,11 @@ function pickDayForStaff(
 
     const workingNames = roster.filter((n) => !day.filledNames.has(n) && n !== staffName);
     const reasons = [];
-    if (femaleNames.length > 0 && !workingNames.some((n) => femaleNames.includes(n))) {
-      reasons.push('女性スタッフ0人');
-    }
-    if (newPatientNames.length > 0 && !workingNames.some((n) => newPatientNames.includes(n))) {
-      reasons.push('新患対応スタッフ0人');
-    }
+    softGroups.forEach(({ label, names }) => {
+      if (names.length > 0 && !workingNames.some((n) => names.includes(n))) {
+        reasons.push(`${label}0人`);
+      }
+    });
     const consecutive = wouldViolateConsecutiveOff(days, index, staffName);
     if (consecutive) reasons.push('連休になります');
 
@@ -1134,7 +1224,10 @@ function pickDayForStaff(
   let bestScore = null;
   let bestGroup = [];
   pool.forEach((c) => {
-    // crowdingを最優先、同点なら女性/新患対応のペナルティが小さい方を優先
+    // その日の休み人数が少ない方（＝日ごとの休み人数をできるだけ均等にする）を最優先し、
+    // 同点の場合にのみ、ソフト制約(女性/新患対応/保持者1人しかいない資格など)のペナルティが
+    // 小さい方を優先する。資格/院長/連休/連勤/ワンオペのハード制約は、この時点で候補から
+    // 除外済みなので、ここでの優先順位に関わらず必ず守られる
     const score = c.crowding * 100 + c.penalty;
     if (bestScore === null || score < bestScore) {
       bestScore = score;
@@ -1353,7 +1446,12 @@ function writeRosterNames(sheet, names) {
 
   sheet.getRange(startRow, col, clearRows, 1).clearContent();
   if (names.length) {
-    sheet.getRange(startRow, col, names.length, 1).setValues(names.map((n) => [n]));
+    // 原本テンプレートの手動の配置設定は、最初に作った人数ぶんしか用意されていないことが
+    // あるため（追加したスタッフの行だけ中央揃えのまま残るなど）、必ず左揃えに統一する
+    sheet
+      .getRange(startRow, col, names.length, 1)
+      .setValues(names.map((n) => [n]))
+      .setHorizontalAlignment('left');
   }
   return true;
 }

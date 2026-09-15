@@ -23,10 +23,13 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `hpb-reservation-slot-check` | 予約枠チェック(公開カレンダーのスクレイピング・○✕判定)。**2026-09-03にColabから`scripts/hpb_slot_check.py`+GitHub Actions(毎日13:07 JST)へ移行済みで、Colabノートブックは日常運用では使わない**。Skillはその保守と、結果の読み方の playbook | daily-ops-monitor(日次の結果確認・異常の振り分け=主担当) / implementer(スクレイパー・ワークフロー修正) / salonboard-operator(✕の原因をSalonBoardで確認) |
 | `hpb-ribbon-kpi` | HPBリボンデータ(店舗別PDF)の復号・KPI抽出 → HPB_145店舗KPI Masterへ反映 | implementer(抽出・転記) / measurer(月次KPI更新)。設計は `functions/hpb-ribbon-kpi/` |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
+| `llmo-gemini-survey` | Gemini API調査(LLMO/AI検索露出計測)とダッシュボードへの反映 | analyst(定点観測) / implementer(パイプライン・自動化)。2026-09-09にこのリポジトリ内で新規構築(skill-kanri由来ではない) |
 | `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
-| `hpb-review-blog-check` | 「口コミブログチェック表」の月次集計(各院のHPB公開ページから口コミ投稿総数・★5口コミ数・ブログ数を自動集計しスプレッドシートに反映)。2026-09-09にGitHub Actions化(毎月1日 10:00 JST、`--mode apply`)+Chatwork(マイチャット)への実行結果通知まで実装済み。要: スプレッドシートを書き込み用サービスアカウントに編集者共有(未実施の場合は書き込み失敗) | implementer(スクリプト・院マスタ・ワークフロー保守) |
+| `hpb-review-blog-check` | 「HPB口コミ・ブログチェック」の月次集計(各院のHPB公開ページから口コミ投稿総数・★5口コミ数・口コミ返信数・ブログ数を自動集計し専用スプレッドシートのB〜F列に反映。手動集計との照合はもう行わない、完全AI入力)。2026-09-09にGitHub Actions化(毎月1日 10:00 JST、`--mode apply`)+Chatwork(マイチャット)への実行結果通知まで実装済み、2026-09-11に書き込み先を専用の新シート・B〜F列に切り替え。要: スプレッドシートを書き込み用サービスアカウントに編集者共有(未実施の場合は書き込み失敗) | implementer(スクリプト・院マスタ・ワークフロー保守) |
 | `good-smile-monthly-report` | 「グッド・スマイル 集客レポート」(単一HTML Artifact)の月次更新。CRM集客数・チャネル別推移・HPBリボン(スマイルのみ)・SEO/MEO・スマイルの広告実績(Google PPC/META)・ボトルネック診断を1レポートに統合。ジェネレータは`scripts/good_smile_report_gen.py`+`data/good-smile-report-data.json`(2026-09-09新設。同種の`relax-monthly-report`とは別パイプライン・別Artifact) | smile-marketing-strategist / good-marketing-strategist(分析・示唆出し) |
 | `genai-search-visibility` | Search Consoleの「生成AI機能(ベータ版)」レポート(AI Overviews表示回数)を直営・サンズミライ全店舗分収集・集計する。HPB(HotPepper Beauty)ではなく自社サイトのSearch Consoleが対象で、`hpb-`系Skillとは無関係(命名は当初誤って`hpb-genai-visibility`としてしまい、2026-09-15に訂正)。この指標はSearch Console APIに未対応(2026-09-15確認)でブラウザ操作必須のため、フェーズA(手順・店舗↔プロパティ対応表確定、通常モデル)→フェーズB(全店舗の反復巡回、ローカルセッションをHaikuに切り替えて実行)の2段構成にした点が他Skillと異なる。2026-09-15新設、対応表(`data/genai-search-visibility-properties.json`)・手順(`references/procedure.md`)ともに未確定(draft) | implementer(手順確定・対応表保守・Haikuフェーズの実行) |
+| `shinkyu-staff-check` | あはき柔整プラン5院に女性の鍼灸有資格者が在籍しているかの月次確認。HPB「雰囲気・メニューなど」の「女性鍼灸師在籍」バナーの出し下げ判断に使う。名簿が写真込みの巨大xlsxでテキスト抽出が旧版を返すため、**ブラウザで開いて顔写真ごと目視**する方式(要ローカルPC) | salonboard-operator(確認とバナー取り下げ) |
+| `hpb-ahaki-blog-rotation` | ライトプラン・あはき柔整プラン並行運用5院の、あはき柔整側ブログ投稿ローテーション。郡山若葉町鍼灸接骨院の投稿から精査した鍼灸専用テンプレート8種を店舗別に自動で差し替え、`hpb-salonboard-update`経由で投稿する(2026-09-12新設、ブログ投稿UIの実クリック手順は未検証)。 | salonboard-operator(投稿の実行、要ローカルのログイン済みChrome) |
 
 `kpi-aggregation`は`.claude/skills/`配下にSkillフォルダを新設せず、既存の
 `functions/kpi-aggregation/CLAUDE.md`(実装は`scripts/kpi_aggregate.py`・
