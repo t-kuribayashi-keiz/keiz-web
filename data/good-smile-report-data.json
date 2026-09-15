@@ -1,0 +1,3359 @@
+{
+  "_meta": {
+    "as_of": "2026年08月号",
+    "note": "このファイルは月次で上書きする「その時点の実データ」。スキーマ・各フィールドの取得元は .claude/skills/good-smile-monthly-report/SKILL.md を参照。新しい月号を反映するときは、このファイル全体を作り直すのではなく、各セクションの配列に当該月のデータ点を追記する(過去月を書き換えない・欠損月を推測で埋めない)。"
+  },
+  "months_order": [
+    "2025年08月号", 
+    "2025年09月号", 
+    "2025年10月号", 
+    "2025年11月号", 
+    "2025年12月号", 
+    "2026年01月号", 
+    "2026年02月号", 
+    "2026年03月号", 
+    "2026年04月号", 
+    "2026年05月号", 
+    "2026年06月号", 
+    "2026年07月号", 
+    "2026年08月号"
+  ], 
+  "crm_months": [
+    1, 
+    2, 
+    3, 
+    4, 
+    5, 
+    6, 
+    7, 
+    8
+  ], 
+  "smile": {
+    "bars": [
+      {
+        "id": "smile-nakamozu", 
+        "name": "山本接骨院 なかもず院", 
+        "hp": 10, 
+        "hpb": 8
+      }, 
+      {
+        "id": "smile-sakaishi", 
+        "name": "山本接骨院 さかいし院", 
+        "hp": 8, 
+        "hpb": 8
+      }, 
+      {
+        "id": "smile-izumigaoka", 
+        "name": "すまいる鍼灸接骨院 泉が丘院", 
+        "hp": 16, 
+        "hpb": 0
+      }, 
+      {
+        "id": "smile-kishiwada", 
+        "name": "岸和田まるまる針灸接骨院", 
+        "hp": 15, 
+        "hpb": 0
+      }, 
+      {
+        "id": "smile-kongou", 
+        "name": "金剛まるまる針灸整骨院", 
+        "hp": 13, 
+        "hpb": 1
+      }, 
+      {
+        "id": "smile-nagayoshi", 
+        "name": "すまいる鍼灸接骨院 ながよし院", 
+        "hp": 10, 
+        "hpb": 4
+      }, 
+      {
+        "id": "smile-rokkomichi", 
+        "name": "すまいる針灸接骨院 六甲道院", 
+        "hp": 8, 
+        "hpb": 4
+      }, 
+      {
+        "id": "smile-konanyamate", 
+        "name": "すまいる針灸接骨院 甲南山手院", 
+        "hp": 2, 
+        "hpb": 5
+      }, 
+      {
+        "id": "smile-otori", 
+        "name": "山本接骨院 おおとり院", 
+        "hp": 6, 
+        "hpb": 0
+      }, 
+      {
+        "id": "smile-kitanoda", 
+        "name": "すまいる針灸接骨院 きたのだ院", 
+        "hp": 6, 
+        "hpb": 0
+      }, 
+      {
+        "id": "smile-haruki", 
+        "name": "すまいる針灸接骨院 春木院", 
+        "hp": 4, 
+        "hpb": 1
+      }
+    ], 
+    "channel_rows": [
+      {
+        "id": "smile-nakamozu", 
+        "name": "山本接骨院 なかもず院", 
+        "channels": {
+          "HP": 10, 
+          "Google": 0, 
+          "メタ広告": 2, 
+          "エキテン": 0, 
+          "HPB": 8, 
+          "紹介": 6, 
+          "看板": 0, 
+          "通りがかり": 2, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 32
+      }, 
+      {
+        "id": "smile-sakaishi", 
+        "name": "山本接骨院 さかいし院", 
+        "channels": {
+          "HP": 8, 
+          "Google": 0, 
+          "メタ広告": 1, 
+          "エキテン": 0, 
+          "HPB": 8, 
+          "紹介": 1, 
+          "看板": 0, 
+          "通りがかり": 1, 
+          "近いから": 7, 
+          "評判": 1, 
+          "ちらし": 0
+        }, 
+        "total": 27
+      }, 
+      {
+        "id": "smile-otori", 
+        "name": "山本接骨院 おおとり院", 
+        "channels": {
+          "HP": 6, 
+          "Google": 1, 
+          "メタ広告": 2, 
+          "エキテン": 0, 
+          "HPB": 0, 
+          "紹介": 0, 
+          "看板": 0, 
+          "通りがかり": 0, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 13
+      }, 
+      {
+        "id": "smile-kongou", 
+        "name": "金剛まるまる針灸整骨院", 
+        "channels": {
+          "HP": 13, 
+          "Google": 3, 
+          "メタ広告": 2, 
+          "エキテン": 1, 
+          "HPB": 1, 
+          "紹介": 2, 
+          "看板": 0, 
+          "通りがかり": 0, 
+          "近いから": 10, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 32
+      }, 
+      {
+        "id": "smile-kishiwada", 
+        "name": "岸和田まるまる針灸接骨院", 
+        "channels": {
+          "HP": 15, 
+          "Google": 0, 
+          "メタ広告": 10, 
+          "エキテン": 0, 
+          "HPB": 0, 
+          "紹介": 6, 
+          "看板": 0, 
+          "通りがかり": 2, 
+          "近いから": 7, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 40
+      }, 
+      {
+        "id": "smile-izumigaoka", 
+        "name": "すまいる鍼灸接骨院 泉が丘院", 
+        "channels": {
+          "HP": 16, 
+          "Google": 0, 
+          "メタ広告": 0, 
+          "エキテン": 0, 
+          "HPB": 0, 
+          "紹介": 0, 
+          "看板": 0, 
+          "通りがかり": 4, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 24
+      }, 
+      {
+        "id": "smile-nagayoshi", 
+        "name": "すまいる鍼灸接骨院 ながよし院", 
+        "channels": {
+          "HP": 10, 
+          "Google": 2, 
+          "メタ広告": 0, 
+          "エキテン": 0, 
+          "HPB": 4, 
+          "紹介": 7, 
+          "看板": 0, 
+          "通りがかり": 0, 
+          "近いから": 8, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 31
+      }, 
+      {
+        "id": "smile-rokkomichi", 
+        "name": "すまいる針灸接骨院 六甲道院", 
+        "channels": {
+          "HP": 8, 
+          "Google": 0, 
+          "メタ広告": 0, 
+          "エキテン": 0, 
+          "HPB": 4, 
+          "紹介": 3, 
+          "看板": 0, 
+          "通りがかり": 5, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 8
+        }, 
+        "total": 32
+      }, 
+      {
+        "id": "smile-haruki", 
+        "name": "すまいる針灸接骨院 春木院", 
+        "channels": {
+          "HP": 4, 
+          "Google": 0, 
+          "メタ広告": 0, 
+          "エキテン": 1, 
+          "HPB": 1, 
+          "紹介": 2, 
+          "看板": 0, 
+          "通りがかり": 1, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 0
+        }, 
+        "total": 13
+      }, 
+      {
+        "id": "smile-konanyamate", 
+        "name": "すまいる針灸接骨院 甲南山手院", 
+        "channels": {
+          "HP": 2, 
+          "Google": 3, 
+          "メタ広告": 6, 
+          "エキテン": 0, 
+          "HPB": 5, 
+          "紹介": 7, 
+          "看板": 0, 
+          "通りがかり": 6, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 5
+        }, 
+        "total": 38
+      }, 
+      {
+        "id": "smile-kitanoda", 
+        "name": "すまいる針灸接骨院 きたのだ院", 
+        "channels": {
+          "HP": 6, 
+          "Google": 0, 
+          "メタ広告": 1, 
+          "エキテン": 0, 
+          "HPB": 0, 
+          "紹介": 5, 
+          "看板": 0, 
+          "通りがかり": 3, 
+          "近いから": 4, 
+          "評判": 0, 
+          "ちらし": 1
+        }, 
+        "total": 20
+      }
+    ], 
+    "aug_total": 302, 
+    "aug_hpb": 31, 
+    "n_stores": 11, 
+    "per_store_total": 27.5, 
+    "per_store_hpb": 2.8, 
+    "month_series": [
+      {
+        "month": 1, 
+        "total": 226, 
+        "n": 11, 
+        "per_store": 20.55
+      }, 
+      {
+        "month": 2, 
+        "total": 213, 
+        "n": 11, 
+        "per_store": 19.36
+      }, 
+      {
+        "month": 3, 
+        "total": 256, 
+        "n": 11, 
+        "per_store": 23.27
+      }, 
+      {
+        "month": 4, 
+        "total": 266, 
+        "n": 11, 
+        "per_store": 24.18
+      }, 
+      {
+        "month": 5, 
+        "total": 317, 
+        "n": 11, 
+        "per_store": 28.82
+      }, 
+      {
+        "month": 6, 
+        "total": 334, 
+        "n": 11, 
+        "per_store": 30.36
+      }, 
+      {
+        "month": 7, 
+        "total": 309, 
+        "n": 11, 
+        "per_store": 28.09
+      }, 
+      {
+        "month": 8, 
+        "total": 300, 
+        "n": 11, 
+        "per_store": 27.27
+      }
+    ], 
+    "seo_meo": [
+      {
+        "id": "smile-nakamozu", 
+        "name": "山本接骨院 なかもず院", 
+        "seo": {
+          "整骨院": 3, 
+          "整体": 6, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 15, 
+          "整体": null, 
+          "腰痛": null, 
+          "肩こり": null, 
+          "骨盤矯正": null
+        }
+      }, 
+      {
+        "id": "smile-otori", 
+        "name": "やまもと鍼灸接骨院 おおとり院", 
+        "seo": {
+          "整骨院": 4, 
+          "整体": 2, 
+          "腰痛": 1, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 9, 
+          "整体": 9, 
+          "腰痛": 11, 
+          "肩こり": null, 
+          "骨盤矯正": 9
+        }
+      }, 
+      {
+        "id": "smile-sakaishi", 
+        "name": "やまもと鍼灸接骨院 さかいし院", 
+        "seo": {
+          "整骨院": 25, 
+          "整体": null, 
+          "腰痛": null, 
+          "肩こり": 8, 
+          "骨盤矯正": null
+        }, 
+        "meo": {
+          "整骨院": 5, 
+          "整体": 11, 
+          "腰痛": null, 
+          "肩こり": null, 
+          "骨盤矯正": null
+        }
+      }, 
+      {
+        "id": "smile-nagayoshi", 
+        "name": "すまいる鍼灸接骨院 ながよし院", 
+        "seo": {
+          "整骨院": 3, 
+          "整体": 2, 
+          "腰痛": 2, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 1, 
+          "整体": 5, 
+          "腰痛": 6, 
+          "肩こり": 6, 
+          "骨盤矯正": 2
+        }
+      }, 
+      {
+        "id": "smile-rokkomichi", 
+        "name": "すまいる針灸接骨院 六甲道院", 
+        "seo": {
+          "整骨院": 11, 
+          "整体": 11, 
+          "腰痛": 12, 
+          "肩こり": 12, 
+          "骨盤矯正": 5
+        }, 
+        "meo": {
+          "整骨院": 5, 
+          "整体": 8, 
+          "腰痛": 7, 
+          "肩こり": 11, 
+          "骨盤矯正": 7
+        }
+      }, 
+      {
+        "id": "smile-konanyamate", 
+        "name": "すまいる針灸接骨院 甲南山手院", 
+        "seo": {
+          "整骨院": 2, 
+          "整体": 3, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 2, 
+          "整体": 3, 
+          "腰痛": 4, 
+          "肩こり": 1, 
+          "骨盤矯正": 3
+        }
+      }, 
+      {
+        "id": "smile-haruki", 
+        "name": "すまいる針灸接骨院 春木院", 
+        "seo": {
+          "整骨院": 2, 
+          "整体": 1, 
+          "腰痛": 2, 
+          "肩こり": 1, 
+          "骨盤矯正": 1
+        }, 
+        "meo": {
+          "整骨院": 1, 
+          "整体": 5, 
+          "腰痛": 6, 
+          "肩こり": 6, 
+          "骨盤矯正": 2
+        }
+      }, 
+      {
+        "id": "smile-kitanoda", 
+        "name": "すまいる針灸接骨院 きたのだ院", 
+        "seo": {
+          "整骨院": 6, 
+          "整体": 4, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 4
+        }, 
+        "meo": {
+          "整骨院": 3, 
+          "整体": 3, 
+          "腰痛": 4, 
+          "肩こり": null, 
+          "骨盤矯正": null
+        }
+      }, 
+      {
+        "id": "smile-izumigaoka", 
+        "name": "すまいる鍼灸接骨院 泉が丘院", 
+        "seo": {
+          "整骨院": 9, 
+          "整体": 4, 
+          "腰痛": 2, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 1, 
+          "整体": 2, 
+          "腰痛": 2, 
+          "肩こり": 4, 
+          "骨盤矯正": 1
+        }
+      }, 
+      {
+        "id": "smile-kishiwada", 
+        "name": "岸和田まるまる針灸接骨院", 
+        "seo": {
+          "整骨院": 3, 
+          "整体": 2, 
+          "腰痛": 2, 
+          "肩こり": 2, 
+          "骨盤矯正": 3
+        }, 
+        "meo": {
+          "整骨院": 2, 
+          "整体": 3, 
+          "腰痛": 2, 
+          "肩こり": 3, 
+          "骨盤矯正": 2
+        }
+      }, 
+      {
+        "id": "smile-kongou", 
+        "name": "金剛まるまる針灸整骨院", 
+        "seo": {
+          "整骨院": 1, 
+          "整体": 2, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": null, 
+          "整体": null, 
+          "腰痛": null, 
+          "肩こり": null, 
+          "骨盤矯正": null
+        }
+      }
+    ], 
+    "ribbon_avg_series": [
+      {
+        "month": "2025年08月号", 
+        "pv_self": 581.8, 
+        "pv_area": 2183.2, 
+        "cvr_self": 49.82, 
+        "cvr_area": 49.68, 
+        "acr_self": 4.42, 
+        "acr_area": 9.52, 
+        "n": 5
+      }, 
+      {
+        "month": "2025年09月号", 
+        "pv_self": 589.8, 
+        "pv_area": 2224.8, 
+        "cvr_self": 48.06, 
+        "cvr_area": 48.1, 
+        "acr_self": 3.32, 
+        "acr_area": 9.42, 
+        "n": 5
+      }, 
+      {
+        "month": "2025年10月号", 
+        "pv_self": 707.2, 
+        "pv_area": 2436.4, 
+        "cvr_self": 42.42, 
+        "cvr_area": 47.66, 
+        "acr_self": 5.28, 
+        "acr_area": 9.66, 
+        "n": 5
+      }, 
+      {
+        "month": "2025年11月号", 
+        "pv_self": 454.6, 
+        "pv_area": 1687.2, 
+        "cvr_self": 41.9, 
+        "cvr_area": 46.32, 
+        "acr_self": 3.48, 
+        "acr_area": 10.12, 
+        "n": 5
+      }, 
+      {
+        "month": "2025年12月号", 
+        "pv_self": 381.2, 
+        "pv_area": 1350.8, 
+        "cvr_self": 46.02, 
+        "cvr_area": 47.26, 
+        "acr_self": 4.7, 
+        "acr_area": 9.62, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年01月号", 
+        "pv_self": 744.2, 
+        "pv_area": 2881.6, 
+        "cvr_self": 46.98, 
+        "cvr_area": 45.5, 
+        "acr_self": 5.28, 
+        "acr_area": 8.94, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年02月号", 
+        "pv_self": 509.0, 
+        "pv_area": 2008.2, 
+        "cvr_self": 53.36, 
+        "cvr_area": 46.58, 
+        "acr_self": 4.38, 
+        "acr_area": 9.16, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年03月号", 
+        "pv_self": 530.2, 
+        "pv_area": 1819.0, 
+        "cvr_self": 41.28, 
+        "cvr_area": 44.16, 
+        "acr_self": 4.78, 
+        "acr_area": 9.14, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年04月号", 
+        "pv_self": 577.4, 
+        "pv_area": 1907.0, 
+        "cvr_self": 51.48, 
+        "cvr_area": 48.36, 
+        "acr_self": 3.24, 
+        "acr_area": 8.72, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年05月号", 
+        "pv_self": 710.0, 
+        "pv_area": 2348.8, 
+        "cvr_self": 55.78, 
+        "cvr_area": 49.18, 
+        "acr_self": 2.14, 
+        "acr_area": 8.76, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年06月号", 
+        "pv_self": 621.0, 
+        "pv_area": 1854.2, 
+        "cvr_self": 61.0, 
+        "cvr_area": 50.62, 
+        "acr_self": 2.38, 
+        "acr_area": 8.2, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年07月号", 
+        "pv_self": 719.6, 
+        "pv_area": 2290.8, 
+        "cvr_self": 66.96, 
+        "cvr_area": 50.22, 
+        "acr_self": 2.54, 
+        "acr_area": 8.18, 
+        "n": 5
+      }, 
+      {
+        "month": "2026年08月号", 
+        "pv_self": 509.8, 
+        "pv_area": 1936.8, 
+        "cvr_self": 66.16, 
+        "cvr_area": 52.46, 
+        "acr_self": 1.88, 
+        "acr_area": 7.66, 
+        "n": 5
+      }
+    ], 
+    "ribbon_by_store": [
+      {
+        "id": "smile-nakamozu", 
+        "name": "山本接骨院 なかもず院", 
+        "series": [
+          {
+            "month": "2025年08月号", 
+            "pv_self": 769.0, 
+            "pv_area": 2521.0, 
+            "cvr_self": 44.9, 
+            "cvr_area": 54.1, 
+            "acr_self": 5.2, 
+            "acr_area": 9.7
+          }, 
+          {
+            "month": "2025年09月号", 
+            "pv_self": 736.0, 
+            "pv_area": 2717.0, 
+            "cvr_self": 47.6, 
+            "cvr_area": 51.9, 
+            "acr_self": 5.1, 
+            "acr_area": 8.5
+          }, 
+          {
+            "month": "2025年10月号", 
+            "pv_self": 873.0, 
+            "pv_area": 2866.0, 
+            "cvr_self": 37.9, 
+            "cvr_area": 49.9, 
+            "acr_self": 6.6, 
+            "acr_area": 9.3
+          }, 
+          {
+            "month": "2025年11月号", 
+            "pv_self": 559.0, 
+            "pv_area": 2025.0, 
+            "cvr_self": 33.3, 
+            "cvr_area": 47.6, 
+            "acr_self": 4.8, 
+            "acr_area": 9.5
+          }, 
+          {
+            "month": "2025年12月号", 
+            "pv_self": 431.0, 
+            "pv_area": 1665.0, 
+            "cvr_self": 43.6, 
+            "cvr_area": 48.5, 
+            "acr_self": 6.9, 
+            "acr_area": 9.0
+          }, 
+          {
+            "month": "2026年01月号", 
+            "pv_self": 793.0, 
+            "pv_area": 3568.0, 
+            "cvr_self": 39.5, 
+            "cvr_area": 44.1, 
+            "acr_self": 7.0, 
+            "acr_area": 8.2
+          }, 
+          {
+            "month": "2026年02月号", 
+            "pv_self": 648.0, 
+            "pv_area": 2562.0, 
+            "cvr_self": 50.9, 
+            "cvr_area": 45.8, 
+            "acr_self": 4.5, 
+            "acr_area": 8.1
+          }, 
+          {
+            "month": "2026年03月号", 
+            "pv_self": 648.0, 
+            "pv_area": 2243.0, 
+            "cvr_self": 44.8, 
+            "cvr_area": 43.9, 
+            "acr_self": 6.6, 
+            "acr_area": 8.6
+          }, 
+          {
+            "month": "2026年04月号", 
+            "pv_self": 584.0, 
+            "pv_area": 2184.0, 
+            "cvr_self": 44.7, 
+            "cvr_area": 48.8, 
+            "acr_self": 3.1, 
+            "acr_area": 8.7
+          }, 
+          {
+            "month": "2026年05月号", 
+            "pv_self": 778.0, 
+            "pv_area": 2701.0, 
+            "cvr_self": 54.4, 
+            "cvr_area": 49.4, 
+            "acr_self": 2.6, 
+            "acr_area": 8.7
+          }, 
+          {
+            "month": "2026年06月号", 
+            "pv_self": 662.0, 
+            "pv_area": 2122.0, 
+            "cvr_self": 61.9, 
+            "cvr_area": 51.6, 
+            "acr_self": 2.2, 
+            "acr_area": 8.2
+          }, 
+          {
+            "month": "2026年07月号", 
+            "pv_self": 828.0, 
+            "pv_area": 2598.0, 
+            "cvr_self": 64.6, 
+            "cvr_area": 51.0, 
+            "acr_self": 2.4, 
+            "acr_area": 8.4
+          }, 
+          {
+            "month": "2026年08月号", 
+            "pv_self": 576.0, 
+            "pv_area": 2368.0, 
+            "cvr_self": 65.1, 
+            "cvr_area": 50.4, 
+            "acr_self": 1.6, 
+            "acr_area": 7.9
+          }
+        ]
+      }, 
+      {
+        "id": "smile-sakaishi", 
+        "name": "やまもと鍼灸接骨院 さかいし院", 
+        "series": [
+          {
+            "month": "2025年08月号", 
+            "pv_self": 464.0, 
+            "pv_area": 2521.0, 
+            "cvr_self": 49.4, 
+            "cvr_area": 54.1, 
+            "acr_self": 4.4, 
+            "acr_area": 9.7
+          }, 
+          {
+            "month": "2025年09月号", 
+            "pv_self": 626.0, 
+            "pv_area": 2717.0, 
+            "cvr_self": 43.0, 
+            "cvr_area": 51.9, 
+            "acr_self": 3.3, 
+            "acr_area": 8.5
+          }, 
+          {
+            "month": "2025年10月号", 
+            "pv_self": 610.0, 
+            "pv_area": 2866.0, 
+            "cvr_self": 43.1, 
+            "cvr_area": 49.9, 
+            "acr_self": 5.7, 
+            "acr_area": 9.3
+          }, 
+          {
+            "month": "2025年11月号", 
+            "pv_self": 435.0, 
+            "pv_area": 2025.0, 
+            "cvr_self": 48.7, 
+            "cvr_area": 47.6, 
+            "acr_self": 1.9, 
+            "acr_area": 9.5
+          }, 
+          {
+            "month": "2025年12月号", 
+            "pv_self": 422.0, 
+            "pv_area": 1665.0, 
+            "cvr_self": 41.7, 
+            "cvr_area": 48.5, 
+            "acr_self": 4.0, 
+            "acr_area": 9.0
+          }, 
+          {
+            "month": "2026年01月号", 
+            "pv_self": 863.0, 
+            "pv_area": 3568.0, 
+            "cvr_self": 38.0, 
+            "cvr_area": 44.1, 
+            "acr_self": 4.6, 
+            "acr_area": 8.2
+          }, 
+          {
+            "month": "2026年02月号", 
+            "pv_self": 500.0, 
+            "pv_area": 2562.0, 
+            "cvr_self": 52.8, 
+            "cvr_area": 45.8, 
+            "acr_self": 1.9, 
+            "acr_area": 8.1
+          }, 
+          {
+            "month": "2026年03月号", 
+            "pv_self": 559.0, 
+            "pv_area": 2243.0, 
+            "cvr_self": 41.1, 
+            "cvr_area": 43.9, 
+            "acr_self": 4.3, 
+            "acr_area": 8.6
+          }, 
+          {
+            "month": "2026年04月号", 
+            "pv_self": 606.0, 
+            "pv_area": 2184.0, 
+            "cvr_self": 48.2, 
+            "cvr_area": 48.8, 
+            "acr_self": 3.1, 
+            "acr_area": 8.7
+          }, 
+          {
+            "month": "2026年05月号", 
+            "pv_self": 723.0, 
+            "pv_area": 2701.0, 
+            "cvr_self": 49.8, 
+            "cvr_area": 49.4, 
+            "acr_self": 2.5, 
+            "acr_area": 8.7
+          }, 
+          {
+            "month": "2026年06月号", 
+            "pv_self": 639.0, 
+            "pv_area": 2122.0, 
+            "cvr_self": 49.9, 
+            "cvr_area": 51.6, 
+            "acr_self": 2.5, 
+            "acr_area": 8.2
+          }, 
+          {
+            "month": "2026年07月号", 
+            "pv_self": 781.0, 
+            "pv_area": 2598.0, 
+            "cvr_self": 57.5, 
+            "cvr_area": 51.0, 
+            "acr_self": 3.3, 
+            "acr_area": 8.4
+          }, 
+          {
+            "month": "2026年08月号", 
+            "pv_self": 523.0, 
+            "pv_area": 2368.0, 
+            "cvr_self": 60.0, 
+            "cvr_area": 50.4, 
+            "acr_self": 1.6, 
+            "acr_area": 7.9
+          }
+        ]
+      }, 
+      {
+        "id": "smile-nagayoshi", 
+        "name": "すまいる鍼灸接骨院 ながよし院", 
+        "series": [
+          {
+            "month": "2025年08月号", 
+            "pv_self": 558.0, 
+            "pv_area": 1996.0, 
+            "cvr_self": 48.9, 
+            "cvr_area": 42.8, 
+            "acr_self": 5.1, 
+            "acr_area": 8.0
+          }, 
+          {
+            "month": "2025年09月号", 
+            "pv_self": 517.0, 
+            "pv_area": 1950.0, 
+            "cvr_self": 64.4, 
+            "cvr_area": 41.3, 
+            "acr_self": 1.5, 
+            "acr_area": 8.5
+          }, 
+          {
+            "month": "2025年10月号", 
+            "pv_self": 723.0, 
+            "pv_area": 1812.0, 
+            "cvr_self": 45.0, 
+            "cvr_area": 44.7, 
+            "acr_self": 8.3, 
+            "acr_area": 8.3
+          }, 
+          {
+            "month": "2025年11月号", 
+            "pv_self": 447.0, 
+            "pv_area": 1306.0, 
+            "cvr_self": 43.6, 
+            "cvr_area": 41.2, 
+            "acr_self": 5.6, 
+            "acr_area": 9.4
+          }, 
+          {
+            "month": "2025年12月号", 
+            "pv_self": 387.0, 
+            "pv_area": 1014.0, 
+            "cvr_self": 50.1, 
+            "cvr_area": 45.1, 
+            "acr_self": 5.7, 
+            "acr_area": 8.5
+          }, 
+          {
+            "month": "2026年01月号", 
+            "pv_self": 748.0, 
+            "pv_area": 2090.0, 
+            "cvr_self": 49.9, 
+            "cvr_area": 43.3, 
+            "acr_self": 6.2, 
+            "acr_area": 8.3
+          }, 
+          {
+            "month": "2026年02月号", 
+            "pv_self": 487.0, 
+            "pv_area": 1423.0, 
+            "cvr_self": 61.8, 
+            "cvr_area": 44.1, 
+            "acr_self": 7.0, 
+            "acr_area": 8.6
+          }, 
+          {
+            "month": "2026年03月号", 
+            "pv_self": 536.0, 
+            "pv_area": 1377.0, 
+            "cvr_self": 41.4, 
+            "cvr_area": 39.8, 
+            "acr_self": 4.5, 
+            "acr_area": 7.9
+          }, 
+          {
+            "month": "2026年04月号", 
+            "pv_self": 592.0, 
+            "pv_area": 1539.0, 
+            "cvr_self": 50.5, 
+            "cvr_area": 42.0, 
+            "acr_self": 3.3, 
+            "acr_area": 8.0
+          }, 
+          {
+            "month": "2026年05月号", 
+            "pv_self": 735.0, 
+            "pv_area": 1816.0, 
+            "cvr_self": 51.3, 
+            "cvr_area": 46.9, 
+            "acr_self": 2.7, 
+            "acr_area": 7.2
+          }, 
+          {
+            "month": "2026年06月号", 
+            "pv_self": 593.0, 
+            "pv_area": 1415.0, 
+            "cvr_self": 58.7, 
+            "cvr_area": 49.7, 
+            "acr_self": 1.7, 
+            "acr_area": 6.4
+          }, 
+          {
+            "month": "2026年07月号", 
+            "pv_self": 741.0, 
+            "pv_area": 1636.0, 
+            "cvr_self": 67.5, 
+            "cvr_area": 49.1, 
+            "acr_self": 3.0, 
+            "acr_area": 6.5
+          }, 
+          {
+            "month": "2026年08月号", 
+            "pv_self": 487.0, 
+            "pv_area": 1242.0, 
+            "cvr_self": 63.2, 
+            "cvr_area": 56.7, 
+            "acr_self": 2.3, 
+            "acr_area": 5.7
+          }
+        ]
+      }, 
+      {
+        "id": "smile-rokkomichi", 
+        "name": "すまいる針灸接骨院 六甲道院", 
+        "series": [
+          {
+            "month": "2025年08月号", 
+            "pv_self": 635.0, 
+            "pv_area": 1939.0, 
+            "cvr_self": 54.3, 
+            "cvr_area": 48.7, 
+            "acr_self": 3.8, 
+            "acr_area": 10.1
+          }, 
+          {
+            "month": "2025年09月号", 
+            "pv_self": 595.0, 
+            "pv_area": 1870.0, 
+            "cvr_self": 44.9, 
+            "cvr_area": 47.7, 
+            "acr_self": 4.1, 
+            "acr_area": 10.8
+          }, 
+          {
+            "month": "2025年10月号", 
+            "pv_self": 768.0, 
+            "pv_area": 2319.0, 
+            "cvr_self": 47.5, 
+            "cvr_area": 46.9, 
+            "acr_self": 3.0, 
+            "acr_area": 10.7
+          }, 
+          {
+            "month": "2025年11月号", 
+            "pv_self": 507.0, 
+            "pv_area": 1540.0, 
+            "cvr_self": 50.7, 
+            "cvr_area": 47.6, 
+            "acr_self": 2.3, 
+            "acr_area": 11.1
+          }, 
+          {
+            "month": "2025年12月号", 
+            "pv_self": 375.0, 
+            "pv_area": 1205.0, 
+            "cvr_self": 46.9, 
+            "cvr_area": 47.1, 
+            "acr_self": 4.0, 
+            "acr_area": 10.8
+          }, 
+          {
+            "month": "2026年01月号", 
+            "pv_self": 764.0, 
+            "pv_area": 2591.0, 
+            "cvr_self": 52.9, 
+            "cvr_area": 48.0, 
+            "acr_self": 4.0, 
+            "acr_area": 10.0
+          }, 
+          {
+            "month": "2026年02月号", 
+            "pv_self": 567.0, 
+            "pv_area": 1747.0, 
+            "cvr_self": 58.2, 
+            "cvr_area": 48.6, 
+            "acr_self": 2.4, 
+            "acr_area": 10.5
+          }, 
+          {
+            "month": "2026年03月号", 
+            "pv_self": 525.0, 
+            "pv_area": 1616.0, 
+            "cvr_self": 35.8, 
+            "cvr_area": 46.6, 
+            "acr_self": 3.7, 
+            "acr_area": 10.3
+          }, 
+          {
+            "month": "2026年04月号", 
+            "pv_self": 595.0, 
+            "pv_area": 1814.0, 
+            "cvr_self": 54.8, 
+            "cvr_area": 51.1, 
+            "acr_self": 3.1, 
+            "acr_area": 9.1
+          }, 
+          {
+            "month": "2026年05月号", 
+            "pv_self": 752.0, 
+            "pv_area": 2263.0, 
+            "cvr_self": 60.1, 
+            "cvr_area": 50.1, 
+            "acr_self": 1.8, 
+            "acr_area": 9.6
+          }, 
+          {
+            "month": "2026年06月号", 
+            "pv_self": 661.0, 
+            "pv_area": 1806.0, 
+            "cvr_self": 67.8, 
+            "cvr_area": 50.1, 
+            "acr_self": 2.5, 
+            "acr_area": 9.1
+          }, 
+          {
+            "month": "2026年07月号", 
+            "pv_self": 671.0, 
+            "pv_area": 2311.0, 
+            "cvr_self": 67.2, 
+            "cvr_area": 50.0, 
+            "acr_self": 2.9, 
+            "acr_area": 8.8
+          }, 
+          {
+            "month": "2026年08月号", 
+            "pv_self": 570.0, 
+            "pv_area": 1853.0, 
+            "cvr_self": 64.6, 
+            "cvr_area": 52.4, 
+            "acr_self": 1.9, 
+            "acr_area": 8.4
+          }
+        ]
+      }, 
+      {
+        "id": "smile-konanyamate", 
+        "name": "すまいる針灸接骨院 甲南山手院", 
+        "series": [
+          {
+            "month": "2025年08月号", 
+            "pv_self": 483.0, 
+            "pv_area": 1939.0, 
+            "cvr_self": 51.6, 
+            "cvr_area": 48.7, 
+            "acr_self": 3.6, 
+            "acr_area": 10.1
+          }, 
+          {
+            "month": "2025年09月号", 
+            "pv_self": 475.0, 
+            "pv_area": 1870.0, 
+            "cvr_self": 40.4, 
+            "cvr_area": 47.7, 
+            "acr_self": 2.6, 
+            "acr_area": 10.8
+          }, 
+          {
+            "month": "2025年10月号", 
+            "pv_self": 562.0, 
+            "pv_area": 2319.0, 
+            "cvr_self": 38.6, 
+            "cvr_area": 46.9, 
+            "acr_self": 2.8, 
+            "acr_area": 10.7
+          }, 
+          {
+            "month": "2025年11月号", 
+            "pv_self": 325.0, 
+            "pv_area": 1540.0, 
+            "cvr_self": 33.2, 
+            "cvr_area": 47.6, 
+            "acr_self": 2.8, 
+            "acr_area": 11.1
+          }, 
+          {
+            "month": "2025年12月号", 
+            "pv_self": 291.0, 
+            "pv_area": 1205.0, 
+            "cvr_self": 47.8, 
+            "cvr_area": 47.1, 
+            "acr_self": 2.9, 
+            "acr_area": 10.8
+          }, 
+          {
+            "month": "2026年01月号", 
+            "pv_self": 553.0, 
+            "pv_area": 2591.0, 
+            "cvr_self": 54.6, 
+            "cvr_area": 48.0, 
+            "acr_self": 4.6, 
+            "acr_area": 10.0
+          }, 
+          {
+            "month": "2026年02月号", 
+            "pv_self": 343.0, 
+            "pv_area": 1747.0, 
+            "cvr_self": 43.1, 
+            "cvr_area": 48.6, 
+            "acr_self": 6.1, 
+            "acr_area": 10.5
+          }, 
+          {
+            "month": "2026年03月号", 
+            "pv_self": 383.0, 
+            "pv_area": 1616.0, 
+            "cvr_self": 43.3, 
+            "cvr_area": 46.6, 
+            "acr_self": 4.8, 
+            "acr_area": 10.3
+          }, 
+          {
+            "month": "2026年04月号", 
+            "pv_self": 510.0, 
+            "pv_area": 1814.0, 
+            "cvr_self": 59.2, 
+            "cvr_area": 51.1, 
+            "acr_self": 3.6, 
+            "acr_area": 9.1
+          }, 
+          {
+            "month": "2026年05月号", 
+            "pv_self": 562.0, 
+            "pv_area": 2263.0, 
+            "cvr_self": 63.3, 
+            "cvr_area": 50.1, 
+            "acr_self": 1.1, 
+            "acr_area": 9.6
+          }, 
+          {
+            "month": "2026年06月号", 
+            "pv_self": 550.0, 
+            "pv_area": 1806.0, 
+            "cvr_self": 66.7, 
+            "cvr_area": 50.1, 
+            "acr_self": 3.0, 
+            "acr_area": 9.1
+          }, 
+          {
+            "month": "2026年07月号", 
+            "pv_self": 577.0, 
+            "pv_area": 2311.0, 
+            "cvr_self": 78.0, 
+            "cvr_area": 50.0, 
+            "acr_self": 1.1, 
+            "acr_area": 8.8
+          }, 
+          {
+            "month": "2026年08月号", 
+            "pv_self": 393.0, 
+            "pv_area": 1853.0, 
+            "cvr_self": 77.9, 
+            "cvr_area": 52.4, 
+            "acr_self": 2.0, 
+            "acr_area": 8.4
+          }
+        ]
+      }
+    ], 
+    "ribbon_aug_index": [
+      {
+        "id": "smile-nakamozu", 
+        "name": "山本接骨院 なかもず院", 
+        "pv_idx": 24.3, 
+        "cvr_idx": 129.2, 
+        "acr_idx": 20.3
+      }, 
+      {
+        "id": "smile-sakaishi", 
+        "name": "やまもと鍼灸接骨院 さかいし院", 
+        "pv_idx": 22.1, 
+        "cvr_idx": 119.0, 
+        "acr_idx": 20.3
+      }, 
+      {
+        "id": "smile-nagayoshi", 
+        "name": "すまいる鍼灸接骨院 ながよし院", 
+        "pv_idx": 39.2, 
+        "cvr_idx": 111.5, 
+        "acr_idx": 40.4
+      }, 
+      {
+        "id": "smile-rokkomichi", 
+        "name": "すまいる針灸接骨院 六甲道院", 
+        "pv_idx": 30.8, 
+        "cvr_idx": 123.3, 
+        "acr_idx": 22.6
+      }, 
+      {
+        "id": "smile-konanyamate", 
+        "name": "すまいる針灸接骨院 甲南山手院", 
+        "pv_idx": 21.2, 
+        "cvr_idx": 148.7, 
+        "acr_idx": 23.8
+      }
+    ], 
+    "hpb_listed_ids": [
+      "smile-konanyamate", 
+      "smile-nagayoshi", 
+      "smile-nakamozu", 
+      "smile-rokkomichi", 
+      "smile-sakaishi"
+    ], 
+    "seo_trend": {
+      "months": [
+        "4月", 
+        "5月", 
+        "6月", 
+        "7月", 
+        "8月"
+      ], 
+      "seo": {
+        "label": "6位外KWの店舗数", 
+        "rows": [
+          {
+            "kw": "整骨院", 
+            "values": [
+              4, 
+              6, 
+              4, 
+              3, 
+              3
+            ], 
+            "mom": 0
+          }, 
+          {
+            "kw": "整体", 
+            "values": [
+              5, 
+              2, 
+              4, 
+              3, 
+              2
+            ], 
+            "mom": -1
+          }, 
+          {
+            "kw": "腰痛", 
+            "values": [
+              4, 
+              3, 
+              3, 
+              1, 
+              2
+            ], 
+            "mom": 1
+          }, 
+          {
+            "kw": "肩こり", 
+            "values": [
+              5, 
+              4, 
+              2, 
+              1, 
+              2
+            ], 
+            "mom": 1
+          }, 
+          {
+            "kw": "骨盤矯正", 
+            "values": [
+              2, 
+              2, 
+              2, 
+              1, 
+              1
+            ], 
+            "mom": 0
+          }
+        ], 
+        "total": {
+          "values": [
+            20, 
+            17, 
+            15, 
+            9, 
+            10
+          ], 
+          "mom": 1
+        }
+      }, 
+      "meo": {
+        "label": "3位外KWの店舗数", 
+        "rows": [
+          {
+            "kw": "整骨院", 
+            "values": [
+              3, 
+              3, 
+              2, 
+              2, 
+              5
+            ], 
+            "mom": 3
+          }, 
+          {
+            "kw": "整体", 
+            "values": [
+              9, 
+              5, 
+              4, 
+              4, 
+              7
+            ], 
+            "mom": 3
+          }, 
+          {
+            "kw": "腰痛", 
+            "values": [
+              9, 
+              7, 
+              6, 
+              8, 
+              8
+            ], 
+            "mom": 0
+          }, 
+          {
+            "kw": "肩こり", 
+            "values": [
+              8, 
+              5, 
+              5, 
+              5, 
+              8
+            ], 
+            "mom": 3
+          }, 
+          {
+            "kw": "骨盤矯正", 
+            "values": [
+              8, 
+              4, 
+              4, 
+              5, 
+              5
+            ], 
+            "mom": 0
+          }
+        ], 
+        "total": {
+          "values": [
+            37, 
+            24, 
+            21, 
+            24, 
+            33
+          ], 
+          "mom": 9
+        }
+      }, 
+      "computed_from_8gatsu": true
+    }, 
+    "ad": {
+      "google_spend": {
+        "y2025": [
+          [
+            6, 
+            36512.6923
+          ], 
+          [
+            7, 
+            34184.3846
+          ], 
+          [
+            8, 
+            42574.3846
+          ], 
+          [
+            9, 
+            44594.4615
+          ], 
+          [
+            10, 
+            33749.5385
+          ], 
+          [
+            11, 
+            43163.6154
+          ], 
+          [
+            12, 
+            44306.3846
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            44216.1538
+          ], 
+          [
+            2, 
+            42585.3846
+          ], 
+          [
+            3, 
+            49049.1538
+          ], 
+          [
+            4, 
+            42751.5385
+          ], 
+          [
+            5, 
+            47723.8182
+          ], 
+          [
+            6, 
+            49975.1818
+          ], 
+          [
+            7, 
+            49199.8182
+          ], 
+          [
+            8, 
+            43421.9091
+          ]
+        ]
+      }, 
+      "google_cv": {
+        "y2025": [
+          [
+            6, 
+            2.4242
+          ], 
+          [
+            7, 
+            1.8742
+          ], 
+          [
+            8, 
+            2.2796
+          ], 
+          [
+            9, 
+            1.9985
+          ], 
+          [
+            10, 
+            2.0396
+          ], 
+          [
+            11, 
+            2.2681
+          ], 
+          [
+            12, 
+            1.1154
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            1.4615
+          ], 
+          [
+            2, 
+            1.8842
+          ], 
+          [
+            3, 
+            2.2692
+          ], 
+          [
+            4, 
+            3.3077
+          ], 
+          [
+            5, 
+            3.9545
+          ], 
+          [
+            6, 
+            3.0891
+          ], 
+          [
+            7, 
+            3.0455
+          ], 
+          [
+            8, 
+            4.1364
+          ]
+        ]
+      }, 
+      "meta_spend": {
+        "y2026": [
+          [
+            6, 
+            47062.5
+          ], 
+          [
+            7, 
+            32785.6
+          ], 
+          [
+            8, 
+            48467.8
+          ]
+        ]
+      }, 
+      "meta_cv": {
+        "y2026": [
+          [
+            6, 
+            4.75
+          ], 
+          [
+            7, 
+            2.2
+          ], 
+          [
+            8, 
+            2.7
+          ]
+        ]
+      }, 
+      "n_stores_note": "1院あたりの値。分母(実施院数)は「1-Google_合計」「2-Meta広告」タブの「担当院数」行(row124)実測値を使用。Google: 13院(2025年6月〜2026年4月、うりわり院・はつしば院の閉院前含む)→11院(2026年5月〜、閉院済み2院を除いた実質稼働数)。2025年4-5月は担当院数が未記録のためグラフから除外(補間していない)。META: 2院(2026年6月)→5院(2026年7月〜)。"
+    }
+  }, 
+  "good": {
+    "bars": [
+      {
+        "id": "good-fuchu", 
+        "name": "姿勢堂 府中整体院", 
+        "hp": 5, 
+        "hpb": 22
+      }, 
+      {
+        "id": "good-miyauchi", 
+        "name": "姿勢堂 宮内整体院", 
+        "hp": 4, 
+        "hpb": 17
+      }, 
+      {
+        "id": "good-danbara", 
+        "name": "姿勢堂 段原整体院", 
+        "hp": 2, 
+        "hpb": 18
+      }, 
+      {
+        "id": "good-jike", 
+        "name": "姿勢堂 寺家整体院", 
+        "hp": 1, 
+        "hpb": 14
+      }, 
+      {
+        "id": "good-gion", 
+        "name": "姿勢堂 祇園鍼灸接骨院", 
+        "hp": 1, 
+        "hpb": 12
+      }, 
+      {
+        "id": "good-saijo", 
+        "name": "姿勢堂 西条整体院", 
+        "hp": 1, 
+        "hpb": 8
+      }, 
+      {
+        "id": "good-kamezaki", 
+        "name": "ひなた整体院", 
+        "hp": 4, 
+        "hpb": 5
+      }
+    ], 
+    "channel_rows": [
+      {
+        "id": "good-miyauchi", 
+        "name": "姿勢堂 宮内整体院", 
+        "channels": {
+          "HP": 4, 
+          "google": 2, 
+          "other_net": 0, 
+          "referral": 2, 
+          "HPB": 17, 
+          "flyer": 0, 
+          "walkin": 5, 
+          "booth": 0, 
+          "other": 1
+        }, 
+        "total": 31
+      }, 
+      {
+        "id": "good-jike", 
+        "name": "姿勢堂 寺家整体院", 
+        "channels": {
+          "HP": 1, 
+          "google": 1, 
+          "other_net": 0, 
+          "referral": 6, 
+          "HPB": 14, 
+          "flyer": 0, 
+          "walkin": 2, 
+          "booth": 0, 
+          "other": 0
+        }, 
+        "total": 24
+      }, 
+      {
+        "id": "good-saijo", 
+        "name": "姿勢堂 西条整体院", 
+        "channels": {
+          "HP": 1, 
+          "google": 1, 
+          "other_net": 0, 
+          "referral": 7, 
+          "HPB": 8, 
+          "flyer": 0, 
+          "walkin": 0, 
+          "booth": 0, 
+          "other": 1
+        }, 
+        "total": 18
+      }, 
+      {
+        "id": "good-danbara", 
+        "name": "姿勢堂 段原整体院", 
+        "channels": {
+          "HP": 2, 
+          "google": 1, 
+          "other_net": 7, 
+          "referral": 1, 
+          "HPB": 18, 
+          "flyer": 0, 
+          "walkin": 10, 
+          "booth": 1, 
+          "other": 2
+        }, 
+        "total": 42
+      }, 
+      {
+        "id": "good-fuchu", 
+        "name": "姿勢堂 府中整体院", 
+        "channels": {
+          "HP": 5, 
+          "google": 0, 
+          "other_net": 0, 
+          "referral": 3, 
+          "HPB": 22, 
+          "flyer": 0, 
+          "walkin": 13, 
+          "booth": 1, 
+          "other": 6
+        }, 
+        "total": 50
+      }, 
+      {
+        "id": "good-gion", 
+        "name": "姿勢堂 祇園鍼灸接骨院", 
+        "channels": {
+          "HP": 1, 
+          "google": 0, 
+          "other_net": 1, 
+          "referral": 6, 
+          "HPB": 12, 
+          "flyer": 1, 
+          "walkin": 10, 
+          "booth": 0, 
+          "other": 1
+        }, 
+        "total": 32
+      }, 
+      {
+        "id": "good-kamezaki", 
+        "name": "ひなた整体院", 
+        "channels": {
+          "HP": 4, 
+          "google": 4, 
+          "other_net": 0, 
+          "referral": 3, 
+          "HPB": 5, 
+          "flyer": 3, 
+          "walkin": 3, 
+          "booth": 0, 
+          "other": 0
+        }, 
+        "total": 22
+      }
+    ], 
+    "aug_total": 219, 
+    "aug_hpb": 96, 
+    "n_stores": 7, 
+    "per_store_total": 31.3, 
+    "per_store_hpb": 13.7, 
+    "month_series": [
+      {
+        "month": 1, 
+        "total": 166, 
+        "n": 7, 
+        "per_store": 23.71
+      }, 
+      {
+        "month": 2, 
+        "total": 171, 
+        "n": 7, 
+        "per_store": 24.43
+      }, 
+      {
+        "month": 3, 
+        "total": 222, 
+        "n": 7, 
+        "per_store": 31.71
+      }, 
+      {
+        "month": 4, 
+        "total": 211, 
+        "n": 7, 
+        "per_store": 30.14
+      }, 
+      {
+        "month": 5, 
+        "total": 299, 
+        "n": 7, 
+        "per_store": 42.71
+      }, 
+      {
+        "month": 6, 
+        "total": 202, 
+        "n": 7, 
+        "per_store": 28.86
+      }, 
+      {
+        "month": 7, 
+        "total": 210, 
+        "n": 7, 
+        "per_store": 30.0
+      }, 
+      {
+        "month": 8, 
+        "total": 211, 
+        "n": 7, 
+        "per_store": 30.14
+      }
+    ], 
+    "seo_meo": [
+      {
+        "id": "good-miyauchi", 
+        "name": "姿勢堂 宮内整体院", 
+        "seo": {
+          "整骨院": 1, 
+          "整体": 4, 
+          "腰痛": 3, 
+          "肩こり": 3, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": 2, 
+          "整体": 1, 
+          "腰痛": 1, 
+          "肩こり": 4, 
+          "骨盤矯正": 1
+        }
+      }, 
+      {
+        "id": "good-jike", 
+        "name": "姿勢堂 寺家整体院", 
+        "seo": {
+          "整骨院": 1, 
+          "整体": 4, 
+          "腰痛": 1, 
+          "肩こり": 2, 
+          "骨盤矯正": 2
+        }, 
+        "meo": {
+          "整骨院": null, 
+          "整体": null, 
+          "腰痛": null, 
+          "肩こり": null, 
+          "骨盤矯正": 2
+        }
+      }, 
+      {
+        "id": "good-saijo", 
+        "name": "姿勢堂 西条整体院", 
+        "seo": {
+          "整骨院": 4, 
+          "整体": 18, 
+          "腰痛": null, 
+          "肩こり": 11, 
+          "骨盤矯正": 15
+        }, 
+        "meo": {
+          "整骨院": 6, 
+          "整体": 12, 
+          "腰痛": 5, 
+          "肩こり": 4, 
+          "骨盤矯正": 9
+        }
+      }, 
+      {
+        "id": "good-danbara", 
+        "name": "姿勢堂 段原整体院", 
+        "seo": {
+          "整骨院": 8, 
+          "整体": 5, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 1
+        }, 
+        "meo": {
+          "整骨院": 1, 
+          "整体": 2, 
+          "腰痛": 2, 
+          "肩こり": 9, 
+          "骨盤矯正": 2
+        }
+      }, 
+      {
+        "id": "good-fuchu", 
+        "name": "姿勢堂 府中整体院", 
+        "seo": {
+          "整骨院": 7, 
+          "整体": 7, 
+          "腰痛": 19, 
+          "肩こり": 9, 
+          "骨盤矯正": 9
+        }, 
+        "meo": {
+          "整骨院": null, 
+          "整体": null, 
+          "腰痛": null, 
+          "肩こり": null, 
+          "骨盤矯正": 4
+        }
+      }, 
+      {
+        "id": "good-gion", 
+        "name": "姿勢堂 祇園鍼灸接骨院", 
+        "seo": {
+          "整骨院": 26, 
+          "整体": 24, 
+          "腰痛": 3, 
+          "肩こり": 10, 
+          "骨盤矯正": 26
+        }, 
+        "meo": {
+          "整骨院": 2, 
+          "整体": 3, 
+          "腰痛": 2, 
+          "肩こり": 2, 
+          "骨盤矯正": 1
+        }
+      }, 
+      {
+        "id": "good-kamezaki", 
+        "name": "ひなた整体院", 
+        "seo": {
+          "整骨院": 9, 
+          "整体": 3, 
+          "腰痛": 3, 
+          "肩こり": 2, 
+          "骨盤矯正": 3
+        }, 
+        "meo": {
+          "整骨院": 2, 
+          "整体": 12, 
+          "腰痛": 3, 
+          "肩こり": 3, 
+          "骨盤矯正": 2
+        }
+      }
+    ], 
+    "seo_trend": {
+      "months": [
+        "4月", 
+        "5月", 
+        "6月", 
+        "7月", 
+        "8月"
+      ], 
+      "computed": true, 
+      "seo": {
+        "label": "6位外KWの店舗数", 
+        "rows": [
+          {
+            "kw": "整骨院", 
+            "values": [
+              5, 
+              3, 
+              4, 
+              3, 
+              4
+            ], 
+            "mom": 1
+          }, 
+          {
+            "kw": "整体", 
+            "values": [
+              3, 
+              4, 
+              2, 
+              3, 
+              3
+            ], 
+            "mom": 0
+          }, 
+          {
+            "kw": "腰痛", 
+            "values": [
+              3, 
+              3, 
+              2, 
+              3, 
+              2
+            ], 
+            "mom": -1
+          }, 
+          {
+            "kw": "肩こり", 
+            "values": [
+              3, 
+              3, 
+              3, 
+              3, 
+              3
+            ], 
+            "mom": 0
+          }, 
+          {
+            "kw": "骨盤矯正", 
+            "values": [
+              3, 
+              3, 
+              3, 
+              3, 
+              3
+            ], 
+            "mom": 0
+          }
+        ], 
+        "total": {
+          "values": [
+            17, 
+            16, 
+            14, 
+            15, 
+            15
+          ], 
+          "mom": 0
+        }
+      }, 
+      "meo": {
+        "label": "3位外KWの店舗数", 
+        "rows": [
+          {
+            "kw": "整骨院", 
+            "values": [
+              1, 
+              1, 
+              2, 
+              2, 
+              3
+            ], 
+            "mom": 1
+          }, 
+          {
+            "kw": "整体", 
+            "values": [
+              2, 
+              3, 
+              3, 
+              2, 
+              4
+            ], 
+            "mom": 2
+          }, 
+          {
+            "kw": "腰痛", 
+            "values": [
+              2, 
+              2, 
+              2, 
+              3, 
+              3
+            ], 
+            "mom": 0
+          }, 
+          {
+            "kw": "肩こり", 
+            "values": [
+              2, 
+              3, 
+              2, 
+              3, 
+              5
+            ], 
+            "mom": 2
+          }, 
+          {
+            "kw": "骨盤矯正", 
+            "values": [
+              0, 
+              0, 
+              0, 
+              0, 
+              2
+            ], 
+            "mom": 2
+          }
+        ], 
+        "total": {
+          "values": [
+            7, 
+            9, 
+            9, 
+            10, 
+            17
+          ], 
+          "mom": 7
+        }
+      }
+    }
+  }, 
+  "channels": {
+    "hp": {
+      "good": {
+        "y2025": [
+          [
+            1, 
+            2.4
+          ], 
+          [
+            2, 
+            3.1
+          ], 
+          [
+            3, 
+            3.0
+          ], 
+          [
+            4, 
+            3.9
+          ], 
+          [
+            5, 
+            2.3
+          ], 
+          [
+            6, 
+            2.6
+          ], 
+          [
+            7, 
+            4.0
+          ], 
+          [
+            8, 
+            4.3
+          ], 
+          [
+            9, 
+            3.3
+          ], 
+          [
+            10, 
+            5.0
+          ], 
+          [
+            11, 
+            4.3
+          ], 
+          [
+            12, 
+            4.1
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            4.7
+          ], 
+          [
+            2, 
+            2.1
+          ], 
+          [
+            3, 
+            2.6
+          ], 
+          [
+            4, 
+            4.9
+          ], 
+          [
+            5, 
+            6.4
+          ], 
+          [
+            6, 
+            4.6
+          ], 
+          [
+            7, 
+            5.0
+          ], 
+          [
+            8, 
+            3.9
+          ]
+        ]
+      }, 
+      "smile": {
+        "y2025": [
+          [
+            1, 
+            4.2
+          ], 
+          [
+            2, 
+            1.9
+          ], 
+          [
+            3, 
+            2.2
+          ], 
+          [
+            4, 
+            3.2
+          ], 
+          [
+            5, 
+            5.1
+          ], 
+          [
+            6, 
+            5.4
+          ], 
+          [
+            7, 
+            5.0
+          ], 
+          [
+            8, 
+            5.2
+          ], 
+          [
+            9, 
+            4.5
+          ], 
+          [
+            10, 
+            3.9
+          ], 
+          [
+            11, 
+            4.4
+          ], 
+          [
+            12, 
+            5.3
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            5.1
+          ], 
+          [
+            2, 
+            6.3
+          ], 
+          [
+            3, 
+            5.7
+          ], 
+          [
+            4, 
+            7.1
+          ], 
+          [
+            5, 
+            8.4
+          ], 
+          [
+            6, 
+            9.1
+          ], 
+          [
+            7, 
+            8.4
+          ], 
+          [
+            8, 
+            12.1
+          ]
+        ]
+      }, 
+      "chokuei": {
+        "y2025": [
+          [
+            1, 
+            11.2
+          ], 
+          [
+            2, 
+            11.2
+          ], 
+          [
+            3, 
+            13.2
+          ], 
+          [
+            4, 
+            15.0
+          ], 
+          [
+            5, 
+            16.6
+          ], 
+          [
+            6, 
+            15.1
+          ], 
+          [
+            7, 
+            14.2
+          ], 
+          [
+            8, 
+            15.2
+          ], 
+          [
+            9, 
+            14.3
+          ], 
+          [
+            10, 
+            13.3
+          ], 
+          [
+            11, 
+            13.3
+          ], 
+          [
+            12, 
+            11.7
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            10.0
+          ], 
+          [
+            2, 
+            9.0
+          ], 
+          [
+            3, 
+            9.0
+          ], 
+          [
+            4, 
+            10.0
+          ], 
+          [
+            5, 
+            14.0
+          ], 
+          [
+            6, 
+            13.0
+          ], 
+          [
+            7, 
+            13.0
+          ], 
+          [
+            8, 
+            14.9
+          ]
+        ]
+      }
+    }, 
+    "hpb": {
+      "good": {
+        "y2025": [
+          [
+            1, 
+            12.9
+          ], 
+          [
+            2, 
+            8.9
+          ], 
+          [
+            3, 
+            9.4
+          ], 
+          [
+            4, 
+            12.1
+          ], 
+          [
+            5, 
+            15.4
+          ], 
+          [
+            6, 
+            13.0
+          ], 
+          [
+            7, 
+            16.4
+          ], 
+          [
+            8, 
+            10.9
+          ], 
+          [
+            9, 
+            13.4
+          ], 
+          [
+            10, 
+            13.7
+          ], 
+          [
+            11, 
+            9.6
+          ], 
+          [
+            12, 
+            11.1
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            8.4
+          ], 
+          [
+            2, 
+            10.7
+          ], 
+          [
+            3, 
+            8.7
+          ], 
+          [
+            4, 
+            10.9
+          ], 
+          [
+            5, 
+            12.1
+          ], 
+          [
+            6, 
+            10.3
+          ], 
+          [
+            7, 
+            11.9
+          ], 
+          [
+            8, 
+            13.7
+          ]
+        ]
+      }, 
+      "smile": {
+        "y2025": [
+          [
+            1, 
+            3.8
+          ], 
+          [
+            2, 
+            6.0
+          ], 
+          [
+            3, 
+            6.7
+          ], 
+          [
+            4, 
+            9.7
+          ], 
+          [
+            5, 
+            10.0
+          ], 
+          [
+            6, 
+            8.3
+          ], 
+          [
+            7, 
+            7.5
+          ], 
+          [
+            8, 
+            9.0
+          ], 
+          [
+            9, 
+            5.2
+          ], 
+          [
+            10, 
+            6.0
+          ], 
+          [
+            11, 
+            3.2
+          ], 
+          [
+            12, 
+            7.7
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            4.8
+          ], 
+          [
+            2, 
+            6.6
+          ], 
+          [
+            3, 
+            5.8
+          ], 
+          [
+            4, 
+            5.3
+          ], 
+          [
+            5, 
+            4.8
+          ], 
+          [
+            6, 
+            8.0
+          ], 
+          [
+            7, 
+            8.8
+          ], 
+          [
+            8, 
+            5.8
+          ]
+        ]
+      }, 
+      "chokuei": {
+        "y2025": [
+          [
+            1, 
+            17.8
+          ], 
+          [
+            2, 
+            18.0
+          ], 
+          [
+            3, 
+            19.5
+          ], 
+          [
+            4, 
+            21.8
+          ], 
+          [
+            5, 
+            24.0
+          ], 
+          [
+            6, 
+            23.5
+          ], 
+          [
+            7, 
+            22.7
+          ], 
+          [
+            8, 
+            25.2
+          ], 
+          [
+            9, 
+            21.7
+          ], 
+          [
+            10, 
+            18.9
+          ], 
+          [
+            11, 
+            15.3
+          ], 
+          [
+            12, 
+            15.1
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            10.0
+          ], 
+          [
+            2, 
+            11.0
+          ], 
+          [
+            3, 
+            12.0
+          ], 
+          [
+            4, 
+            15.0
+          ], 
+          [
+            5, 
+            14.0
+          ], 
+          [
+            6, 
+            13.0
+          ], 
+          [
+            7, 
+            12.0
+          ], 
+          [
+            8, 
+            11.0
+          ]
+        ]
+      }
+    }, 
+    "offline": {
+      "good": {
+        "y2025": [
+          [
+            1, 
+            12.3
+          ], 
+          [
+            2, 
+            11.7
+          ], 
+          [
+            3, 
+            15.3
+          ], 
+          [
+            4, 
+            13.4
+          ], 
+          [
+            5, 
+            21.4
+          ], 
+          [
+            6, 
+            20.1
+          ], 
+          [
+            7, 
+            14.4
+          ], 
+          [
+            8, 
+            20.6
+          ], 
+          [
+            9, 
+            16.9
+          ], 
+          [
+            10, 
+            13.7
+          ], 
+          [
+            11, 
+            13.9
+          ], 
+          [
+            12, 
+            11.9
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            10.6
+          ], 
+          [
+            2, 
+            11.6
+          ], 
+          [
+            3, 
+            20.4
+          ], 
+          [
+            4, 
+            14.4
+          ], 
+          [
+            5, 
+            24.1
+          ], 
+          [
+            6, 
+            14.0
+          ], 
+          [
+            7, 
+            13.1
+          ], 
+          [
+            8, 
+            12.6
+          ]
+        ]
+      }, 
+      "smile": {
+        "y2025": [
+          [
+            1, 
+            18.4
+          ], 
+          [
+            2, 
+            10.2
+          ], 
+          [
+            3, 
+            13.3
+          ], 
+          [
+            4, 
+            14.0
+          ], 
+          [
+            5, 
+            14.1
+          ], 
+          [
+            6, 
+            13.9
+          ], 
+          [
+            7, 
+            14.3
+          ], 
+          [
+            8, 
+            14.0
+          ], 
+          [
+            9, 
+            12.4
+          ], 
+          [
+            10, 
+            14.2
+          ], 
+          [
+            11, 
+            9.5
+          ], 
+          [
+            12, 
+            12.1
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            10.5
+          ], 
+          [
+            2, 
+            7.5
+          ], 
+          [
+            3, 
+            11.3
+          ], 
+          [
+            4, 
+            10.9
+          ], 
+          [
+            5, 
+            13.8
+          ], 
+          [
+            6, 
+            14.3
+          ], 
+          [
+            7, 
+            12.2
+          ], 
+          [
+            8, 
+            12.2
+          ]
+        ]
+      }, 
+      "chokuei": {
+        "y2025": [
+          [
+            1, 
+            8.5
+          ], 
+          [
+            2, 
+            8.3
+          ], 
+          [
+            3, 
+            8.8
+          ], 
+          [
+            4, 
+            11.4
+          ], 
+          [
+            5, 
+            14.1
+          ], 
+          [
+            6, 
+            12.2
+          ], 
+          [
+            7, 
+            11.8
+          ], 
+          [
+            8, 
+            12.2
+          ], 
+          [
+            9, 
+            11.9
+          ], 
+          [
+            10, 
+            10.9
+          ], 
+          [
+            11, 
+            10.1
+          ], 
+          [
+            12, 
+            9.2
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            7.5
+          ], 
+          [
+            2, 
+            7.6
+          ], 
+          [
+            3, 
+            9.1
+          ], 
+          [
+            4, 
+            9.7
+          ], 
+          [
+            5, 
+            12.1
+          ], 
+          [
+            6, 
+            10.4
+          ], 
+          [
+            7, 
+            9.9
+          ]
+        ]
+      }
+    }, 
+    "organic_uu": {
+      "good": {
+        "y2025": [
+          [
+            5, 
+            80.7
+          ], 
+          [
+            6, 
+            74.3
+          ], 
+          [
+            7, 
+            68.0
+          ], 
+          [
+            8, 
+            80.6
+          ], 
+          [
+            9, 
+            73.4
+          ], 
+          [
+            10, 
+            66.9
+          ], 
+          [
+            11, 
+            59.9
+          ], 
+          [
+            12, 
+            57.9
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            60.4
+          ], 
+          [
+            2, 
+            63.9
+          ], 
+          [
+            3, 
+            59.0
+          ], 
+          [
+            4, 
+            71.9
+          ], 
+          [
+            5, 
+            84.0
+          ], 
+          [
+            6, 
+            90.7
+          ], 
+          [
+            7, 
+            78.4
+          ], 
+          [
+            8, 
+            80.4
+          ]
+        ]
+      }, 
+      "smile": {
+        "y2025": [
+          [
+            5, 
+            109.6
+          ], 
+          [
+            6, 
+            97.7
+          ], 
+          [
+            7, 
+            92.7
+          ], 
+          [
+            8, 
+            96.6
+          ], 
+          [
+            9, 
+            95.7
+          ], 
+          [
+            10, 
+            82.7
+          ], 
+          [
+            11, 
+            69.0
+          ], 
+          [
+            12, 
+            60.9
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            58.7
+          ], 
+          [
+            2, 
+            59.5
+          ], 
+          [
+            3, 
+            67.7
+          ], 
+          [
+            4, 
+            70.8
+          ], 
+          [
+            5, 
+            90.6
+          ], 
+          [
+            6, 
+            98.9
+          ], 
+          [
+            7, 
+            90.3
+          ], 
+          [
+            8, 
+            94.2
+          ]
+        ]
+      }, 
+      "chokuei": {
+        "y2025": [], 
+        "y2026": [
+          [
+            1, 
+            99.0
+          ], 
+          [
+            2, 
+            106.0
+          ], 
+          [
+            3, 
+            97.0
+          ], 
+          [
+            4, 
+            122.0
+          ], 
+          [
+            5, 
+            127.0
+          ], 
+          [
+            6, 
+            141.0
+          ], 
+          [
+            7, 
+            135.0
+          ]
+        ]
+      }
+    }, 
+    "organic_cvr": {
+      "good": {
+        "y2025": [
+          [
+            5, 
+            2.75
+          ], 
+          [
+            6, 
+            3.45
+          ], 
+          [
+            7, 
+            5.88
+          ], 
+          [
+            8, 
+            5.32
+          ], 
+          [
+            9, 
+            4.47
+          ], 
+          [
+            10, 
+            7.48
+          ], 
+          [
+            11, 
+            7.14
+          ], 
+          [
+            12, 
+            7.16
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            7.8
+          ], 
+          [
+            2, 
+            3.36
+          ], 
+          [
+            3, 
+            4.35
+          ], 
+          [
+            4, 
+            6.67
+          ], 
+          [
+            5, 
+            7.63
+          ], 
+          [
+            6, 
+            5.04
+          ], 
+          [
+            7, 
+            6.36
+          ]
+        ]
+      }, 
+      "smile": {
+        "y2025": [
+          [
+            5, 
+            2.42
+          ], 
+          [
+            6, 
+            2.93
+          ], 
+          [
+            7, 
+            2.82
+          ], 
+          [
+            8, 
+            2.64
+          ], 
+          [
+            9, 
+            2.23
+          ], 
+          [
+            10, 
+            2.38
+          ], 
+          [
+            11, 
+            3.24
+          ], 
+          [
+            12, 
+            3.13
+          ]
+        ], 
+        "y2026": [
+          [
+            1, 
+            2.76
+          ], 
+          [
+            2, 
+            3.71
+          ], 
+          [
+            3, 
+            3.02
+          ], 
+          [
+            4, 
+            4.12
+          ], 
+          [
+            5, 
+            4.97
+          ], 
+          [
+            6, 
+            4.53
+          ], 
+          [
+            7, 
+            2.78
+          ]
+        ]
+      }, 
+      "chokuei": {
+        "y2025": [], 
+        "y2026": [
+          [
+            1, 
+            4.22
+          ], 
+          [
+            2, 
+            3.7
+          ], 
+          [
+            3, 
+            3.91
+          ], 
+          [
+            4, 
+            3.44
+          ], 
+          [
+            5, 
+            4.46
+          ], 
+          [
+            6, 
+            4.18
+          ]
+        ]
+      }
+    }
+  }, 
+  "chokuei_kansai": {
+    "ids_found": [
+      "chokuei-hattoritenjin", 
+      "chokuei-karasuma", 
+      "chokuei-kawanishinoseguchi", 
+      "chokuei-mikuni", 
+      "chokuei-nijyo", 
+      "chokuei-taniyon", 
+      "chokuei-tenjinbashi"
+    ], 
+    "id_missing": [
+      "chokuei-kitayama"
+    ], 
+    "month_series": [
+      {
+        "month": 1, 
+        "total": 98.0, 
+        "n": 7, 
+        "per_store": 14.0
+      }, 
+      {
+        "month": 2, 
+        "total": 88.0, 
+        "n": 7, 
+        "per_store": 12.57
+      }, 
+      {
+        "month": 3, 
+        "total": 92.0, 
+        "n": 7, 
+        "per_store": 13.14
+      }, 
+      {
+        "month": 4, 
+        "total": 99.0, 
+        "n": 7, 
+        "per_store": 14.14
+      }, 
+      {
+        "month": 5, 
+        "total": 117.0, 
+        "n": 7, 
+        "per_store": 16.71
+      }, 
+      {
+        "month": 6, 
+        "total": 125.0, 
+        "n": 7, 
+        "per_store": 17.86
+      }, 
+      {
+        "month": 7, 
+        "total": 85.0, 
+        "n": 7, 
+        "per_store": 12.14
+      }, 
+      {
+        "month": 8, 
+        "total": 88.0, 
+        "n": 6, 
+        "per_store": 14.67
+      }
+    ], 
+    "ids": [
+      "chokuei-mikuni", 
+      "chokuei-taniyon", 
+      "chokuei-hattoritenjin", 
+      "chokuei-tenjinbashi", 
+      "chokuei-karasuma", 
+      "chokuei-nijyo", 
+      "chokuei-kawanishinoseguchi", 
+      "chokuei-kitayama"
+    ], 
+    "names": [
+      "三国エキナカ接骨院", 
+      "谷町四丁目接骨院", 
+      "服部天神駅前接骨院", 
+      "天神橋三丁目接骨院", 
+      "四条烏丸中央整骨院", 
+      "二条駅前整骨院", 
+      "川西能勢口駅西口接骨院", 
+      "北山駅前接骨院"
+    ]
+  }
+}

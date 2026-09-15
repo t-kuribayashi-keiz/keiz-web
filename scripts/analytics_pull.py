@@ -73,15 +73,42 @@ def pull_ga4(creds, brand: str, month_label: str, stores: set[str] | None = None
         if not property_id:
             print(f"  [プロパティID不明] {store} ({display_name!r})", file=sys.stderr)
             continue
+
+        # 新規ユーザー数(チャネル別)。"newUsers" はGA4 Data APIのgetMetadataに
+        # 載っている正式なapiName(2026-09-07に確認済み。scripts/ga4_metrics_probe.py参照)。
         response = data_api.properties().runReport(
             property=property_id,
             body={
                 "dateRanges": [{"startDate": start, "endDate": end}],
                 "dimensions": [{"name": "sessionDefaultChannelGroup"}],
-                "metrics": [{"name": "sessions"}, {"name": "conversions"}],
+                "metrics": [{"name": "newUsers"}],
             },
         ).execute()
         all_rows.extend(rows_mod.ga4_rows(month_label, store, response))
+
+        # コンバージョンユーザー数(チャネル別)。GA4には「コンバージョンに至った
+        # ユニークユーザー数」という単一の指標apiNameが存在しない(getMetadataに
+        # 出てくるのは"keyEvents"=イベント数のみ)。isKeyEventディメンションで
+        # 絞り込んだ上でactiveUsers(ユニークユーザー数)を取ることで、店舗ごとに
+        # 個別のキーイベント名(電話タップ、WEB予約リンクタップ等)を知らなくても、
+        # 全キーイベントを横断したユニークユーザー数が取れる。
+        # 応答の指標名はAPI上「activeUsers」のままなので、意味を明確にするため
+        # ここで"convertedUsers"に付け替える。
+        conv_response = data_api.properties().runReport(
+            property=property_id,
+            body={
+                "dateRanges": [{"startDate": start, "endDate": end}],
+                "dimensions": [{"name": "sessionDefaultChannelGroup"}],
+                "metrics": [{"name": "activeUsers"}],
+                "dimensionFilter": {
+                    "filter": {"fieldName": "isKeyEvent", "stringFilter": {"value": "true"}},
+                },
+            },
+        ).execute()
+        conv_rows = rows_mod.ga4_rows(month_label, store, conv_response)
+        for row in conv_rows:
+            row["metric"] = "convertedUsers"
+        all_rows.extend(conv_rows)
     return all_rows
 
 

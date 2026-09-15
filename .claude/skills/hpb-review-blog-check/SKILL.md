@@ -72,6 +72,12 @@ E列は基本的に前月タブ(例:「2608月分」)自身のC列の値をそ�
 (テスト実行時など)はこのフォールバックは働かない(テスト用タブは呼び出し側が用意している
 前提のため)。
 
+**GitHub Actionsのログ確認・手動実行を行う前に、必ず`gh auth status`を先に確認すること。**
+未認証(セッション開始直後によくある。認証はセッションスコープでディスクに永続化されない
+— `hpb-reservation-slot-check/references/github-actions-ops.md`で確認済みの挙動と同じ)
+なら、そこで止まって栗林さんに`gh auth login`の実行を依頼する。以前のセッションで
+認証できていたことを前提にしない。
+
 手動で任意の月を再実行・確認したい場合は、GitHub Actionsの「HPB review/blog check (monthly)」
 ワークフローを`workflow_dispatch`で手動実行できる(対象月・mode(apply/report)を指定可能)。
 ローカルで直接実行する場合は以下(Chatwork通知は行われない):
