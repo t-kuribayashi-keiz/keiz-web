@@ -119,20 +119,77 @@ Sprocket / Optimize Next はCSSセレクタで要素を掴んでDOMを書き換�
 場所に差し込まれる)。数字が動かないだけなので「この訴求は効果がなかった」と誤判定し、
 テスト結果自体が汚染される。**CSSセレクタは「契約」として扱う。**
 
-### 実機調査(未実施)
+### 実機調査(2026-09-15実施)
 
-25店舗のWordPress編集をAI化する設計はまだ確定していない。XServerへのSSHが要るため
-**ローカルのClaude Codeセッション**で実施する。確認項目は
-[docs/backlog.md](../../docs/backlog.md)「リラックス WordPress環境の実態調査 ★次にやる」
-に集約:
+25店舗のWordPress編集をAI化する設計の前提として、
+[docs/backlog.md](../../docs/backlog.md)「リラックス WordPress環境の実態調査」の確認事項に
+実際に回答した。**SSHではなく、ローカルのClaude Codeセッションからclaude-in-chrome経由で
+XServerサーバーパネル(ファイルマネージャ)とWP管理画面を直接見て確認した。** 確認したのは
+浜田山店(hamadayama)・阿佐ヶ谷店(asagaya)の2店舗のみで、**25店舗全部を横断確認したわけ
+ではない**点に注意。
 
-- All in One SEO のバージョンと保存先(v3系=`wp_postmeta`、v4系=専用テーブル
-  `wp_aioseo_posts`。**v4だと `wp post meta update` が効かず、更新方法が根本的に変わる**)
-- 25店舗のテーマ構成(完全に別テーマか、同名テーマの中身違いか)
-- `front-page.php` の店舗間差分の大きさ(文言だけか、構造か)
-- WP本体/PHPのバージョン、WP-CLIが使えるか
-- Sprocket / Optimize Next のタグ埋め込み場所と、**掴んでいるCSSセレクタの一覧**
-- WP外の共通ディレクトリの実際のパスと参照方法
+1. **All in One SEO**: バージョン **4.4.0.1**(v4系)。v4は専用テーブル(`wp_aioseo_posts`)を
+   使う設計のため、`wp post meta update` では更新できない前提で設計すること。
+   ※DBテーブルの直接確認(`SHOW TABLES LIKE '%aioseo%'`)は、phpMyAdminがBASIC認証を要求し
+   認証情報の入力はポリシー上代行できないため未実施。バージョン番号からの推定に留まる
+2. **25店舗のテーマ構成**: 「完全に別テーマ」ではなく**「同名テーマ(店舗スラッグ名)の
+   中身違い」**。浜田山店は`wp-content/themes/hamadayama/`、阿佐ヶ谷店は
+   `wp-content/themes/asagaya/`で、ファイル構成(`archive.php`・`author.php`・`cta.php`・
+   `flow.php`・`footer.php`・`functions.php`・`header.php`・`home.php`・`page-*.php`等)は
+   ほぼ同一。店舗ごとに複製されたベーステーマという設計
+3. **フロントページのテンプレート**: **`front-page.php`は存在しない**(backlog記載を訂正)。
+   実際は`home.php`がフロントページ相当を担っている。浜田山店・阿佐ヶ谷店の`home.php`を
+   比較したところ、**DOM構造・div class名は完全に同一**で、差分は
+   (a)画像パス中の店舗スラッグ、(b)WEB予約リンク(`mitsuraku.jp/pm/online/index/...`)の
+   店舗別トークン、の2点のみだった。「文言だけ」というより「共通テンプレートそのもの」
+4. **WP本体・PHP・WP-CLI**:
+   - PHPバージョンは**7.4.33**(サーバーパネルのドメイン一覧で確認。EOL済みの旧バージョン。
+     プラグイン一覧に「お使いのPHPバージョンでは動作しません」という警告が出ているものもあった)
+   - サーバーパネル「SSH設定」は**「現在、SSH設定はありません」**(公開鍵未登録=SSH未開通)。
+     WP-CLIを使うにはSSHの有効化+公開鍵登録が先に必要(未実施。鍵登録はセキュリティ設定の
+     変更にあたるため今回は行っていない)
+   - ただしアカウント直下に`.wp-cli`フォルダが存在しており、WP-CLI自体は環境に
+     インストール済みと見られる(ファイルマネージャで確認)
+5. **Sprocket / Optimize Nextのタグ埋め込み場所とCSSセレクタ**:
+   - 埋め込みは**GTM経由**(`GTM-TB46D23N`・`GTM-5C5H5V3X`の2コンテナ、`G-Z4C81Q20BZ`の
+     gtag.jsも同居)。テーマファイルへの直接ハードコードではない
+   - Sprocketは`assets.v2.sprocket.bz/js/sprocket-jssdk.js`(SDK本体)+
+     `assets.sprocket.bz/config/<サービスID>.json`(設定)+ページごとの`activities_*.js`
+     (個別施策)という構成。浜田山店・阿佐ヶ谷店は共通のサービスID
+     `a61e1373af5e4146a80d4ca520bbf7a8`を使用
+   - 阿佐ヶ谷店トップページで実際に読み込まれていた施策は1つ
+     (`activities_custom_click_relax_tel_btn_sp`=電話ボタンのクリック計測)で、
+     **掴んでいるセレクタは以下の7つ**(実JSファイルの中身から直接確認):
+     `.sp_menuIcon a[href^="tel:"]` / `.telB.btn_tel` / `.spMenu_tel a[href^="tel:"]` /
+     `.footer_access_box .hello_tel a[href^="tel:"]` /
+     `.hello_tel.yoyaku_tel_num a[href^="tel:"]` / `.hd_sp_tel.sp-only` / `.tel2 p.hello_tel`
+   - **これらのクラス名は「契約」として扱い、リファクタで消さないこと。** 他店舗・他ページに
+     別の`activities_*.js`がある可能性が高く、今回確認できたのは1施策・1店舗分のみ
+6. **WP外の共通ディレクトリ**: `public_html/00_relax_kyoutsu/`(ドメイン直下、店舗フォルダと
+   同じ階層)。`banner/`・`images/`・`js/`・`slick/`と`common*.css`(日付・BK付きの
+   バックアップファイルが複数同居しており、バージョン管理されていない素の上書き運用)。
+   各店舗のテーマから`/00_relax_kyoutsu/images/...`のような**絶対パスの相対URL**で直接
+   参照されている(WPメディアライブラリ経由ではない)
+
+### サイト構成についての新しい発見(backlogのチェックリストになかった論点)
+
+- **各店舗フォルダは、共通WordPress本体の中の1テーマではなく、店舗ごとに完全に独立した
+  WordPressインストール**(`wp-config.php`・`wp-admin`・`wp-content`・`wp-includes`一式を
+  各店舗フォルダがそれぞれ持つ)。`public_html`直下にも別のWP一式があり(店舗ではなく
+  本社/旧サイトの可能性、未確認)、これも含めると25店舗+αのWordPressが同一サーバー上に
+  同居している。1つのWPマルチサイトに親子テーマを載せる設計とは前提が異なり、横展開の
+  自動化は「店舗ごとに独立したFTP接続先へ同じ手順を繰り返す」設計にせざるを得ない
+  (relaxリポジトリのREADMEが店舗ごとにFTPアカウント/Environmentを分ける設計にしているのは
+  この実態と整合している)
+- **`asagaya`と`asagaya-g`のように、同じ店舗名+末尾`-g`の「もう1つの完全に独立した
+  WordPress」が複数店舗に存在する**(`asagaya-g`・`chitose-karasuyama-g`・`fkd-g`・
+  `honancho-g`・`umegaoka-g`・`urawa-g`等、ファイルマネージャで確認できただけで6件以上)。
+  `asagaya-g`は`asagaya`と見た目はほぼ同一だが、`<title>`タグの文言が異なる
+  (通常サイト:「リラックス整体 阿佐ヶ谷店｜整体・マッサージ・肩こり・腰痛ならお任せ」/
+  `-g`サイト:「阿佐ヶ谷で整体・マッサージなら「リラックス整体 阿佐ヶ谷店」」)。
+  **用途は未確認**(SEOタイトルのA/BテストかGoogle広告専用LPの可能性を推測しているが
+  裏取りできていない)。25店舗の横展開設計を詰める前に、この`-g`サイトの位置づけ
+  (誰が何のために作ったか、更新が必要なものか)を栗林さんに確認する必要がある
 
 ## 分析環境(構築中)
 
@@ -296,7 +353,12 @@ GA4にもSearch Consoleにもリポジトリにも書き込まない。スコー
 
 ## 既知の課題(未対応)
 
-- リラックスWordPress環境の実機調査が未着手(`docs/backlog.md`「★次にやる」)
+- リラックスWordPress環境の実機調査は2026-09-15に浜田山店・阿佐ヶ谷店の2店舗で実施済み
+  (本ファイル「実機調査」参照)。25店舗全部の横断確認・DBテーブルの直接確認・`-g`サイトの
+  用途確認はまだ残っている
+- relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント作成はポリシー上Claudeが代行できない
+  操作のため未着手。栗林さんご本人がXServerサーバーパネルで作成する必要がある
+  (手順は[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#1-xserver側その店舗専用のftpアカウントを作る)参照)
 - `@claude` マーカー規約の「【WEBマーケ】ケイズ×リラックス」メンバーへの周知が未実施
 - `acquisition_channels` が全店舗で空
 
@@ -307,6 +369,13 @@ GA4にもSearch Consoleにもリポジトリにも書き込まない。スコー
   2026-09-06確認)。GSCも2026-09-07に他店舗と合わせて付与完了・確認済み
 - リラックスがHotPepper Beauty(SalonBoard)に掲載しているか
 - 広告費シート上のリラックスの媒体内訳
-- All in One SEO のバージョン・保存先(v3/v4)、25店舗のテーマ構成の同一性、
-  Sprocket / Optimize Next が実際に掴んでいるCSSセレクタの一覧
 - 店舗の業態区分(百貨店テナント型 vs 路面店)が集客導線に効くか
+- All in One SEOがv4系(=`wp_aioseo_posts`)であることをDBテーブルの直接確認では裏取り
+  できていない(phpMyAdminがBASIC認証を要求し、認証情報の入力はポリシー上代行できないため。
+  バージョン番号からの推定に留まる)
+- 25店舗のテーマ構成・`home.php`の共通性は浜田山店・阿佐ヶ谷店の2店舗でしか確認していない
+  (残り23店舗も同じ設計かは未確認)
+- `-g`付き(`asagaya-g`等)の完全に独立したWordPressサイトの用途(SEOタイトルA/Bテストか
+  Google広告専用LPかは未確認)
+- Sprocketの`activities_*.js`は今回確認できた1施策(電話ボタンクリック計測)以外にも
+  ページ・店舗ごとに存在する可能性が高く、未確認
