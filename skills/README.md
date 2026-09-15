@@ -23,6 +23,7 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `hpb-reservation-slot-check` | 予約枠チェック(公開カレンダーのスクレイピング・○✕判定)。**2026-09-03にColabから`scripts/hpb_slot_check.py`+GitHub Actions(毎日13:07 JST)へ移行済みで、Colabノートブックは日常運用では使わない**。Skillはその保守と、結果の読み方の playbook | daily-ops-monitor(日次の結果確認・異常の振り分け=主担当) / implementer(スクレイパー・ワークフロー修正) / salonboard-operator(✕の原因をSalonBoardで確認) |
 | `hpb-ribbon-kpi` | HPBリボンデータ(店舗別PDF)の復号・KPI抽出 → HPB_145店舗KPI Masterへ反映 | implementer(抽出・転記) / measurer(月次KPI更新)。設計は `functions/hpb-ribbon-kpi/` |
 | `chatwork-integration` | Chatwork APIの読み書き(依頼検知の共通基盤、ブランド非依存) | 全役割の入口。検知後の実作業はsalonboard-operator / implementer等に引き渡す |
+| `llmo-gemini-survey` | Gemini API調査(LLMO/AI検索露出計測)とダッシュボードへの反映 | analyst(定点観測) / implementer(パイプライン・自動化)。2026-09-09にこのリポジトリ内で新規構築(skill-kanri由来ではない) |
 | `kpi-aggregation`(実体は`functions/kpi-aggregation/`) | 直営+サンズミライの月次集客KPI集計(Sheets API + GitHub Actions、Python) | implementer(自動化の保守) |
 | `hpb-review-blog-check` | 「HPB口コミ・ブログチェック」の月次集計(各院のHPB公開ページから口コミ投稿総数・★5口コミ数・口コミ返信数・ブログ数を自動集計し専用スプレッドシートのB〜F列に反映。手動集計との照合はもう行わない、完全AI入力)。2026-09-09にGitHub Actions化(毎月1日 10:00 JST、`--mode apply`)+Chatwork(マイチャット)への実行結果通知まで実装済み、2026-09-11に書き込み先を専用の新シート・B〜F列に切り替え。要: スプレッドシートを書き込み用サービスアカウントに編集者共有(未実施の場合は書き込み失敗) | implementer(スクリプト・院マスタ・ワークフロー保守) |
 | `shinkyu-staff-check` | あはき柔整プラン5院に女性の鍼灸有資格者が在籍しているかの月次確認。HPB「雰囲気・メニューなど」の「女性鍼灸師在籍」バナーの出し下げ判断に使う。名簿が写真込みの巨大xlsxでテキスト抽出が旧版を返すため、**ブラウザで開いて顔写真ごと目視**する方式(要ローカルPC) | salonboard-operator(確認とバナー取り下げ) |
