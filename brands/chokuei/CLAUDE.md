@@ -125,5 +125,7 @@ SEO/MEO/PPC等の集客数・UU数、店舗数)を、Sheets API + GitHub Actions
 
 - SalonBoard/HPBの対象院が直営のうち何院・どの院かの確定リスト
 - `hpb-crm-reconciliation`が直営を対象に含むかどうか
-- GA4・Google Search Console等の分析ツール連携状況(現時点で連携の記録なし)
+- GA4連携状況(現時点で連携の記録なし)。Google Search Consoleはadmin@keizgroup.jpのブラウザ
+  アクセスで連携確認済み(2026-09-15、`genai-search-visibility` Skillのフェーズ Aで確認。
+  API連携(サービスアカウント+ドメイン全体委任)は別途未整備)
 - ドメイン系統(`chiryouin.biz` / `chiryou-in.biz` / `curacion.jp`)の使い分けの理由・経緯

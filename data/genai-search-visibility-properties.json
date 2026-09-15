@@ -1,13 +1,1231 @@
-{
-  "_comment": "genai-search-visibility skill用: 店舗名(clinics.jsonのnameと合わせる) ↔ Google Search Consoleプロパティ(URL)の対応表。フェーズAのパイロット実行で、admin@keizgroup.jpが実際にアクセスできることを1件ずつ確認したものだけをconfirmedとして追加すること。推測で埋めない。",
-  "status": "draft",
-  "scope_note": "対象は暫定でhpb-ribbon-kpiと同じ「Master 140店(直営＋サンズミライ)」。実際の店舗数・リストはフェーズAで確定させる。",
-  "properties": [
-    {
-      "store_name": null,
-      "gsc_property": "https://genki.chiryouin.biz/",
-      "status": "unconfirmed",
-      "note": "2026-09-15、栗林さん提供のスクリーンショットに写っていたプロパティ。合計表示回数=1,073(2026年5月〜9月)、店舗名との対応は未確認。フェーズAで店舗名を確定させること。"
-    }
-  ]
+﻿{
+    "_comment":  "genai-search-visibility skill用: 店舗名(clinics.jsonのnameと合わせる) ↔ Google Search Consoleプロパティ(URL)の対応表。フェーズAのパイロット実行で、admin@keizgroup.jpが実際にアクセスできることを1件ずつ確認したものだけをconfirmedとして追加すること。推測で埋めない。",
+    "status":  "confirmed",
+    "scope_note":  "対象はdata/clinics.jsonのbrand=直営 または サンズミライ、計153店舗(2026-09-15フェーズAで確定。従来「140店」としていたのは概数)。うち147店舗はadmin@keizgroup.jpのGSCプロパティ一覧とclinics.jsonのwebsiteフィールドの自動突合でconfirmed。残り6店舗はGSC上に該当プロパティが見つからずnot_found(要栗林さん確認)。",
+    "properties":  [
+                       {
+                           "store_id":  "sunsmirai-kawachinagano-310",
+                           "store_name":  "弁慶はりきゅう整骨院 河内長野市310号線院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/kawachinagano/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-nishiotsu",
+                           "store_name":  "弁慶はりきゅう整骨院 西大津院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/nishiotsu/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-otsu-ishiyama",
+                           "store_name":  "弁慶はりきゅう整骨院 大津市石山整骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/ishiyama/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-otsu",
+                           "store_name":  "弁慶はりきゅう整骨院 大津市整骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/otsu/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-sakai-mihara",
+                           "store_name":  "堺市美原区整骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/mihara/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-tondabayashi-170",
+                           "store_name":  "弁慶はりきゅう整骨院 富田林市旧170号線院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/tondabayashi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-wakayama-arimoto",
+                           "store_name":  "弁慶はりきゅう整骨院 和歌山市有本院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/arimoto/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-wakayama-higashiguchi",
+                           "store_name":  "和歌山駅東口接骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://wakayama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-hiramatsu-joto",
+                           "store_name":  "ミライ接骨院 ヒラマツ城東店",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://hiramatsu.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-hirakata-nagao",
+                           "store_name":  "あやめ鍼灸整骨院 枚方長尾院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/nagao/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-kawachi-iwafune",
+                           "store_name":  "河内いわふね駅前整骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/iwafune/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-takatsuki",
+                           "store_name":  "ひまわり鍼灸整骨院 高槻院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/takatsuki/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-hirakata-gotenyama",
+                           "store_name":  "おかだ鍼灸整骨院 枚方御殿山院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/gotenyama/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-matsuiyamate",
+                           "store_name":  "たいよう鍼灸整骨院 branch松井山手院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/matsuiyamate/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-fukaebashi",
+                           "store_name":  "たいよう鍼灸整骨院 深江橋院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/fukaebashi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-minami-ibaraki",
+                           "store_name":  "たいよう鍼灸整骨院 南茨木院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/minamiibaraki/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-shinobugaoka",
+                           "store_name":  "忍ヶ丘駅前整骨院",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/shinobugaoka/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "sunsmirai-hirakata-koen",
+                           "store_name":  "たいよう鍼灸整骨院 枚方公園",
+                           "brand":  "サンズミライ",
+                           "gsc_property":  "https://chiryou-in.biz/hirakatakoen/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-motoyawata",
+                           "store_name":  "本八幡駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://motoyawata.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-wakaba",
+                           "store_name":  "わかば整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://wakaba.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-tsuga",
+                           "store_name":  "都賀駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://tsuga.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sakura",
+                           "store_name":  "市川さくら整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/sakura/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-minamikashiwa",
+                           "store_name":  "南柏駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://minamikashiwa.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-genki",
+                           "store_name":  "市川げんき整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://genki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kamagaya",
+                           "store_name":  "鎌ヶ谷西口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kamagaya.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-inagekaigan",
+                           "store_name":  "稲毛海岸中央整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://inagekaigan.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-futawa",
+                           "store_name":  "二和向台駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://futawamukodai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-hatsuishi",
+                           "store_name":  "初石駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://hatsuishi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-tennodai",
+                           "store_name":  "天王台駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://tennodai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kashiwaminamiguchi",
+                           "store_name":  "柏南口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryou-in.biz/kashiwaminami/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-abikoekimae",
+                           "store_name":  "我孫子駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://abikoekimae.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sakuraekimae",
+                           "store_name":  "佐倉駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://sakuraekimae.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nakayama",
+                           "store_name":  "下総中山駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://nakayama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nagareyama",
+                           "store_name":  "南流山駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://nagareyama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shizu",
+                           "store_name":  "佐倉志津整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shizu.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-yachimata",
+                           "store_name":  "八街駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://yachimata.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-lifegarden",
+                           "store_name":  "ライフガーデン茂原整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://lifegarden.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kozu",
+                           "store_name":  "成田公津の杜整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kozu.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shinmatsudo",
+                           "store_name":  "新松戸クラシオン整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shinmatsudo.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-ichikawa",
+                           "store_name":  "市川南口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ichikawaminami.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-narita",
+                           "store_name":  "成田駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://narita.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-makuhari",
+                           "store_name":  "幕張南口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/makuhariminami/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-toyoshiki",
+                           "store_name":  "豊四季北口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://toyoshiki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-owada",
+                           "store_name":  "八千代大和田整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://owada.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ooami",
+                           "store_name":  "大網駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://oami.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-abekawa",
+                           "store_name":  "安倍川駅前総合治療院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://abekawa.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ginowan",
+                           "store_name":  "宜野湾うちどまり整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ginowan.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-hachioji",
+                           "store_name":  "八王子北口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://hachioji.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kotoni",
+                           "store_name":  "琴似駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kotoni.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-okayama",
+                           "store_name":  "岡山駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://okayama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-jujo",
+                           "store_name":  "十条銀座整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://jujo.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-asaka",
+                           "store_name":  "朝霞エキナカ整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://asaka.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nishiogikubo",
+                           "store_name":  "西荻窪中央整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://nishiogikubo.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shinbashi",
+                           "store_name":  "新橋西口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shinbashi.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-mikuni",
+                           "store_name":  "三国エキナカ接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://mikuni.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-taniyon",
+                           "store_name":  "谷町四丁目接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://tanimachi.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-natori",
+                           "store_name":  "名取西口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://natori.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sekiya",
+                           "store_name":  "新潟関屋整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://sekiya.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-machida",
+                           "store_name":  "町田シバヒロ接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://machida.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kamoi",
+                           "store_name":  "鴨居南口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kamoi.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-tateishiekimae",
+                           "store_name":  "立石駅前通り整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://tateishi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-motoyawata",
+                           "store_name":  "本八幡南口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://motoyawata.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ooyama",
+                           "store_name":  "大山駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ooyama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shimoigusa",
+                           "store_name":  "下井草駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shimoigusa.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-motosumiyoshi",
+                           "store_name":  "元住吉ブレーメン通り接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://motosumiyoshi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shinshizuoka",
+                           "store_name":  "新静岡駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://shizuoka.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-rikuzen",
+                           "store_name":  "陸前高砂駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://takasago.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-koiwakuramae",
+                           "store_name":  "小岩蔵前橋通り接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://koiwakuramae.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sapporo",
+                           "store_name":  "札幌北円山接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kitamaruyama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-urasoe",
+                           "store_name":  "浦添宮城接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://urasoe.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-hattoritenjin",
+                           "store_name":  "服部天神駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://hattori.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shimoakatsuka",
+                           "store_name":  "下赤塚北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://shimoakatsuka.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-higashifukai",
+                           "store_name":  "流山東深井接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://higashifukai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kitasenju",
+                           "store_name":  "北千住西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kitasenju.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-hanajiri",
+                           "store_name":  "ハローズ花尻接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://chiryou-in.biz/hanajiri/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-naritamisatodai",
+                           "store_name":  "成田美郷台接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://misatodai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-toyoshikichuo",
+                           "store_name":  "豊四季中央接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/toyoshiki/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-e-kamiitabashi",
+                           "store_name":  "上板橋駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/kamiitabashi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-aja",
+                           "store_name":  "新都心あじゃ接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://aja.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-teraohigashi",
+                           "store_name":  "新潟寺尾東接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://terao.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-e-minamisendai",
+                           "store_name":  "南仙台東口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://minamisendai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ikeshita",
+                           "store_name":  "池下エキナカ接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://ikeshita.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-tomisato",
+                           "store_name":  "成田富里接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://tomisato.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-kitakogane",
+                           "store_name":  "北小金南口駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/kitakogane/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-tenjinbashi",
+                           "store_name":  "天神橋三丁目接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://tenjinbashi.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ijiri",
+                           "store_name":  "井尻駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ijiri.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-imaike",
+                           "store_name":  "今池南接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://imaike.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kurashiki",
+                           "store_name":  "倉敷インター接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kurashiki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nishijin",
+                           "store_name":  "西新中央商店街接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://nishijin.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kodaira",
+                           "store_name":  "小平南口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kodaira.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-umesato",
+                           "store_name":  "梅郷山崎接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://umesato.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-awase",
+                           "store_name":  "沖縄あわせ接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://awase.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kawaguchiekimae",
+                           "store_name":  "川口駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/kawaguchi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-n-funabashi",
+                           "store_name":  "船橋北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://funabashi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-s-asaka",
+                           "store_name":  "朝霞駅南口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/asaka/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kashiwahigashi",
+                           "store_name":  "柏駅東口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kashiwahigashiguchi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-c-kashiwanoha",
+                           "store_name":  "柏の葉キャンパス駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kashiwanoha.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-e-kawama",
+                           "store_name":  "川間駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kawama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kawagoekasumigaseki",
+                           "store_name":  "川越霞ヶ関駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kasumigaseki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shinsayama",
+                           "store_name":  "新狭山駅北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shinsayama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sakurayukarigaoka",
+                           "store_name":  "佐倉ユーカリが丘接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://yukarigaoka.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-higashikoganei",
+                           "store_name":  "東小金井駅北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://higashikoganei.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sayamagaoka",
+                           "store_name":  "狭山ヶ丘駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://sayamagaoka.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-sapporokotoni",
+                           "store_name":  "札幌琴似本通り接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/kotonihondori/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-honda",
+                           "store_name":  "誉田南口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://curacion.jp/honda/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ikebukuro",
+                           "store_name":  "池袋駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ikebukuro.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ishida",
+                           "store_name":  "静岡さわやか接骨院　静岡市駿河区石田院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://ishida.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-eniwa",
+                           "store_name":  "恵庭駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://eniwa.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-higashijujo",
+                           "store_name":  "東十条駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://higashijujo.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-matsusaki",
+                           "store_name":  "新潟松崎接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://matsusaki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-fuchinobe",
+                           "store_name":  "淵野辺駅北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://fuchinobe.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kohdo",
+                           "store_name":  "新潟こうど接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kohdo.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-mabashi",
+                           "store_name":  "馬橋東口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://mabashi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-mutsumi",
+                           "store_name":  "六実駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "http://mutsumi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-koriyama",
+                           "store_name":  "郡山若葉町接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://koriyama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nagamachi",
+                           "store_name":  "長町南駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://nagamachi.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-katsutadai",
+                           "store_name":  "勝田台北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://katsutadai.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-keiseiyawata",
+                           "store_name":  "京成八幡駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/yawataekimae/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shiki",
+                           "store_name":  "志木駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://shiki.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-takada",
+                           "store_name":  "クラシオン接骨院　MEGAドン・キホーテ長野高田院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://takada.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-chitose",
+                           "store_name":  "千歳駅南接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chitose.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-mizue",
+                           "store_name":  "瑞江駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://mizue.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shinhamamatsu",
+                           "store_name":  "新浜松駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/shinhamamatsu/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shimosakitaguchi",
+                           "store_name":  "下総中山駅北口整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/nakayamakita/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-minamihiragishi",
+                           "store_name":  "南平岸駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/minamihiragishi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-goi-h",
+                           "store_name":  "五井駅東口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://goihigashi.chiryou-in.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nakamurakouen",
+                           "store_name":  "中村公園駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/nakamurakouen/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kitasendai",
+                           "store_name":  "北仙台駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/kitasendai/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-nijyo",
+                           "store_name":  "二条駅前整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://nijoekimae.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kameda",
+                           "store_name":  "新潟亀田大通り接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/kameda/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-shindohigashi",
+                           "store_name":  "新道東駅接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/shindohigashi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kawanishinoseguchi",
+                           "store_name":  "川西能勢口駅西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/kawanishinoseguchi/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-yawatajuku-n",
+                           "store_name":  "八幡宿駅西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/yawatajuku/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kitayama",
+                           "store_name":  "北山駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/kitayama/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-otakanomori",
+                           "store_name":  "流山おおたかの森西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/otakanomori/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-anegasaki",
+                           "store_name":  "姉ヶ崎駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/anegasaki/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-koriyama-n",
+                           "store_name":  "郡山駅西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/koriyama/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-teine",
+                           "store_name":  "手稲駅北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://teine.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-yotsukaido-k",
+                           "store_name":  "四街道北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://curacion.jp/yotsukaido/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-creamall",
+                           "store_name":  "川越クレアモール接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://creamall.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-kikugawa",
+                           "store_name":  "菊川駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://kikugawa.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-haijima",
+                           "store_name":  "拝島駅南口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://haijima.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-motoyama",
+                           "store_name":  "千種本山接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://motoyama.chiryouin.biz/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-musashisakai",
+                           "store_name":  "武蔵境駅北口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/musashisakai/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-miraidaira",
+                           "store_name":  "みらい平駅前接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/miraidaira/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-ichinomiya",
+                           "store_name":  "一宮白旗通接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/ichinomiya/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-mizuhodai",
+                           "store_name":  "みずほ台駅東口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  "https://chiryouin.biz/mizuhodai/",
+                           "status":  "confirmed",
+                           "note":  "2026-09-15 フェーズAで data/clinics.json の website フィールドとの自動突合により確定。admin@keizgroup.jpでアクセス可能。"
+                       },
+                       {
+                           "store_id":  "chokuei-fujimino",
+                           "store_name":  "ふじみ野駅西口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://fujimino.chiryouin.biz/)。栗林さんに確認要。"
+                       },
+                       {
+                           "store_id":  "chokuei-karasuma",
+                           "store_name":  "四条烏丸中央整骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://karasuma.chiryouin.biz/)。栗林さんに確認要。"
+                       },
+                       {
+                           "store_id":  "chokuei-monenosato",
+                           "store_name":  "四街道もねの里接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://monenosato.chiryouin.biz/)。栗林さんに確認要。"
+                       },
+                       {
+                           "store_id":  "chokuei-moriya",
+                           "store_name":  "アクロスモール守谷接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://chiryouin.biz/moriya/)。栗林さんに確認要。"
+                       },
+                       {
+                           "store_id":  "chokuei-meinohama",
+                           "store_name":  "姪浜駅南2丁目接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://chiryouin.biz/meinohama/)。栗林さんに確認要。"
+                       },
+                       {
+                           "store_id":  "chokuei-yakuendai",
+                           "store_name":  "薬園台駅東口接骨院",
+                           "brand":  "直営",
+                           "gsc_property":  null,
+                           "status":  "not_found",
+                           "note":  "2026-09-15 admin@keizgroup.jpのSearch Consoleプロパティ一覧に該当なし(website: https://chiryouin.biz/yakuendai/)。栗林さんに確認要。"
+                       }
+                   ]
 }
