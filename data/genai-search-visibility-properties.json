@@ -1,5 +1,5 @@
 {
-  "_comment": "hpb-genai-visibility skill用: 店舗名(clinics.jsonのnameと合わせる) ↔ Google Search Consoleプロパティ(URL)の対応表。フェーズAのパイロット実行で、admin@keizgroup.jpが実際にアクセスできることを1件ずつ確認したものだけをconfirmedとして追加すること。推測で埋めない。",
+  "_comment": "genai-search-visibility skill用: 店舗名(clinics.jsonのnameと合わせる) ↔ Google Search Consoleプロパティ(URL)の対応表。フェーズAのパイロット実行で、admin@keizgroup.jpが実際にアクセスできることを1件ずつ確認したものだけをconfirmedとして追加すること。推測で埋めない。",
   "status": "draft",
   "scope_note": "対象は暫定でhpb-ribbon-kpiと同じ「Master 140店(直営＋サンズミライ)」。実際の店舗数・リストはフェーズAで確定させる。",
   "properties": [

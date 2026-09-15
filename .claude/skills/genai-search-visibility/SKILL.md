@@ -1,5 +1,5 @@
 ---
-name: hpb-genai-visibility
+name: genai-search-visibility
 description: Use this skill for collecting and aggregating Google Search Console's beta「生成AI機能(AI Overviews)」performance report — "合計表示回数" (impressions inside Google's AI-generated search surfaces) — across all 直営・サンズミライ store properties. Trigger on "生成AI表示回数を集計して", "AI Overviewsの表示回数まとめて", "生成AI機能のレポートを店舗分集めて", or requests to roll up the GSC "生成AI機能(ベータ版)" report across many stores. Do NOT trigger for ordinary GA4/GSC (web検索) automation, which is a separate API-based pipeline once one exists for this brand group — this skill exists specifically because the AI-features metric has no API and must be read from the browser.
 ---
 
@@ -29,7 +29,7 @@ UI専用のベータ機能で、Discover/Newsレポートの時と同じ「UI先
    依頼する**こと。
 1. **2フェーズで進める。フェーズを飛ばさない。**
    - **フェーズA(パイロット・都度確認)**: `references/procedure.md`の「確定手順」と
-     `data/hpb-genai-visibility-properties.json`の店舗↔プロパティ対応表が**両方とも確定済み
+     `data/genai-search-visibility-properties.json`の店舗↔プロパティ対応表が**両方とも確定済み
      (`status: confirmed`)**でない限り、まずこのセッション自身(モデルは通常どおりでよい。
      Haikuに切り替える前)が実際に1つ以上のプロパティで画面を操作し、以下を確認・記録する:
      - 正確なクリック手順(検索パフォーマンス→生成AI機能タブへの到達経路、期間指定UIの操作)
@@ -69,21 +69,21 @@ UI専用のベータ機能で、Discover/Newsレポートの時と同じ「UI先
 
 ### フェーズA: パイロット(手順・対応表の確定)
 
-1. `references/procedure.md`と`data/hpb-genai-visibility-properties.json`を読み、既に
+1. `references/procedure.md`と`data/genai-search-visibility-properties.json`を読み、既に
    `confirmed`になっている内容があればそこから再開する(全部やり直さない)。
 2. admin@keizgroup.jpでログイン済みの実Chromeで、Search Consoleのプロパティ一覧を開き、対象
    140店に該当するプロパティが実際に見えるか確認する。見えないプロパティがあれば、その場で
    一覧化して栗林さんに報告する(憶測で「あるはず」として進めない)。
 3. 1店舗で実際に「検索パフォーマンス→生成AI機能(ベータ版)」タブを開き、期間設定→
    「合計表示回数」の読み取りまで一通り操作し、正確な手順を`references/procedure.md`に書く。
-4. 店舗名とGSCプロパティURLの対応を、確認できた分から`data/hpb-genai-visibility-properties.json`
+4. 店舗名とGSCプロパティURLの対応を、確認できた分から`data/genai-search-visibility-properties.json`
    に追記する(1件ずつ実在確認したものだけ)。
 
 ### フェーズB: 一括収集(Haiku)
 
 1. フェーズAの手順・対応表が確定していることを確認してから、ローカルセッションをHaikuモデルへ
    切り替える。
-2. `data/hpb-genai-visibility-properties.json`の対応表を1店舗ずつ辿り、`references/procedure.md`
+2. `data/genai-search-visibility-properties.json`の対応表を1店舗ずつ辿り、`references/procedure.md`
    の確定手順どおりに「生成AI機能(ベータ版)」タブを開き、指定された期間の「合計表示回数」を
    読み取って記録する。
 3. 手順書に無い分岐(タブが無い/0件/エラー)に当たった店舗は、推測で埋めず「要確認」として
@@ -101,12 +101,12 @@ UI専用のベータ機能で、Discover/Newsレポートの時と同じ「UI先
 - `references/procedure.md` — フェーズAで確定させる、生成AI機能レポートへの正確な操作手順
   (期間指定の具体的なUI操作を含む)。**未確定のうちは`status: draft`のままにしておき、
   Haikuフェーズを始めない。**
-- `data/hpb-genai-visibility-properties.json` — 店舗名 ↔ GSCプロパティURLの対応表。
+- `data/genai-search-visibility-properties.json` — 店舗名 ↔ GSCプロパティURLの対応表。
 
 ## 並行セッション対策
 
 他のセッションと並行している可能性がある間は、`SKILL.md`や`references/procedure.md`、
-`data/hpb-genai-visibility-properties.json`を直接編集しない。学習・確認済み対応表の追記は
+`data/genai-search-visibility-properties.json`を直接編集しない。学習・確認済み対応表の追記は
 `learnings/<日時>_<セッションIDの先頭8桁>.md`に新規ファイルとして残す。手順・統合方法は
 [`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)
 と同じ。

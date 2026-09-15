@@ -2,7 +2,7 @@
 
 status: draft
 
-**この`status`が`confirmed`になるまで、`hpb-genai-visibility`スキルのフェーズB(Haikuでの
+**この`status`が`confirmed`になるまで、`genai-search-visibility`スキルのフェーズB(Haikuでの
 一括収集)を始めないこと。** ここはフェーズAのパイロット実行で、実際に画面を操作しながら
 埋めていく。
 
