@@ -1,24 +1,47 @@
 ---
 name: hpb-review-blog-check
-description: Use this skill for the monthly「口コミブログチェック表」作業 — 各院のHotPepper Beauty公開ページから前月分の口コミ投稿総数・★5口コミ数・ブログ数(写真ありのみ)を自動集計し、手動集計値と照合してスプレッドシートに反映する。Trigger on "口コミブログチェック表", "口コミとブログの集計", "前月分の口コミ・ブログを集計して", "手動集計と照合して", or requests to run/update the monthly review-and-blog count for HPB listings. Do NOT trigger for SalonBoard content edits (hpb-salonboard-update) or the public reservation-calendar ○✕チェック (hpb-reservation-slot-check) — this skill is specifically about counting 口コミ/ブログ activity, a different HPB public page section.
+description: Use this skill for the monthly「HPB口コミ・ブログチェック」作業 — 各院のHotPepper Beauty公開ページから対象月の口コミ投稿総数・★5口コミ数・口コミ返信数・ブログ数(写真ありのみ)を自動集計し、専用スプレッドシートのB〜F列に書き込む(完全自動入力、手動集計との照合は行わない)。Trigger on "口コミブログチェック表", "HPB口コミ・ブログチェック", "口コミとブログの集計", "前月分の口コミ・ブログを集計して", or requests to run/update the monthly review-and-blog count for HPB listings. Do NOT trigger for SalonBoard content edits (hpb-salonboard-update) or the public reservation-calendar ○✕チェック (hpb-reservation-slot-check) — this skill is specifically about counting 口コミ/ブログ activity, a different HPB public page section.
 ---
 
 # 口コミ・ブログ集計チェック(hpb-review-blog-check)
 
-「口コミブログチェック表」(スプレッドシートID: `1cmYMBJb5do2MsdO43-RS2uD22vEbNJHoPYMZ3hvqEvA`)は、
-各院のHotPepper Beauty上での月次の口コミ投稿総数・★5口コミ数・ブログ投稿数(写真ありのみ)を
-毎月月初に前月分、人が手作業で数えてシートに入力していた。このSkillはその集計を自動化し、
-手動集計値と突き合わせるための一式(スクリプト・院マスタ・既知の落とし穴)をまとめたもの。
-2026-09-07〜09に初回構築・検証・自動化済み(下記「実績」「自動化」参照)。
+「HPB口コミ・ブログチェック」(スプレッドシートID: `12gx_guSdsVToNn3fjA5fzujqrk7E4crs9UE6V9rJ71Y`)は、
+各院のHotPepper Beauty上での月次の口コミ投稿総数・★5口コミ数・口コミ返信数・ブログ投稿数
+(写真ありのみ)を自動集計するための専用シート。2026-09-07〜09にまず旧シート「口コミブログ
+チェック表」(スプレッドシートID: `1cmYMBJb5do2MsdO43-RS2uD22vEbNJHoPYMZ3hvqEvA`、人手で
+B〜D列に手動集計、G〜I列に自動集計を書き込んで突き合わせる方式)で構築・検証・自動化し、
+2026-09-11に栗林さんが本Skill専用の新シート(旧シートのコピー)を用意して書き込み先を
+切り替えた。**新シートはB〜F列の全てがAI入力という位置づけで、旧シートのような手動集計値
+との照合運用ではない**(旧シートはそのまま残っているが、このSkillはもう触らない)。
+
+## シートの列構成(対象月のタブ、例:「2609月分」の場合)
+
+| 列 | 内容 |
+|---|---|
+| A | 院名 |
+| B | 対象月(9月)のブログ数(写真ありのみ) |
+| C | 対象月(9月)の口コミ投稿総数 |
+| D | 対象月(9月)の★5口コミ数 |
+| E | 前月(8月)の口コミ投稿総数 |
+| F | 前月(8月)の口コミ返信数 |
+
+E列は基本的に前月タブ(例:「2608月分」)自身のC列の値をそのままコピーする(前月分を
+二重にスクレイピングしない)。前月タブや該当行が無い場合のみ、フォールバックとして
+このスクリプトが直接スクレイピングした値を使う。**F列(口コミ返信数)はどの月のタブにも
+「その月の返信数」を記録する列が存在せず前月タブからコピーできる元データが無いため、
+毎月その場でHPBから直接スクレイピングする**(2026-09-11、栗林さんと合意)。
 
 ## 実体
 
 - `scripts/hpb_review_blog_check.py` — Playwrightで各院のHPB公開ページ(口コミ一覧・
-  月別ブログアーカイブ)を巡回し、対象月の口コミ総数・★5数・写真ありブログ数を集計する。
-  `--mode report`(既定、CSV出力のみ)と`--mode apply`(スプレッドシートのG〜I列に書き込み、
-  `GCP_KPI_WRITER_KEY`環境変数が必要)がある。
-- `data/hpb-review-blog-ids.json` — 「口コミブログチェック表」の院名 → HotPepper Beauty
-  店舗ID(storeId)の対応表。スクリプトはこれを読んで各院のURLを組み立てる。
+  月別ブログアーカイブ)を巡回し、対象月・前月の口コミ総数・★5数・返信数、対象月の
+  写真ありブログ数を集計する。`--mode report`(既定、CSV出力のみ)と`--mode apply`
+  (スプレッドシートのB〜F列に書き込み、`GCP_KPI_WRITER_KEY`環境変数が必要)がある。
+  口コミ返信の有無は、口コミ本文に「〇〇からの返信コメント」ブロック(クラス名
+  `.mT20.mH10.pV5.pH9.bdGray`)が挿入されているかどうかで判定する(2026-09-11、
+  わかば整骨院の実データで確認済み)。
+- `data/hpb-review-blog-ids.json` — 院名 → HotPepper Beauty店舗ID(storeId)の対応表。
+  スクリプトはこれを読んで各院のURLを組み立てる。
 - `scripts/notify_hpb_review_blog_check.py` — 実行結果をChatworkの送信キュー
   (`data/chatwork-outbox/`)に積む。実際の送信は`scripts/chatwork_send.py`が行う。
 - `.github/workflows/hpb-review-blog-check.yml` — 毎月1日 10:00 JSTに自動実行する
@@ -33,7 +56,7 @@ description: Use this skill for the monthly「口コミブログチェック表�
 真っ先に疑うこと(`.github/workflows/hpb-reservation-slot-check.yml`でも一度、毎時ちょうど
 指定が原因で初回発火しなかった前例がある)。
 
-**前提条件(未実施の場合は書き込みが失敗する):** 「口コミブログチェック表」スプレッドシートを、
+**前提条件(未実施の場合は書き込みが失敗する):** 「HPB口コミ・ブログチェック」スプレッドシートを、
 書き込み用サービスアカウント(`chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com`、
 `functions/kpi-aggregation`・`hpb-reservation-slot-check`と共用、新規の鍵作成は不要)に
 **編集者として共有**しておく必要がある。共有手順: スプレッドシート右上の「共有」→上記の
@@ -41,13 +64,13 @@ description: Use this skill for the monthly「口コミブログチェック表�
 
 **対象月のタブ(例: 「2609月分」)は基本的に栗林さんが手動で用意する運用。** 無い場合は
 `ensure_tab_exists()`(`scripts/hpb_review_blog_check.py`)が**前月のタブを複製して自動作成**
-するフォールバックが2026-09-09に入っている。複製後、B〜I列(手動集計欄・自動集計欄の両方)は
-全データ行(行3-36・40-170、`DATA_ROW_RANGES`定数)で空にするが、**ヘッダー行の月表記
-(「8月」「7月」等の文言)は前月のまま残る**ため、このフォールバックが発火した月は
-ヘッダーの手動修正が必要になる場合がある。前月のタブ自体が無い場合はこのフォールバックも
-使えず、通常通り失敗として扱われる(手動でどちらかのタブを用意する必要がある)。
-`--tab`でタブ名を明示指定した場合(テスト実行時など)はこのフォールバックは働かない
-(テスト用タブは呼び出し側が用意している前提のため)。
+するフォールバックが2026-09-09に入っている。複製後、B〜F列は全データ行(行3-36・40-170、
+`DATA_ROW_RANGES`定数)で空にするが、**ヘッダー行の月表記(「8月」「7月」等の文言)は
+前月のまま残る**ため、このフォールバックが発火した月はヘッダーの手動修正が必要になる
+場合がある。前月のタブ自体が無い場合はこのフォールバックも使えず、通常通り失敗として
+扱われる(手動でどちらかのタブを用意する必要がある)。`--tab`でタブ名を明示指定した場合
+(テスト実行時など)はこのフォールバックは働かない(テスト用タブは呼び出し側が用意している
+前提のため)。
 
 手動で任意の月を再実行・確認したい場合は、GitHub Actionsの「HPB review/blog check (monthly)」
 ワークフローを`workflow_dispatch`で手動実行できる(対象月・mode(apply/report)を指定可能)。
@@ -57,12 +80,13 @@ description: Use this skill for the monthly「口コミブログチェック表�
 python scripts/hpb_review_blog_check.py --month 202609 --mode report --out hpb_review_blog_202609.csv
 ```
 
-出力CSVを「口コミブログチェック表」の該当タブ(タブ名は `{年下2桁}{月2桁}月分`、例:
-2026年9月分なら `2609月分`)の手動集計値(B〜D列)と突き合わせ、大きな差異があれば
-[references/interpreting-mismatches.md](references/interpreting-mismatches.md) の分類に
-従って原因を切り分ける。ローカルから直接`--mode apply`で書き込む場合(サービスアカウントの
-鍵が使えない環境など)は[references/sheet-write-back.md](references/sheet-write-back.md)の
-ブラウザ経由の手順を使うこと。
+出力CSVには対象月の口コミ総数・★5数・写真ありブログ数に加え、前月分の口コミ総数
+(`prev_review_total_scraped`、通常は使われずE列は前月タブのC列から転記される)と
+前月の返信数(`prev_review_reply`、F列に書き込まれる値)も含まれる。ローカルから直接
+`--mode apply`で書き込む場合(サービスアカウントの鍵が使えない環境など)は
+[references/sheet-write-back.md](references/sheet-write-back.md)のブラウザ経由の手順を
+使うこと(旧シートでの手動照合運用を前提に書かれた部分があるため、新シート(B〜F列)に
+適用する際は読み替えが必要)。
 
 Chatworkの通知の仕組み自体(`kind: "status_report"`という新しい種別)の詳細は
 [functions/chatwork-integration/CLAUDE.md](../../../functions/chatwork-integration/CLAUDE.md)

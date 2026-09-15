@@ -1,14 +1,35 @@
 #!/usr/bin/env python3
 """HotPepper Beautyの公開サロンページから、月次の口コミ・ブログ実績を自動集計する。
 
-「口コミブログチェック表」(スプレッドシートID: 1cmYMBJb5do2MsdO43-RS2uD22vEbNJHoPYMZ3hvqEvA)を
+「HPB口コミ・ブログチェック」(スプレッドシートID: 12gx_guSdsVToNn3fjA5fzujqrk7E4crs9UE6V9rJ71Y)を
 毎月月初に前月分手動で数えている作業を自動化するためのスクリプト。2026-09-07、わかば整骨院
 (H000475060)を対象に手動集計と突き合わせて検証済み(口コミ総数・★5数・写真あり ブログ数の
 3項目とも完全一致)。
 
-集計する3項目:
+2026-09-11、栗林さんが本Skill専用の新しいスプレッドシート(旧「口コミブログチェック表」の
+コピー)を用意し、書き込み先をそちらに切り替えるとともに、書き込み対象列をG〜I(旧シートの
+自動集計欄)からB〜F(旧シートの手動集計欄)に変更した。新シートは列B〜Fの全てがAI入力
+という位置づけで、旧シートのように手動集計値と突き合わせて照合する運用ではなくなった
+(旧シートは「口コミブログチェック表」のまま残っており、このスクリプトはもう触らない)。
+
+新シートの列構成(対象月のタブ、例:「2609月分」の場合):
+  - B列: 対象月(9月)のブログ数(写真ありのみ) = blog_photo_count
+  - C列: 対象月(9月)の口コミ投稿総数 = review_total
+  - D列: 対象月(9月)の★5口コミ数 = review_5star
+  - E列: 前月(8月)の口コミ投稿総数 = prev_review_total
+  - F列: 前月(8月)の口コミ返信数 = prev_review_reply
+E列は基本的に前月タブ(例:「2608月分」)自身のC列の値をそのままコピーしてくる(二重に
+スクレイピングしない)。ただし前月タブが存在しない/該当行が無い場合のフォールバックとして、
+このスクリプトが直接スクレイピングした前月分の値を使う。F列(返信数)は、いずれの月のタブにも
+「その月の返信数」を記録する列が無く前月タブからコピーできる元データが存在しないため、
+毎月その場でHPBから直接スクレイピングする(2026-09-11、栗林さんと合意)。
+
+集計する項目:
   - review_total: 対象月に投稿された口コミの総数
   - review_5star: そのうち「総合」が★5のもの
+  - review_reply: そのうち院からの返信が付いているものの数(返信本文の有無をDOMで判定。
+    2026-09-11時点でHPBの口コミ本文欄には返信があれば「〇〇からの返信コメント」というブロックが
+    差し込まれることを確認済み)
   - blog_photo_count: 対象月のブログのうち、本文サムネイルに実写真が付いているものの数
     (「写真有りだけ数える」というシート側のルール。サムネイル画像のsrcに"IMG_BLOG_ORG"を
     含むかどうかで判定する。カテゴリアイコンのみの投稿はここに含まれない)
@@ -48,7 +69,7 @@ import re
 import sys
 from pathlib import Path
 
-SHEET_ID = "1cmYMBJb5do2MsdO43-RS2uD22vEbNJHoPYMZ3hvqEvA"
+SHEET_ID = "12gx_guSdsVToNn3fjA5fzujqrk7E4crs9UE6V9rJ71Y"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 IDS_FILE = Path(__file__).resolve().parent.parent / "data" / "hpb-review-blog-ids.json"
 
@@ -87,13 +108,24 @@ async def check_not_delisted(page, store_id: str) -> None:
         raise RuntimeError(f"店舗ページが掲載エラー(掲載終了)になっています: {store_id}")
 
 
-async def fetch_review_counts(page, store_id: str, year: int, month: int) -> tuple[int, int]:
-    """対象月の口コミ総数と★5件数を返す。ページを新しい順にたどり、対象月より前の
-    口コミしか無いページに着いたら打ち切る(サロンPick Upで1件だけ順序が前後することが
-    あるため、各口コミは個別に日付判定し、ページ単位の打ち切りだけ保守的に行う)。
+async def fetch_review_month_stats(
+    page, store_id: str, months: list[tuple[int, int]]
+) -> dict[tuple[int, int], dict[str, int]]:
+    """指定した月(複数可)について、口コミ総数・★5件数・返信件数を集計する。
+
+    ページを新しい順にたどり、指定した月のうち最も古い月よりさらに前の口コミしか
+    無いページに着いたら打ち切る(サロンPick Upで1件だけ順序が前後することがあるため、
+    各口コミは個別に日付判定し、ページ単位の打ち切りだけ保守的に行う)。
+    複数月を一度に指定できるのは、対象月と前月をまとめて1回の巡回で集計するため
+    (前月分だけのために別途ページを最初から辿り直すのを避ける)。
+
+    返信件数は、口コミ本文に「〇〇からの返信コメント」ブロックが挿入されているかどうかで
+    判定する(クラス名 `.mT20.mH10.pV5.pH9.bdGray` の要素。2026-09-11、わかば整骨院の
+    口コミページで実データ確認済み。汎用的なユーティリティクラスの組み合わせのため、
+    クラス名だけでなくテキストに「からの返信コメント」を含むことも条件にして誤検出を防ぐ)。
     """
-    total = 0
-    star5 = 0
+    stats = {m: {"total": 0, "star5": 0, "reply": 0} for m in months}
+    oldest_target = min(months)
     page_num = 1
     while True:
         url = (
@@ -111,10 +143,13 @@ async def fetch_review_counts(page, store_id: str, year: int, month: int) -> tup
                 const dateP = li.querySelector('p.fs10.fgGray');
                 const dateMatch = dateP ? dateP.textContent.match(/(\\d{4})\\/(\\d{1,2})\\/(\\d{1,2})/) : null;
                 const scoreEl = li.querySelector('.judgeList .fgPurple4');
+                const replyEl = li.querySelector('.mT20.mH10.pV5.pH9.bdGray');
+                const hasReply = !!replyEl && replyEl.textContent.includes('からの返信コメント');
                 return {
                     year: dateMatch ? parseInt(dateMatch[1]) : null,
                     month: dateMatch ? parseInt(dateMatch[2]) : null,
                     score: scoreEl ? parseInt(scoreEl.textContent.trim()) : null,
+                    hasReply,
                 };
             })
             """
@@ -122,17 +157,24 @@ async def fetch_review_counts(page, store_id: str, year: int, month: int) -> tup
         if not items:
             break
 
-        in_month = [it for it in items if it["year"] == year and it["month"] == month]
-        total += len(in_month)
-        star5 += sum(1 for it in in_month if it["score"] == 5)
+        for it in items:
+            key = (it["year"], it["month"])
+            bucket = stats.get(key)
+            if bucket is None:
+                continue
+            bucket["total"] += 1
+            if it["score"] == 5:
+                bucket["star5"] += 1
+            if it["hasReply"]:
+                bucket["reply"] += 1
 
-        # このページの口コミが全て対象月より前(=対象月より古い)なら、以降のページは
-        # さらに古いので打ち切ってよい。ページの中に対象月または対象月より新しいものが
-        # 1件でもあれば、次ページも対象月の口コミが残っている可能性があるので継続する。
+        # このページの口コミが全て指定月のうち最古の月より前(=それより古い)なら、
+        # 以降のページはさらに古いので打ち切ってよい。1件でも該当月以降のものが
+        # 残っていれば、次ページにまだ対象月の口コミが残っている可能性があるので継続する。
         def is_older(it):
             if it["year"] is None:
                 return True
-            return (it["year"], it["month"]) < (year, month)
+            return (it["year"], it["month"]) < oldest_target
 
         if items and all(is_older(it) for it in items):
             break
@@ -149,7 +191,7 @@ async def fetch_review_counts(page, store_id: str, year: int, month: int) -> tup
         if page_num > 30:  # 異常系の安全弁
             break
 
-    return total, star5
+    return stats
 
 
 async def fetch_blog_photo_count(page, store_id: str, year: int, month: int) -> tuple[int, int]:
@@ -202,6 +244,8 @@ async def run(clinics: dict[str, str], year: int, month: int, limit: int | None)
     if limit:
         names = names[:limit]
 
+    prev_year, prev_month = (year, month - 1) if month > 1 else (year - 1, 12)
+
     results = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -212,16 +256,22 @@ async def run(clinics: dict[str, str], year: int, month: int, limit: int | None)
             print(f"🔍 集計中 ({i + 1}/{len(names)}): {name} ({store_id})", flush=True)
             try:
                 await check_not_delisted(page, store_id)
-                review_total, review_5star = await fetch_review_counts(page, store_id, year, month)
+                review_stats = await fetch_review_month_stats(
+                    page, store_id, [(year, month), (prev_year, prev_month)]
+                )
+                this_month = review_stats[(year, month)]
+                prev = review_stats[(prev_year, prev_month)]
                 blog_total, blog_photo = await fetch_blog_photo_count(page, store_id, year, month)
                 results.append(
                     {
                         "name": name,
                         "store_id": store_id,
-                        "review_total": review_total,
-                        "review_5star": review_5star,
+                        "review_total": this_month["total"],
+                        "review_5star": this_month["star5"],
                         "blog_total_raw": blog_total,
                         "blog_photo_count": blog_photo,
+                        "prev_review_total_scraped": prev["total"],
+                        "prev_review_reply": prev["reply"],
                         "error": "",
                     }
                 )
@@ -235,6 +285,8 @@ async def run(clinics: dict[str, str], year: int, month: int, limit: int | None)
                         "review_5star": None,
                         "blog_total_raw": None,
                         "blog_photo_count": None,
+                        "prev_review_total_scraped": None,
+                        "prev_review_reply": None,
                         "error": str(e),
                     }
                 )
@@ -247,7 +299,17 @@ def write_csv(results: list[dict], out_path: Path) -> None:
     with open(out_path, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=["name", "store_id", "review_total", "review_5star", "blog_total_raw", "blog_photo_count", "error"],
+            fieldnames=[
+                "name",
+                "store_id",
+                "review_total",
+                "review_5star",
+                "blog_total_raw",
+                "blog_photo_count",
+                "prev_review_total_scraped",
+                "prev_review_reply",
+                "error",
+            ],
         )
         writer.writeheader()
         writer.writerows(results)
@@ -289,7 +351,7 @@ def ensure_tab_exists(spreadsheet, tab_name: str, year: int, month: int):
     """対象タブが無ければ、前月のタブを複製して作る(2026-09-09、栗林さん合意の運用)。
 
     基本的にはタブは手動で用意される想定。無い場合のフォールバックとして、前月分の
-    タブをそのまま複製し、B〜I列(手動集計値・自動集計値の両方)を全データ行で空にする。
+    タブをそのまま複製し、B〜F列(このスクリプトが書き込む全列)を全データ行で空にする。
     列A(院名)とヘッダー行(1-2, 39-40付近)はそのまま残る — ただしヘッダーの月表記
     (「8月」「7月」等の文言)は前月のまま残るので、フォールバックが発火した場合は
     後で手動修正が必要になる場合がある。
@@ -313,16 +375,62 @@ def ensure_tab_exists(spreadsheet, tab_name: str, year: int, month: int):
     new_worksheet = prev_worksheet.duplicate(
         insert_sheet_index=prev_worksheet.index + 1, new_sheet_name=tab_name
     )
-    clear_ranges = [f"B{start}:I{end}" for start, end in DATA_ROW_RANGES]
+    clear_ranges = [f"B{start}:F{end}" for start, end in DATA_ROW_RANGES]
     new_worksheet.batch_clear(clear_ranges)
-    print(f"タブ「{tab_name}」を作成し、手動集計欄(B〜F列)・実測欄(G〜I列)を空にしました。", flush=True)
+    print(f"タブ「{tab_name}」を作成し、B〜F列を空にしました。", flush=True)
     return new_worksheet
 
 
+def _name_to_row_map(worksheet) -> dict[str, int]:
+    import unicodedata
+
+    all_values = worksheet.get_all_values()
+    name_to_row: dict[str, int] = {}
+    for row_idx, row in enumerate(all_values, start=1):
+        if not row:
+            continue
+        cell = unicodedata.normalize("NFC", row[0].strip())
+        if cell:
+            name_to_row[cell] = row_idx
+    return name_to_row
+
+
+def _load_prev_month_c_column(spreadsheet, prev_year: int, prev_month: int) -> dict[str, str]:
+    """前月タブ自身のC列(前月時点での「今月の口コミ投稿総数」)を院名 -> 値で返す。
+    E列(前月の口コミ投稿総数)を二重スクレイピングせずに転記するために使う。
+    前月タブが無い場合は空の辞書を返す(呼び出し側でフォールバックする)。
+    """
+    prev_tab_name = month_tab_name(prev_year, prev_month)
+    try:
+        prev_worksheet = spreadsheet.worksheet(prev_tab_name)
+    except Exception:
+        return {}
+
+    name_to_row = _name_to_row_map(prev_worksheet)
+    if not name_to_row:
+        return {}
+    max_row = max(name_to_row.values())
+    c_values = prev_worksheet.get(f"C1:C{max_row}")
+    result = {}
+    for name, row_idx in name_to_row.items():
+        row_offset = row_idx - 1
+        if row_offset < len(c_values) and c_values[row_offset]:
+            value = c_values[row_offset][0]
+            if value != "":
+                result[name] = value
+    return result
+
+
 def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str | None = None) -> None:
-    """対象タブのG/H/I列(口コミ投稿総数・★5の口コミ数・ブログ数)に書き込む。
-    列A(院名)が一致する行だけを対象にする。列が用意されていないセクション
-    (2026-09-07時点ではアンビション担当セクション)の院は書き込み対象外。
+    """対象タブのB〜F列に書き込む。列A(院名)が一致する行だけを対象にする。
+
+    列構成:
+      B: 対象月のブログ数(写真ありのみ) / C: 対象月の口コミ投稿総数 /
+      D: 対象月の★5口コミ数 / E: 前月の口コミ投稿総数 / F: 前月の口コミ返信数
+
+    E列は前月タブ自身のC列の値をそのままコピーする(前月タブ・該当行が無い場合は
+    このスクリプトが直接スクレイピングした値をフォールバックとして使う)。F列は
+    前月分を転記できる列がどのタブにも存在しないため、常にスクレイピング値を使う。
 
     tab_override: 通常は対象月から自動計算したタブ名(例: 202608 -> "2608月分")に書き込むが、
     テスト目的で複製したタブなど、別のタブ名を明示的に指定したい場合に使う
@@ -330,6 +438,8 @@ def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str
     タブが無くても自動作成しない(テスト用タブは明示的に用意されている前提のため)。
     """
     import unicodedata
+
+    prev_year, prev_month = (year, month - 1) if month > 1 else (year - 1, 12)
 
     tab_name = tab_override or month_tab_name(year, month)
     spreadsheet = build_spreadsheet()
@@ -341,19 +451,14 @@ def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str
     else:
         worksheet = ensure_tab_exists(spreadsheet, tab_name, year, month)
 
-    all_values = worksheet.get_all_values()
-    name_to_row = {}
-    for row_idx, row in enumerate(all_values, start=1):
-        if not row:
-            continue
-        cell = unicodedata.normalize("NFC", row[0].strip())
-        if cell:
-            name_to_row[cell] = row_idx
+    name_to_row = _name_to_row_map(worksheet)
+    prev_c_column = _load_prev_month_c_column(spreadsheet, prev_year, prev_month)
 
     by_name = {unicodedata.normalize("NFC", r["name"]): r for r in results}
 
     updates = []
     skipped = []
+    fallback_used = []
     for name, r in by_name.items():
         row_idx = name_to_row.get(name)
         if not row_idx:
@@ -361,10 +466,24 @@ def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str
             continue
         if r["error"]:
             continue
+
+        prev_review_total = prev_c_column.get(name)
+        if prev_review_total is None:
+            prev_review_total = r["prev_review_total_scraped"]
+            fallback_used.append(name)
+
         updates.append(
             {
-                "range": f"G{row_idx}:I{row_idx}",
-                "values": [[r["review_total"], r["review_5star"], r["blog_photo_count"]]],
+                "range": f"B{row_idx}:F{row_idx}",
+                "values": [
+                    [
+                        r["blog_photo_count"],
+                        r["review_total"],
+                        r["review_5star"],
+                        prev_review_total,
+                        r["prev_review_reply"],
+                    ]
+                ],
             }
         )
 
@@ -374,6 +493,14 @@ def apply_to_sheet(results: list[dict], year: int, month: int, tab_override: str
     if skipped:
         print(f"⚠️ シート上に該当行が見つからず書き込めなかった院: {len(skipped)}件")
         for name in skipped:
+            print(f"  - {name}")
+    if fallback_used:
+        print(
+            f"ℹ️ E列(前月投稿総数)を前月タブから転記できず、スクレイピング値で代用した院: "
+            f"{len(fallback_used)}件(前月タブ「{month_tab_name(prev_year, prev_month)}」が無い、"
+            f"または該当行が無い場合に発生)"
+        )
+        for name in fallback_used:
             print(f"  - {name}")
 
 

@@ -1,18 +1,18 @@
 name: HPB review/blog check (monthly)
 
-# 「口コミブログチェック表」の月次自動集計(scripts/hpb_review_blog_check.py)。
-# 各院のHPB公開ページから前月分の口コミ投稿総数・★5口コミ数・ブログ数(写真ありのみ)を
-# 取得し、スプレッドシートのG〜I列に書き込む。詳細は
-# .claude/skills/hpb-review-blog-check/SKILL.md 参照。
+# 「HPB口コミ・ブログチェック」の月次自動集計(scripts/hpb_review_blog_check.py)。
+# 各院のHPB公開ページから対象月・前月の口コミ投稿総数・★5口コミ数・口コミ返信数、
+# 対象月のブログ数(写真ありのみ)を取得し、専用スプレッドシートのB〜F列に書き込む。
+# 詳細は .claude/skills/hpb-review-blog-check/SKILL.md 参照。
 #
 # 実行後は必ずマイチャット(Chatwork)へ結果を通知する(成功・失敗どちらも)。
 # 「本当に毎月動いているか」を栗林さんが確認できるようにするための仕組みで、2026-09-09に
 # 追加した。通知が来ない月がある場合、cron自体が発火していない可能性を疑うこと。
 #
-# 前提: 「口コミブログチェック表」スプレッドシートを、書き込み用サービスアカウント
+# 前提: 「HPB口コミ・ブログチェック」スプレッドシートを、書き込み用サービスアカウント
 # (chokuei-sunsumirai-kpi-writer@keizgroup-automation.iam.gserviceaccount.com、
 # functions/kpi-aggregation・hpb-reservation-slot-checkと共用)に編集者共有しておくこと。
-# 新規に鍵を作る必要はない。
+# 新規に鍵を作る必要はない(2026-09-11、書き込み先を専用の新シートに切り替え済み)。
 #
 # 対象月のタブ(例:「2609月分」)は基本的に手動で用意される運用。無い場合は前月のタブを
 # 複製して自動作成するフォールバックがある(scripts/hpb_review_blog_check.pyの
