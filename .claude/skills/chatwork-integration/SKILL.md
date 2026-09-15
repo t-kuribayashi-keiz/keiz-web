@@ -170,3 +170,10 @@ Issue that Claude dismisses, while a false negative means a real request silentl
 - **Reading Chatwork from a cloud Claude session.** The token is not there. If you need live
   Chatwork data in a session, either run the workflow manually
   (`workflow_dispatch`) and read its Issue, or ask the user.
+
+## 並行セッション対策
+
+他のセッションがこのSkillを同時に使っている可能性がある間は、`SKILL.md`や`references/*.md`を
+直接編集しない。学習は`learnings/`配下に新規ファイルとして置き、gitコマンド(`add`/`commit`/
+ブランチ切り替え)は実行しない。タスク開始前に`learnings/`を読むこと。詳細・統合手順は
+[`../hpb-salonboard-update/references/concurrent-sessions.md`](../hpb-salonboard-update/references/concurrent-sessions.md)を参照。

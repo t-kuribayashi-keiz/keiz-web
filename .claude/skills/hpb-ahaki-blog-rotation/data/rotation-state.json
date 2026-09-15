@@ -1,0 +1,75 @@
+{
+  "_comment": "各店舗のブログテンプレート使用履歴。scripts/build_ahaki_blog_post.py が読み書きする。実際に投稿が完了した後にのみ mark-posted で追記すること — 手で編集しない。",
+  "stores": {
+    "本八幡南口鍼灸接骨院": {
+      "history": [
+        {
+          "template_id": "t01_capillary",
+          "posted_at": "2026-09-12",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124783414"
+        },
+        {
+          "template_id": "t08_about_us",
+          "posted_at": "2026-09-14",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124923675"
+        }
+      ]
+    },
+    "ライフガーデン茂原鍼灸整骨院": {
+      "history": [
+        {
+          "template_id": "t02_swelling",
+          "posted_at": "2026-09-12",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124786821"
+        },
+        {
+          "template_id": "t07_nutrition_sos",
+          "posted_at": "2026-09-14",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124923844"
+        }
+      ]
+    },
+    "新潟関屋鍼灸整骨院": {
+      "history": [
+        {
+          "template_id": "t03_autonomic",
+          "posted_at": "2026-09-12",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124786957"
+        },
+        {
+          "template_id": "t06_kids_welcome",
+          "posted_at": "2026-09-14",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124923984"
+        }
+      ]
+    },
+    "新静岡駅前鍼灸接骨院": {
+      "history": [
+        {
+          "template_id": "t04_neck_posture_check",
+          "posted_at": "2026-09-12",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124787071"
+        },
+        {
+          "template_id": "t05_posture_muscle",
+          "posted_at": "2026-09-14",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124924144"
+        }
+      ]
+    },
+    "八幡宿駅西口鍼灸接骨院": {
+      "history": [
+        {
+          "template_id": "t05_posture_muscle",
+          "posted_at": "2026-09-12",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124787267"
+        },
+        {
+          "template_id": "t04_neck_posture_check",
+          "posted_at": "2026-09-14",
+          "hpb_blog_url": "https://salonboard.com/KLP/blog/blog/?blogId=A124924295"
+        }
+      ]
+    }
+  }
+}

@@ -5,6 +5,12 @@ Claude cannot call Chatwork itself — the token lives in GitHub Secrets and onl
 Actions — so Claude writes a message into data/chatwork-outbox/ and this script, running in
 Actions, posts it. See .claude/skills/chatwork-integration/SKILL.md.
 
+Two message kinds may be sent without a per-message approval (see ALLOWED_KINDS/KIND_CONFIG):
+"hearing" (gathering information needed to act on a request) and "status_report" (a scheduled
+automation reporting whether it ran, e.g. hpb-review-blog-check's monthly job). Each kind is
+gated per-room by its own flag in data/chatwork-rooms.json, so opting a room into one doesn't
+opt it into the other.
+
 Every delivered message carries a visible "Claudeによる自動確認" header, for two reasons: the
 token belongs to a real person's account, so without it the recipient would think that person
 wrote the message; and the watcher uses the same string to skip Claude's own posts instead of
@@ -35,12 +41,29 @@ OUTBOX_DIR = REPO_ROOT / "data" / "chatwork-outbox"
 AUTO_POST_MARKER = "Claudeによる自動確認"
 
 # Only these kinds may be delivered without a per-message approval from the user. "hearing" is
-# a question gathering information needed to act; anything that commits to work, reports
-# completion, or answers a business question is not covered by that standing permission.
-ALLOWED_KINDS = {"hearing"}
+# a question gathering information needed to act; "status_report" is a scheduled automation
+# (GitHub Actions cron job) reporting whether it ran and what it did, to a room the user has
+# specifically opted in for that purpose (data/chatwork-rooms.json's allow_auto_status_report).
+# Anything else that commits to work, reports on a business decision, or answers a business
+# question is not covered by either standing permission.
+ALLOWED_KINDS = {"hearing", "status_report"}
 
-# One consolidated question, not a stream of them.
-MAX_BODY_CHARS = 1500
+# kind -> (room permission flag required, max body length, message framing under the header)
+KIND_CONFIG = {
+    "hearing": {
+        "permission_flag": "allow_auto_hearing",
+        "max_body_chars": 1500,
+        "intro": (
+            "ご依頼の対応にあたって確認させてください。"
+            "この確認は自動送信で、回答いただいた内容は担当者が確認のうえ着手します。"
+        ),
+    },
+    "status_report": {
+        "permission_flag": "allow_auto_status_report",
+        "max_body_chars": 3000,
+        "intro": "定期実行(GitHub Actions)からの自動レポートです。返信は不要です。",
+    },
+}
 
 
 def fail(message: str) -> None:
@@ -108,10 +131,10 @@ def render_body(message: dict) -> str:
     """Wrap the message so the recipient can see it was sent automatically, not typed by hand."""
     body = message["body"].strip()
     reply_to = message.get("in_reply_to_message_id")
+    intro = KIND_CONFIG[message["kind"]]["intro"]
     lines = [
         f"[info][title]{AUTO_POST_MARKER}[/title]",
-        "ご依頼の対応にあたって確認させてください。"
-        "この確認は自動送信で、回答いただいた内容は担当者が確認のうえ着手します。",
+        intro,
         "",
         body,
         "[/info]",
@@ -140,16 +163,20 @@ def validate(message: dict, path: Path, rooms: dict[str, dict]) -> dict:
     room = rooms.get(room_name)
     if room is None:
         fail(f"{path.name}: room {room_name!r} is not in data/chatwork-rooms.json")
-    if not room.get("allow_auto_hearing"):
+
+    config = KIND_CONFIG[kind]
+    permission_flag = config["permission_flag"]
+    if not room.get(permission_flag):
         fail(
-            f"{path.name}: room {room_name!r} does not have allow_auto_hearing set, so nothing "
-            f"may be posted to it automatically."
+            f"{path.name}: room {room_name!r} does not have {permission_flag} set, so a "
+            f"{kind!r} message may not be posted to it automatically."
         )
 
-    if len(message["body"]) > MAX_BODY_CHARS:
+    max_chars = config["max_body_chars"]
+    if len(message["body"]) > max_chars:
         fail(
-            f"{path.name}: body is {len(message['body'])} characters (limit {MAX_BODY_CHARS}). "
-            f"Ask for what is needed in one consolidated message."
+            f"{path.name}: body is {len(message['body'])} characters (limit {max_chars} for "
+            f"kind {kind!r}). Ask for what is needed in one consolidated message."
         )
 
     if AUTO_POST_MARKER in message["body"]:

@@ -1,0 +1,70 @@
+{
+  "_comment": "あはき柔整プラン・ライトプラン並行運用5院(2026-09-10のブラッシュアップ対象と同じ5院)。住所・電話・営業時間はdata/clinics.jsonのライトプラン側エントリ(同一物件の同じ店舗のため住所等は共通)から2026-09-12時点で転記。今後clinics.json側が更新されたら、この配列も合わせて更新すること。facility_wordは各院のあはき柔整側HPB掲載名の末尾(鍼灸接骨院/鍼灸整骨院)。instagramはahaki-page-copy配下の各院ファイルに記載が無く、未確認のためnull(見つかった場合は追記)。",
+  "stores": [
+    {
+      "store_name": "本八幡南口鍼灸接骨院",
+      "hpb_store_id": "H000822241",
+      "facility_word": "鍼灸接骨院",
+      "corporation": "クラシオン",
+      "address": "千葉県市川市南八幡3-6-1 UTAK BUILDING",
+      "phone": "047-712-6670",
+      "hours_text": "【平日】10:30～13:00/15:00～21:00【土日祝】8:30～12:30/15:00～17:30",
+      "closed_day": "",
+      "instagram": null,
+      "hp_url": "https://motoyawata.chiryou-in.biz/",
+      "area_keyword": "市川"
+    },
+    {
+      "store_name": "ライフガーデン茂原鍼灸整骨院",
+      "hpb_store_id": "H000822239",
+      "facility_word": "鍼灸整骨院",
+      "corporation": "ケイズ",
+      "address": "千葉県茂原市六ツ野八貫野2785-1",
+      "phone": "0475-23-6003",
+      "hours_text": "【平日】9:15～12:30/15:15～20:30【土日祝】9:00～12:30/14:30～17:30",
+      "closed_day": "",
+      "instagram": null,
+      "hp_url": "http://lifegarden.chiryouin.biz/",
+      "area_keyword": "茂原"
+    },
+    {
+      "store_name": "新潟関屋鍼灸整骨院",
+      "hpb_store_id": "H000822243",
+      "facility_word": "鍼灸整骨院",
+      "corporation": "ケイズ",
+      "address": "新潟県新潟市中央区関屋本村町1-148-3",
+      "phone": "025-378-2266",
+      "hours_text": "【平日】10:00～13:00/15:30～20:30【土日祝】9:00～13:00/14:30～17:00",
+      "closed_day": "",
+      "instagram": null,
+      "hp_url": "http://sekiya.chiryouin.biz/",
+      "area_keyword": "新潟"
+    },
+    {
+      "store_name": "新静岡駅前鍼灸接骨院",
+      "hpb_store_id": "H000822244",
+      "facility_word": "鍼灸接骨院",
+      "corporation": "アポロ",
+      "address": "静岡県静岡市葵区伝馬町7-9",
+      "phone": "054-269-5811",
+      "hours_text": "【平日】10:30～13:00/15:30～21:00【土日祝】10:00～13:00/15:30～18:30",
+      "closed_day": "日",
+      "instagram": null,
+      "hp_url": "http://shizuoka.chiryouin.biz/",
+      "area_keyword": "静岡"
+    },
+    {
+      "store_name": "八幡宿駅西口鍼灸接骨院",
+      "hpb_store_id": "H000822247",
+      "facility_word": "鍼灸接骨院",
+      "corporation": "ケイズ",
+      "address": "千葉県市原市八幡1059-13 セレーナ八幡宿",
+      "phone": "0436-43-0011",
+      "hours_text": "【平日】10:00～13:00/15:30～21:00【土日祝】8:30～12:30/15:00～17:30",
+      "closed_day": "",
+      "instagram": null,
+      "hp_url": "https://curacion.jp/yawatajuku",
+      "area_keyword": "市原"
+    }
+  ]
+}

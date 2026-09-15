@@ -73,6 +73,31 @@ Chatwork公式の`[To:]`メンションは実在アカウントが必要なた�
 1,500文字以内という3条件を`scripts/chatwork_send.py`が強制する。ただし**上の表の線引き自体は
 機械判定できない**ため、判断はClaude側の責務。
 
+### 例外: 定期実行automationの「動いたかどうか」の事実報告(2026-09-09追加)
+
+上の表の「❌ 常に都度承認」にある「完了報告」は、**業務判断を伴う完了報告**(施策が効いたか、
+対応が完了したか等)を指す。これとは別に、**GitHub Actionsのcronジョブが実際に動いたか
+どうかという事実だけを報告する`kind: "status_report"`**を新設した(hpb-review-blog-checkの
+月次自動集計が最初の利用例)。業務判断も対応の約束も含まれない「定期ジョブの死活確認」に
+限定されるため、栗林さんが個別に`allow_auto_status_report: true`を付けたルームに限り、
+都度承認なしで自動投稿してよい。
+
+`hearing`との違い:
+
+| | kind: hearing | kind: status_report |
+|---|---|---|
+| 目的 | 依頼への対応に必要な情報を聞く | 定期ジョブが動いたか・何をしたかを報告する |
+| 対象ルーム | 依頼が飛んでくるブランドルーム(監視対象) | 栗林さん個人のマイチャット(通知専用) |
+| 権限フラグ | `allow_auto_hearing` | `allow_auto_status_report` |
+| 文字数上限 | 1,500字 | 3,000字 |
+| 返信の要否 | 想定あり(回答を待って着手) | 想定なし(確認のみ) |
+
+新しい定期実行automationにこの仕組みを使う場合は、`data/chatwork-rooms.json`の対象ルームに
+`allow_auto_status_report: true`を足し、ワークフロー側で`scripts/chatwork_send.py`を
+`kind: "status_report"`のメッセージと一緒に呼び出す。実装例は
+[.claude/skills/hpb-review-blog-check/SKILL.md](../../.claude/skills/hpb-review-blog-check/SKILL.md)
+と[scripts/notify_hpb_review_blog_check.py](../../scripts/notify_hpb_review_blog_check.py)。
+
 **トークンが栗林さん個人アカウントのものである以上、自動投稿は栗林さんの発言として表示される。**
 そのため自動送信メッセージには必ず「Claudeによる自動確認」ヘッダを付け、相手が誰に聞かれて
 いるのかを誤認しないようにしている。このヘッダは同時に、Claude自身の投稿を再検知して
@@ -102,10 +127,12 @@ GitHub Actions (30分ごと)
 Claude側が行う。取りこぼしを防ぐためキーワードは広めに設定してあり、空振りのIssueが立つのは
 許容コストとして扱う。
 
-## 監視対象ルーム
+## 監視対象ルーム / 通知専用ルーム
 
-現在の設定は[data/chatwork-rooms.json](../../data/chatwork-rooms.json)が正。2026-09-02時点では
-**「【WEBマーケ】ケイズ×リラックス」(リラックスブランド)の1件のみ**。
+現在の設定は[data/chatwork-rooms.json](../../data/chatwork-rooms.json)が正。2026-09-02時点で
+「【WEBマーケ】ケイズ×リラックス」(リラックスブランド、`allow_auto_hearing`、watcherの
+監視対象)を追加し、2026-09-09に「マイチャット」(`allow_auto_status_report`、watcherの
+監視対象ではなく送信専用)を追加した。
 
 他ブランドのルームを追加する場合は、同ファイルに1エントリ足すだけでよい(スクリプト・
 ワークフローの変更は不要)。追加時は、トークンのアカウントがそのルームのメンバーであることを

@@ -53,6 +53,15 @@ class TestNormalization(unittest.TestCase):
             normalize_store_name("梅ヶ丘店"),
         )
 
+    def test_relax_seitai_prefix_is_stripped_before_the_bare_brand_prefix(self):
+        """HPBリボンCSVの院名は『リラックス整体 高円寺店』。院マスタは『高円寺店』だけ。
+        『リラックス』だけを落とすと『整体』が種別語トークンとして残り一致しない
+        (2026-09-07、実データで発覚)。"""
+        self.assertEqual(
+            normalize_store_name("リラックス整体 高円寺店"),
+            normalize_store_name("高円寺店"),
+        )
+
     def test_shin_kyu_spelling_variants_unify(self):
         self.assertEqual(
             normalize_store_name("すまいる針灸接骨院 六甲道院"),

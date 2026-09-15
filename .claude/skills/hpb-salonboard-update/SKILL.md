@@ -10,6 +10,7 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
 ## Non-negotiable rules
 
 1. **Never type the SalonBoard password.** Logging in is the one step that always stays with the user — have them log into SalonBoard in their real Chrome (via the `mcp__claude-in-chrome__*` MCP tools, **not** the sandboxed `mcp__Claude_Browser__*` tools, since only the real Chrome carries their session) before any automation starts. If no tab is logged in yet, ask them to log in and confirm rather than attempting it yourself. A Chrome that isn't logged in returns `ユーザエラー / 認証エラーです。ログインしなおしてください。` at `CNC/groupTop/` — that's the signal to hand it back to the user, not to try logging in.
+   - **One narrow, explicit exception (2026-09-03)**: `scripts/salonboard_root_cause.py` (see `hpb-reservation-slot-check` skill) does automate login, headless, via `SALONBOARD_USER_ID`/`SALONBOARD_PASSWORD` GitHub Actions secrets — but only for that one unattended batch-classification job, only after the user explicitly approved storing login credentials for it, and only after a manual `--mode verify-login` confirms it actually works. This rule still applies as-is to every *interactive* SalonBoard task (this skill, the `salonboard-operator` agent) — don't generalize the exception.
 2. **Draft-saving and publishing are two separate decisions — treat them that way.** SalonBoard's coupon editor (and likely other tabs) only stages a change when you click 登録; a banner then says the change is *not yet live* until someone clicks a separate "◯◯情報を反映する" button (found on the relevant 掲載管理TOP page). The user has explicitly said they want to review the draft state before anything goes live. So: batch-editing/saving many items under one approval is fine, but **always stop and ask again, freshly, before clicking any 反映/publish button** — never fold that into the earlier "please make these edits" approval, no matter how routine the batch felt.
 3. **salonboard.com is the only editable surface.** beauty.hotpepper.jp is the public, read-only consumer-facing site — never mistake it for the admin backend, and never attempt to "log in" or edit there.
 
@@ -17,10 +18,17 @@ Operational playbook for editing content on SalonBoard (salonboard.com), the adm
 
 - **Load the MCP tool schemas first.** `mcp__claude-in-chrome__*` tools are deferred in this environment — batch every tool you expect to need into **one** `ToolSearch` call (`select:` accepts a comma-separated list). Loading them one at a time wastes a round-trip each.
 - **Pick the right Chrome when several are connected.** `list_connected_browsers` can return more than one, and until one is selected *every* browser call — including `tabs_context_mcp` — fails. Only one of them is likely to hold the 本部 SalonBoard session, so never guess: put every browser in front of the user with `AskUserQuestion`, then `select_browser` with the deviceId they choose. Confirm the choice is actually logged in by loading `CNC/groupTop/` before starting work.
+  - **The display name (`list_connected_browsers`' `name` field, or what a user calls "Browser 1") is not stable and does not necessarily match what the caller/user meant by that name** — confirmed 2026-09-11, a browser the parent session called "Browser 1" showed up as "Browser 2" in the child's own `list_connected_browsers` (the deviceId was identical, so it was the same physical browser). **Only ever match by deviceId, never by display name**, and when handing a deviceId between sessions/callers, pass the deviceId string itself, not just a name.
   - **If you are running as the `salonboard-operator` subagent, you cannot do this** — `AskUserQuestion` is unavailable inside subagents (`No such tool available`, confirmed 2026-09-02). Either the caller hands you a deviceId, or exactly one browser is connected; otherwise stop and return the candidate list to the caller. Do **not** try each browser in turn until one works.
 - **`tabs_context_mcp` does not work as the first item of a `browser_batch`.** Inside a batch, `createIfEmpty: true` is ignored and the batch fails with `No tab available`. Call it standalone first, then batch the rest.
 - **`scroll` already returns a screenshot.** Don't follow a scroll with an explicit screenshot in the same batch — you get the same image twice and pay for both.
 - **Screenshot resolution and scroll position can drift mid-session** — the same tab returned 1568×726 at one point and 958×888 later with no explicit resize (confirmed 2026-09-02). Coordinates computed from an earlier screenshot can miss once this happens. Always click against the *most recent* screenshot, never a cached one from a few turns back. If a screenshot comes back entirely blank, that almost always means the scroll position has gone past the end of the content into empty page background, not that the page failed to load — scroll back (up, or to a known anchor via `find` + `scroll_to`) and re-screenshot rather than guessing coordinates blind.
+- **Don't reuse a numeric scroll amount across different salons/rows in `CNC/groupTop/`'s list.** The list is long (150+ rows) and small drifts in prior scrolling carry over; a scroll amount that correctly landed on one salon's row can land on an unrelated neighboring salon for the next one (confirmed 2026-09-10: an unrelated salon got clicked this way, caught only because it was a read-only step). Use `find` for the target name, `scroll_to` its ref, then **screenshot and visually confirm the row before clicking** — never click from a remembered scroll position.
+- **`CNC/groupTop/` can intermittently hang** — `get_page_text`/`find`/`scroll`/`screenshot` all start failing with "Page still loading" / "Script injection timed out" after several operations on the same tab (cause unconfirmed, possibly a news-feed widget). `wait` doesn't reliably clear it. Close the tab and open a fresh one (`tabs_create_mcp` or `navigate` with `createIfEmpty`) rather than fighting the same tab.
+- **The page footer (`<salon name>様 / <salon ID> / …`) can silently show a *different* salon than the one you just navigated to** — confirmed 2026-09-10: after correctly landing on one salon's TOP page, clicking a nav tab (e.g. 掲載管理→サロン) sometimes lands on the right URL but with a *different, previously-viewed* salon's data. Re-check the footer after **every** navigation that's supposed to stay in the same salon, not just once when you first enter it. If it doesn't match, don't try to recover in place — go back to `CNC/groupTop/` and re-enter.
+- **A `find` query like "the 5th dropdown/checkbox" against a form with several identically-labeled controls (e.g. multiple "未選択" genre dropdowns) can return the wrong one's ref** — confirmed 2026-09-10, a value meant for slot 5 landed in slot 6. For this kind of list-of-identical-controls form, use `read_page` (`filter: interactive`) and count occurrence order yourself instead of trusting `find`'s natural-language match, and always re-screenshot/re-read after `form_input` to confirm the value landed in the intended slot.
+- **A button's visual grey-out (disabled-looking) is not reflected in `read_page`'s `disabled` attribute** — confirmed 2026-09-10 on 掲載管理TOP's 反映申請 buttons, both enabled and disabled-looking ones reported no `disabled` attribute. Confirm clickability by the button's on-screen color (screenshot/`zoom`), not by reading DOM attributes.
+- **A transient `ユーザエラー: サロンが選択されていません` (or `ユーザまたは、お店が切り替わっているため…`) can appear on an otherwise-correct save/navigate**, cause unconfirmed. Nothing was lost when this happened — re-enter via `CNC/groupTop/`, confirm via the footer that you're back in the right salon, and redo the edit; it succeeds on retry.
 
 ## Read-only tasks
 
@@ -42,9 +50,27 @@ Steps 0, 6 and the CSV row below exist to cost out *work*. For a purely read-onl
 
 The headquarters account's salon list lives at `salonboard.com/CNC/groupTop/`. Search that list for the target salon's exact name to jump into its SalonBoard without a separate login — the headquarters login covers every salon underneath it. As of 2026-09-02 the list holds ~160 salons; `get_page_text` on that page returns the whole `salon ID + name` table in one call, which is the cheapest way to resolve a name to an ID.
 
-**The salon-name links are `javascript:void(0);` and clicking them by element ref silently does nothing** — the tool returns `Clicked on element ref_N` and the page stays on `CNC/groupTop/`. Click them by screenshot coordinate instead. More generally: a click that reports success is not proof of navigation, so **verify the resulting URL** (`tabs_context_mcp` or a screenshot) after any click that is supposed to move you, rather than assuming it landed.
+**The salon-name links are `javascript:void(0);`, handled by delegated JS event listeners.** Element-ref clicks and screenshot-coordinate clicks (`computer` tool) are both synthetic mouse events sent via CDP, and **both were observed to stop navigating partway through a multi-salon task** (2026-09-11: worked for the first 1–4 salons, then silently stopped firing the link's handler for every remaining salon, no matter the click method, new tabs, or re-selecting the browser). **The one method that never failed: `javascript_tool` calling `element.click()` directly on the matched `<a>`**, e.g.:
+
+```js
+Array.from(document.querySelectorAll('a'))
+  .find(a => a.textContent.trim() === '柏南口整骨院')
+  .click();
+```
+
+Use exact-text match (`.trim() === 店舗名`), not substring, so you don't hit a different salon whose name contains the target as a substring. Prefer this over coordinate/ref clicks for every `CNC/groupTop/` salon switch. (`salonboard-operator` needs `mcp__claude-in-chrome__javascript_tool` in its `tools:` list for this — added 2026-09-11.)
+
+A click that reports success is still not proof of navigation either way — **verify the resulting URL** (`tabs_context_mcp` or a screenshot, or the page footer's salon name) after any click that is supposed to move you.
+
+**If clicking stops working across several salons in a row (not just one flaky click), stop retrying coordinates/refs and suspect a real concurrent session first**, not a UI quirk: check `hpb_work_log.d/` for a recent file from another session touching the same salon/account, and re-run `list_connected_browsers` to see if the connected-browser count or deviceIds changed since you started. Two different sessions hitting the same SalonBoard account/browser at once has been confirmed (2026-09-11) to cause real symptoms — tabs freezing for 30–45s, `get_page_text` timing out, even a forced session timeout — not just click failures. Retrying harder does not fix this; identifying the collision and waiting it out (or asking the user which session should yield) does.
 
 Once inside a salon, the section URLs below can be reached by direct `navigate` — the salon context is held in the session, so there's no need to re-click through the nav each time.
+
+## 診療時間・定休日を聞かれたとき
+
+`data/clinics.json` には **診療時間も定休日も入っていません**(2026-09-04に全204件のキーを数えて確認)。取り込み元スプレッドシートのファイル名が「診療時間」(ID `1Pd2S6P9sAVMTk8FBqPJHKwihhggPgmvQk6pEFkgwHl8`)なので「渡してあるはず」と食い違いやすいのですが、実際に取り込んだのは院名・住所・電話・URL・メール類だけです。
+
+なので「定休日を扱う仕組みがリポジトリに無い」という回答自体は正しい。ただし**マスタ側にはある**ので、そこで話を止めないこと: 上記スプレッドシートのブランド別タブ、および同スプレッドシート内「AIチェック用」シートの定休日列(「木曜・日曜・第4木曜」形式)を見る。取り込み作業は `docs/backlog.md` で追跡中で、それが済むまで定休日を前提にした判定は書かない。
 
 ## Section-specific details
 
@@ -67,7 +93,21 @@ Section URLs under `https://salonboard.com/`, confirmed 2026-09-02 — all reach
 
 Detailed, field-level notes (exact click paths, character limits, quirks of specific tools like unstable element references after navigation) live in `references/`, one file per SalonBoard section, so this file stays short:
 
-- `references/coupon-editing.md` — クーポン (coupon) tab: the only section mapped out so far.
+- `references/coupon-editing.md` — クーポン (coupon) tab.
+- `references/menu-and-reflect-management.md` — メニュー掲載情報の無変更再登録、および掲載管理TOP(`reflectTop`)の反映申請ボタンの束ね方・有効/無効判定。
+- `references/salon-profile-editing.md` — サロン基本情報(サロンの一言・サロントップ画像・サブコピー・フリーワード)の欄の区別と文字数制限。
+
+直営135院のうち、ライトプラン側ページとあはき柔整プラン側ページの両方を今も現役で運用している
+店舗は本八幡南口・ライフガーデン茂原・新潟関屋・新静岡駅前・八幡宿駅西口の5院だけで(他は未対応、
+または完全切り替え済みでライト側ページが廃止済み)、集客の多いライト側に押されてあはき柔整側の
+口コミ・ブログ・写真が「0か1」で放置されがちという構造的課題がある。この5院向けの施策一式(院別の
+現状ベース差分編集案、画像方針、競合分析)は`data/proposals/2026-09-10_あはき柔整プランページ
+ブラッシュアップ.md`と`data/proposals/ahaki-page-copy/`にまとまっているので、この5院のページ内容
+(クーポン・フォトギャラリー・トップ画像・こだわり・キャッチコピー等)を触るタスクではまずそちらを参照する。
+
+ブログ(`KLP/blog/blogList`)であはき柔整プラン5院向けの投稿を作業する場合は、`../hpb-ahaki-blog-rotation/`が
+本文テンプレート・店舗別ローテーションを担当する(2026-09-12新設)。このSkill側では
+実際のクリック手順(未検証)を`references/blog-posting.md`として書き残す役割を担う。
 
 If a task touches a section without a reference file yet (スタッフ, メニュー, フォトギャラリー, こだわり, 特集, ブログ, 口コミ), work it out live, then **write a new reference file capturing what you learned** (structure, gotchas, field names/limits) so the next task in that section skips the rediscovery. Follow the same shape as `coupon-editing.md`.
 

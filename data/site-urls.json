@@ -1,0 +1,2086 @@
+{
+  "_comment": "店舗名 → 公開HP URLの一覧。出典: Googleスプレッドシート「サイト情報一覧」(ID: 1n06i3R6QYuQ4SUCid3RsT5rnNcmtc9jxOaqZPKNGnnc)。元シートには各店舗のWordPressログインURL・ID・パスワードも含まれるが、認証情報は絶対にこのリポジトリにコミットしないというルール(CLAUDE.md「認証情報の扱い」)に従い、ここには一切含めていない(ログインURL・wp-login.php等を含む値は抽出時に除外済み)。ログイン情報が必要な作業は元シートを都度参照すること。urlは複数タブに渡って揺れがあり(http/https、www有無、旧ドメインからの移行等)、出現回数が最も多かったものをurlに採用し、他の候補はother_urls_seenに残した。どちらが現行URLか不明な場合は元シートかdata/clinics.jsonのwebsiteフィールドと突き合わせて判断すること。data/clinics.jsonと店舗名の突合(id付与)は未実施。2026-09-11時点でのスナップショット。",
+  "source_sheet_url": "https://docs.google.com/spreadsheets/d/1n06i3R6QYuQ4SUCid3RsT5rnNcmtc9jxOaqZPKNGnnc/",
+  "last_synced": "2026-09-11",
+  "sites": [
+    {
+      "name": "あいメディカルサイト",
+      "url": "http://chiryou-in.biz/"
+    },
+    {
+      "name": "あい鍼灸院・接骨院",
+      "url": "http://chiryou-in.biz/"
+    },
+    {
+      "name": "あい鍼灸院・接骨院 南森町院",
+      "url": "https://nanmori.chiryou-in.biz/",
+      "area": "大阪府",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "あい鍼灸院・接骨院 谷4院",
+      "url": "https://tanimachi.chiryou-in.biz/",
+      "area": "大阪"
+    },
+    {
+      "name": "あい鍼灸院・接骨院 阪急三国駅院",
+      "url": "https://mikuni.chiryou-in.biz/",
+      "area": "大阪"
+    },
+    {
+      "name": "あい鍼灸院・接骨院上板橋院",
+      "url": "https://itabashi.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あい鍼灸院・接骨院十条院",
+      "url": "https://jujo.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あい鍼灸院・接骨院新橋院（新橋西口整骨院）",
+      "url": "https://shinbashi.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あい鍼灸院・接骨院朝霞駅院",
+      "url": "https://asaka.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あい鍼灸院・接骨院池袋院",
+      "url": "https://ikebukuro.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あい鍼灸院・接骨院茅場町院",
+      "url": "https://kayabacho.chiryou-in.biz/",
+      "area": "東京"
+    },
+    {
+      "name": "あおば用で使わなかった",
+      "url": "http://aoba.chiryouin.biz/"
+    },
+    {
+      "name": "あさくさ鍼灸整骨院　浅草院",
+      "url": "https://asakusa.chiryou-in.biz/"
+    },
+    {
+      "name": "あやめ鍼灸整骨院 枚方長尾院",
+      "url": "https://chiryou-in.biz/nagao/"
+    },
+    {
+      "name": "えがおリハ 本中山（デイサービス 下総中山 西船橋 本八幡）",
+      "url": "http://egaoreha.jp/"
+    },
+    {
+      "name": "おかだ鍼灸整骨院 枚方御殿山院",
+      "url": "https://chiryou-in.biz/gotenyama/"
+    },
+    {
+      "name": "きずなの会",
+      "url": "http://kizunanokai.net/"
+    },
+    {
+      "name": "きずなの会-新御徒町駅前整骨院",
+      "url": "http://kizunanokai.net/okachimachi/"
+    },
+    {
+      "name": "くまのみ用で使わなかった",
+      "url": "http://kumanomi.chiryouin.biz/"
+    },
+    {
+      "name": "さくら整骨院",
+      "url": "http://sakura.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "さくら整骨院セカンド",
+      "url": "https://curacion.jp/sakura",
+      "other_urls_seen": [
+        "http://www.curacion.jp/sakura"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "さくら整骨院（セカンドサイトにリダイレクト）",
+      "url": "http://sakura.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 branch松井山手",
+      "url": "https://chiryou-in.biz/matsuiyamate/"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 交野院",
+      "url": "https://chiryou-in.biz/katano/"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 南茨木院",
+      "url": "https://chiryou-in.biz/minamiibaraki/"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 枚方公園院",
+      "url": "https://chiryou-in.biz/hirakatakoen/"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 深江橋院",
+      "url": "https://chiryou-in.biz/fukaebashi/"
+    },
+    {
+      "name": "たいよう鍼灸整骨院　立石院",
+      "url": "https://karada.clinic/tateishi/"
+    },
+    {
+      "name": "どれみ鍼灸接骨院",
+      "url": "https://doremi-sekkotuin.com/"
+    },
+    {
+      "name": "なまい接骨院本院",
+      "url": "https://honinnamai.com/"
+    },
+    {
+      "name": "ひなた鍼灸接骨院",
+      "url": "https://chiryouin.biz/kamezaki/"
+    },
+    {
+      "name": "ひまわり鍼灸整骨院 高槻院",
+      "url": "https://chiryou-in.biz/takatsuki/"
+    },
+    {
+      "name": "ふじみ野駅西口接骨院",
+      "url": "https://fujimino.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://fujimino.chiryouin.biz/"
+      ],
+      "area": "富士見市"
+    },
+    {
+      "name": "みずほ台駅前整骨院",
+      "url": "http://mizuhodai.chiryouin.biz/",
+      "area": "埼玉"
+    },
+    {
+      "name": "みどりまちスマイル鍼灸接骨院",
+      "url": "https://midorimachi.chiryouin.biz/",
+      "area": "広島県 広島市"
+    },
+    {
+      "name": "わかば整骨院",
+      "url": "https://wakaba.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://wakaba.chiryouin.biz/"
+      ],
+      "area": "江戸川区"
+    },
+    {
+      "name": "エステティックサロン　シェアラ",
+      "url": "http://sharer.chiryouin.biz/"
+    },
+    {
+      "name": "オンラインマニュアル",
+      "url": "https://autosns.jp/manual"
+    },
+    {
+      "name": "クラシオン交通事故サイト",
+      "url": "http:/chiryouin.biz/lpsite/"
+    },
+    {
+      "name": "クラシオン接骨院　MEGAドン・キホーテ長野高田院",
+      "url": "https://takada.chiryouin.biz/",
+      "area": "長野市",
+      "corporation": "バーニング"
+    },
+    {
+      "name": "クラシオン接骨院イオンタウン松原院",
+      "url": "https://aeon-matsubara.chiryouin.biz",
+      "area": "松原市",
+      "corporation": "光井JAPAN"
+    },
+    {
+      "name": "クラシオン整体サロン都賀西口店",
+      "url": "https://tsuganishi.bodyseitai.com/",
+      "area": "千葉市"
+    },
+    {
+      "name": "クラシオン整体院逆井店",
+      "url": "http://www.curacion.jp/sakasai",
+      "area": "柏市"
+    },
+    {
+      "name": "クラシオン麻布十番整骨院",
+      "url": "http://azabu.chiryouin.biz/",
+      "area": "麻布"
+    },
+    {
+      "name": "グッドフォーチュン公式",
+      "url": "https://www.goodfortune-hiroshima.jp/"
+    },
+    {
+      "name": "グループサイト",
+      "url": "https://namaisekkotsuin.com/"
+    },
+    {
+      "name": "ケイズコーポレート",
+      "url": "http:/keizgroup.jp/"
+    },
+    {
+      "name": "ケイズ経営サポート",
+      "url": "http:/keizgroup.jp/members/"
+    },
+    {
+      "name": "サニタ整骨院上星川店",
+      "url": "https://sanitagroup.jp/kamihoshikawa/"
+    },
+    {
+      "name": "サニタ整骨院十日市場駅前店",
+      "url": "http://sanitagroup.jp/tokaichibaekimae/"
+    },
+    {
+      "name": "サニタ整骨院竹山店",
+      "url": "https://sanitagroup.jp/takeyama"
+    },
+    {
+      "name": "サニタ整骨院若葉台店",
+      "url": "https://sanitagroup.jp/wakabadai/"
+    },
+    {
+      "name": "サニタ整骨院西菅田店【閉店】",
+      "url": "https://sanitagroup.jp/sugeta"
+    },
+    {
+      "name": "サニタ鍼灸整骨院 十日市場店（新サイトにリダイレクト）",
+      "url": "https://sanitagroup.jp/tokaichiba/"
+    },
+    {
+      "name": "サニタ鍼灸整骨院いすみ店",
+      "url": "https://sanitagroup.jp/isumi/"
+    },
+    {
+      "name": "サニタ鍼灸整骨院三田店",
+      "url": "https://sanitagroup.jp/mita"
+    },
+    {
+      "name": "サニタ鍼灸整骨院十日市場店（新サイト）",
+      "url": "https://sanita-seikotsuin.com/tokaichiba/"
+    },
+    {
+      "name": "サニタ鍼灸整骨院君津中野店",
+      "url": "https://sanitagroup.jp/kimitsu"
+    },
+    {
+      "name": "サニタ鍼灸整骨院町田根岸店",
+      "url": "https://sanitagroup.jp/machida"
+    },
+    {
+      "name": "サニタ鍼灸整骨院相模大塚店【閉店】",
+      "url": "https://sanitagroup.jp/sagamiotsuka"
+    },
+    {
+      "name": "サニタ鍼灸整骨院鴨居駅前店（他社作成サイト）",
+      "url": "http://sanitagroup.jp/kamoiekimae/"
+    },
+    {
+      "name": "サニタ鍼灸整骨院鶴ヶ峰店",
+      "url": "https://kizunanokai.net/tsurugamine/"
+    },
+    {
+      "name": "サニタ鍼灸整骨院鶴ヶ峰店（新テーマ）",
+      "url": "https://sanitagroup.jp/tsurugamine/"
+    },
+    {
+      "name": "サンロード整骨院",
+      "url": "http://sunroad.chiryouin.biz/",
+      "area": "江東区"
+    },
+    {
+      "name": "シンデレラ新田駅西口店",
+      "url": "http://cinderella.chiryouin.biz/"
+    },
+    {
+      "name": "テスト？",
+      "url": "http://otest.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://test.chiryouin.biz/"
+      ]
+    },
+    {
+      "name": "トップソルブコーポレート",
+      "url": "https://topsolve.co.jp/"
+    },
+    {
+      "name": "トップソルブ採用サイト",
+      "url": "http://topsolve.co.jp/recruit/"
+    },
+    {
+      "name": "トップソルブ茅場町（仮）",
+      "url": "https://kayabacho-kanjiku.chiryouin.biz/"
+    },
+    {
+      "name": "ハローズ花尻接骨院",
+      "url": "http://chiryou-in.biz/hanajiri/",
+      "area": "岡山市"
+    },
+    {
+      "name": "ファースト整骨院",
+      "url": "https://shinbashi.chiryou-in.biz/",
+      "other_urls_seen": [
+        "http://first.chiryouin.biz/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "ファースト整骨院セカンド",
+      "url": "http://www.curacion.jp/first/",
+      "area": "市川市"
+    },
+    {
+      "name": "ファースト整骨院（セカンドサイトにリダイレクト）",
+      "url": "http://www.curacion.jp/first/",
+      "other_urls_seen": [
+        "http://first.chiryouin.biz/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "ブログ",
+      "url": "https://autosns.jp/blog"
+    },
+    {
+      "name": "ペインセーブ接骨院",
+      "url": "https://pain-sekkotuin.com/"
+    },
+    {
+      "name": "マルナカ灘崎接骨院",
+      "url": "https://nadasaki.chiryouin.biz/",
+      "area": "岡山市",
+      "corporation": "オープンしない"
+    },
+    {
+      "name": "ミライグループ採用サイト（旧光井ジャパン採用）",
+      "url": "https://recruit.mitsui-japan.co.jp"
+    },
+    {
+      "name": "ミライ接骨院 ヒラマツ城東店",
+      "url": "https://hiramatsu.chiryouin.biz/",
+      "area": "和歌山市",
+      "corporation": "ミライ"
+    },
+    {
+      "name": "ミライ整骨院グループサイト（旧：光井グループサイト）",
+      "url": "https://benkei-seikotsuin-group.com"
+    },
+    {
+      "name": "ミライ整骨院本サイト",
+      "url": "https://mitsui-japan.co.jp/"
+    },
+    {
+      "name": "ライフガーデン茂原整骨院",
+      "url": "http://lifegarden.chiryouin.biz/",
+      "area": "茂原市"
+    },
+    {
+      "name": "ライフガーデン茂原整骨院セカンド→やめる",
+      "url": "http://www.curacion.jp/lifegarden/",
+      "area": "茂原市"
+    },
+    {
+      "name": "リフレッシュセンターリラックス FKDインターパーク店",
+      "url": "https://refresh-relax.com/fkd/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス たまプラーザ東急百貨店",
+      "url": "https://refresh-relax.com/tama/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス イオン入間店",
+      "url": "https://refresh-relax.com/iruma/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス サクラス戸塚店",
+      "url": "https://refresh-relax.com/totsuka/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 下高井戸店",
+      "url": "https://refresh-relax.com/shimotakaido/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 中野新橋店",
+      "url": "https://refresh-relax.com/nakanoshinbashi/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 久我山店",
+      "url": "https://refresh-relax.com/kugayama/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 代々木公園店",
+      "url": "https://refresh-relax.com/yoyogi/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 元住吉店",
+      "url": "https://refresh-relax.com/motosumiyoshi/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 千歳烏山店",
+      "url": "https://refresh-relax.com/chitose-karasuyama/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 宇都宮東口駅前店",
+      "url": "https://refresh-relax.com/utsunomiya/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 幡ヶ谷店",
+      "url": "https://refresh-relax.com/hatagaya/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 方南町店",
+      "url": "https://refresh-relax.com/honancho/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 桜上水店",
+      "url": "https://refresh-relax.com/sakurajosui/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 梅ヶ丘店",
+      "url": "https://refresh-relax.com/umegaoka/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 水戸京成百貨店",
+      "url": "https://refresh-relax.com/mito/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 浜田山店",
+      "url": "https://refresh-relax.com/hamadayama/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 浦和店",
+      "url": "https://refresh-relax.com/urawa/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 祖師谷店",
+      "url": "https://refresh-relax.com/soshigaya/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 笹塚店",
+      "url": "https://refresh-relax.com/sasazuka/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 西新宿店",
+      "url": "https://refresh-relax.com/nishishinjuku/"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 阿佐ヶ谷店",
+      "url": "https://refresh-relax.com/asagaya/"
+    },
+    {
+      "name": "リラックス 市川真間店",
+      "url": "https://refresh-relax.com/ichikawamama/"
+    },
+    {
+      "name": "リラックス 茅場町店",
+      "url": "https://refresh-relax.com/kayabacho/"
+    },
+    {
+      "name": "リラックス下総中山店",
+      "url": "https://refresh-relax.com/nakayama/"
+    },
+    {
+      "name": "リラックス中野坂上店",
+      "url": "https://refresh-relax.com/nakanosakaue/"
+    },
+    {
+      "name": "リラックス京成立石店",
+      "url": "https://refresh-relax.com/keiseitateishi/"
+    },
+    {
+      "name": "リラックス仙川店",
+      "url": "https://refresh-relax.com/sengawa/"
+    },
+    {
+      "name": "リラックス戸越銀座店",
+      "url": "https://refresh-relax.com/togoshiginza/"
+    },
+    {
+      "name": "リラックス新山下店",
+      "url": "https://refresh-relax.com/shinyamashita"
+    },
+    {
+      "name": "リラックス武蔵小山店",
+      "url": "https://refresh-relax.com/musashikoyama/"
+    },
+    {
+      "name": "リラックス池袋店",
+      "url": "https://refresh-relax.com/ikebukuro/"
+    },
+    {
+      "name": "ローズ一ノ割",
+      "url": "http://ichinowari.chiryouin.biz/"
+    },
+    {
+      "name": "ローズ豊春",
+      "url": "http://toyoharu.chiryouin.biz"
+    },
+    {
+      "name": "ン",
+      "url": "http://ichikawamama.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "三咲えきなか整骨院",
+      "url": "http://misaki.chiryouin.biz/",
+      "area": "船橋市"
+    },
+    {
+      "name": "三国エキナカ接骨院",
+      "url": "https://mikuni.chiryou-in.biz/",
+      "area": "大阪市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "三河島鍼灸整骨院（「直営以外」の三河島にリダイレクト）",
+      "url": "https://mikawashima.chiryou-in.biz/"
+    },
+    {
+      "name": "三河島鍼灸整骨院（旧：太洋⇒直営）",
+      "url": "https://mikawashima.chiryouin.biz/",
+      "area": "東京都荒川区"
+    },
+    {
+      "name": "上板橋南口整骨院",
+      "url": "https://itabashi.chiryou-in.biz/",
+      "area": "板橋区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "上板橋駅前接骨院",
+      "url": "https://curacion.jp/kamiitabashi/",
+      "other_urls_seen": [
+        "http://curacion.jp/kamiitabashi/"
+      ],
+      "area": "板橋区"
+    },
+    {
+      "name": "上賀茂整骨施術院",
+      "url": "https://kamigamo.chiryouin.biz/"
+    },
+    {
+      "name": "下井草駅前接骨院",
+      "url": "http://shimoigusa.chiryouin.biz/"
+    },
+    {
+      "name": "下総中山中央整骨院",
+      "url": "https://curacion.jp/nakayamachuo/",
+      "other_urls_seen": [
+        "http://curacion.jp/nakayamachuo/",
+        "http://nakayama.chiryouin.biz/"
+      ],
+      "area": "船橋市"
+    },
+    {
+      "name": "下総中山駅前整骨院",
+      "url": "https://nakayama.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://nakayama.chiryouin.biz/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "下総中山駅北口整骨院",
+      "url": "https://curacion.jp/nakayamakita/",
+      "area": "船橋市"
+    },
+    {
+      "name": "下赤塚北口接骨院",
+      "url": "https://shimoakatsuka.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://shimoakatsuka.chiryouin.biz/"
+      ],
+      "area": "板橋区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "中村公園駅前接骨院",
+      "url": "https://chiryouin.biz/nakamurakouen/",
+      "other_urls_seen": [
+        "https://chiryouin.biz/nakamurakouen"
+      ],
+      "area": "名古屋市"
+    },
+    {
+      "name": "二和向台駅前整骨院",
+      "url": "https://futawamukodai.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://futawamukodai.chiryouin.biz/"
+      ],
+      "area": "船橋市"
+    },
+    {
+      "name": "二条駅前整骨院",
+      "url": "https://nijoekimae.chiryouin.biz"
+    },
+    {
+      "name": "五井西口　新交通事故ページ修正",
+      "url": "https://karada.clinic/goi/"
+    },
+    {
+      "name": "五井西口整骨院",
+      "url": "http://goi.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/goi/"
+      ],
+      "area": "市原市"
+    },
+    {
+      "name": "五井駅東口接骨院",
+      "url": "http://goihigashi.chiryou-in.biz",
+      "area": "市原市"
+    },
+    {
+      "name": "井尻駅前接骨院",
+      "url": "https://ijiri.chiryouin.biz/",
+      "area": "福岡市"
+    },
+    {
+      "name": "京成八幡北口整骨院",
+      "url": "http://yawata.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "京成八幡駅前整骨院",
+      "url": "https://curacion.jp/yawataekimae/",
+      "other_urls_seen": [
+        "http://yawata.chiryouin.biz/",
+        "http://curacion.jp/yawataekimae/",
+        "http://curacion.jp/yawataekimae"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "京成立石駅前接骨院",
+      "url": "https://curacion.jp/keiseitateishi/",
+      "other_urls_seen": [
+        "http://curacion.jp/keiseitateishi"
+      ],
+      "area": "葛飾区"
+    },
+    {
+      "name": "京都中央整骨院　今出川院",
+      "url": "https://imadegawa.chiryouin.biz",
+      "area": "京都市上京区"
+    },
+    {
+      "name": "京都中央整骨院　山科院",
+      "url": "https://yamashina.chiryouin.biz",
+      "area": "京都市山科区"
+    },
+    {
+      "name": "今池南接骨院",
+      "url": "https://imaike.chiryouin.biz/",
+      "area": "名古屋市"
+    },
+    {
+      "name": "会社HP",
+      "url": "https://autosns.jp/company"
+    },
+    {
+      "name": "佐倉ユーカリが丘接骨院",
+      "url": "https://yukarigaoka.chiryouin.biz",
+      "other_urls_seen": [
+        "https://yukarigaoka.chiryouin.biz/"
+      ],
+      "area": "佐倉市"
+    },
+    {
+      "name": "佐倉大崎台接骨院",
+      "url": "https://curacion.jp/osakidai/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/osakidai/"
+      ],
+      "area": "佐倉市"
+    },
+    {
+      "name": "佐倉志津整骨院",
+      "url": "http://shizu.chiryouin.biz/",
+      "area": "佐倉市"
+    },
+    {
+      "name": "佐倉駅前整骨院",
+      "url": "https://sakuraekimae.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://sakuraekimae.chiryouin.biz/"
+      ],
+      "area": "佐倉市"
+    },
+    {
+      "name": "修学院整骨施術院",
+      "url": "https://shugakuin.chiryouin.biz/"
+    },
+    {
+      "name": "倉敷インター接骨院",
+      "url": "https://kurashiki.chiryouin.biz/",
+      "area": "倉敷市"
+    },
+    {
+      "name": "健盛鍼灸接骨院",
+      "url": "https://kensei-shinkyu.com/"
+    },
+    {
+      "name": "元住吉ブレーメン通り接骨院",
+      "url": "https://karada.clinic/motosumiyoshi/",
+      "other_urls_seen": [
+        "https://motosumiyoshi.chiryouin.biz/",
+        "http://motosumiyoshi.chiryouin.biz/"
+      ],
+      "area": "川崎市",
+      "corporation": "フォース"
+    },
+    {
+      "name": "元住吉ブレーンストリート接骨院",
+      "url": "http://motosumiyoshi.chiryouin.biz/"
+    },
+    {
+      "name": "児玉なまい接骨院（旧：こだま大地整骨院）",
+      "url": "https://kodamadaichi-seikotuin.com/"
+    },
+    {
+      "name": "八千代大和田整骨院",
+      "url": "https://owada.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/yachiyoowada/",
+        "http://owada.chiryouin.biz/"
+      ],
+      "area": "八千代市"
+    },
+    {
+      "name": "八幡宿駅東口接骨院",
+      "url": "https://yawatajuku.chiryouin.biz/",
+      "area": "市原市"
+    },
+    {
+      "name": "八幡宿駅西口接骨院",
+      "url": "http://curacion.jp/yawatajuku/",
+      "area": "市原市"
+    },
+    {
+      "name": "八王子北口整骨院",
+      "url": "https://hachioji.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/hachioujikitaguchi/",
+        "http://hachioji.chiryouin.biz/"
+      ],
+      "area": "八王子市"
+    },
+    {
+      "name": "八街市交通事故治療.com",
+      "url": "http:/xn--3kq2by8jm0twzipil2hq587a9uo.com/"
+    },
+    {
+      "name": "八街駅前整骨院",
+      "url": "https://yachimata.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://yachimata.chiryouin.biz/"
+      ],
+      "area": "八街市"
+    },
+    {
+      "name": "六実駅前整骨院",
+      "url": "https://mutsumi.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://mutsumi.chiryouin.biz/"
+      ],
+      "area": "松戸市"
+    },
+    {
+      "name": "初石駅前整骨院",
+      "url": "https://hatsuishi.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://hatsuishi.chiryouin.biz/"
+      ],
+      "area": "流山市"
+    },
+    {
+      "name": "勝田台北口接骨院",
+      "url": "https://katsutadai.chiryouin.biz",
+      "area": "八千代市"
+    },
+    {
+      "name": "北仙台駅前接骨院",
+      "url": "https://chiryouin.biz/kitasendai",
+      "area": "仙台市"
+    },
+    {
+      "name": "北千住西口接骨院",
+      "url": "https://kitasenju.chiryou-in.biz/",
+      "area": "足立区"
+    },
+    {
+      "name": "北千住駅前整骨院",
+      "url": "https://kitasenju.chiryouin.biz/",
+      "area": "東京都 足立区"
+    },
+    {
+      "name": "北小金南口駅前接骨院",
+      "url": "https://curacion.jp/kitakogane/",
+      "other_urls_seen": [
+        "http://curacion.jp/kitakogane/"
+      ],
+      "area": "松戸市"
+    },
+    {
+      "name": "北小金駅前整骨院",
+      "url": "http://kitakogane.chiryouin.biz/",
+      "area": "松戸市"
+    },
+    {
+      "name": "北本駅前なまい接骨院",
+      "url": "https://kitamoto-namai.com/"
+    },
+    {
+      "name": "北浦和駅トップ接骨院",
+      "url": "http://kitaurawa.chiryouin.biz/"
+    },
+    {
+      "name": "十条銀座整骨院",
+      "url": "https://jujo.chiryou-in.biz/",
+      "area": "北区"
+    },
+    {
+      "name": "千歳駅南接骨院",
+      "url": "https://chitose.chiryouin.biz/",
+      "area": "千歳市"
+    },
+    {
+      "name": "千種本山接骨院",
+      "url": "https://motoyama.chiryouin.biz/",
+      "area": "名古屋市"
+    },
+    {
+      "name": "南仙台東口接骨院",
+      "url": "http://minamisendai.chiryouin.biz/",
+      "area": "仙台市"
+    },
+    {
+      "name": "南平岸駅前接骨院",
+      "url": "https://chiryouin.biz/minamihiragishi",
+      "area": "札幌市",
+      "corporation": "クラシオン"
+    },
+    {
+      "name": "南柏東口接骨院",
+      "url": "https://curacion.jp/minamikashiwa/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/minamikashiwa/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "南柏駅前整骨院",
+      "url": "https://minamikashiwa.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://minamikashiwa.chiryouin.biz/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "南流山駅前整骨院",
+      "url": "https://nagareyama.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://nagareyama.chiryouin.biz/"
+      ],
+      "area": "流山市"
+    },
+    {
+      "name": "吉見なまい接骨院",
+      "url": "https://yoshiminamai-sekkotsuin.com/"
+    },
+    {
+      "name": "名取市交通事故治療.com",
+      "url": "http://chiryouin.biz/ziko/natorishi/"
+    },
+    {
+      "name": "名取西口整骨院",
+      "url": "https://natori.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://natori.chiryouin.biz/"
+      ],
+      "area": "名取市"
+    },
+    {
+      "name": "和歌山駅東口接骨院",
+      "url": "https://wakayama.chiryouin.biz/",
+      "area": "和歌山市",
+      "corporation": "光井JAPAN"
+    },
+    {
+      "name": "四条烏丸中央整骨院　⇒直営へ移動済",
+      "url": "https://karasuma.chiryouin.biz",
+      "area": "京都市中京区"
+    },
+    {
+      "name": "四街道もねの里接骨院",
+      "url": "https://monenosato.chiryouin.biz/",
+      "area": "四街道市"
+    },
+    {
+      "name": "四街道北口接骨院　→四街道北口整骨院移転",
+      "url": "https://curacion.jp/yotsukaido/",
+      "area": "四街道市"
+    },
+    {
+      "name": "四街道北口整骨院",
+      "url": "https://yotsukaido.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://yotsukaido.chiryouin.biz/"
+      ],
+      "area": "四街道市"
+    },
+    {
+      "name": "土気駅前接骨院",
+      "url": "https://toke.chiryouin.biz/",
+      "area": "千葉市"
+    },
+    {
+      "name": "堺市南区整骨院 泉北 栂美木多",
+      "url": "https://chiryou-in.biz/togamikita/"
+    },
+    {
+      "name": "堺市美原区整骨院",
+      "url": "https://chiryou-in.biz/mihara/"
+    },
+    {
+      "name": "大山駅前接骨院",
+      "url": "http://ooyama.chiryouin.biz/"
+    },
+    {
+      "name": "大網駅前整骨院",
+      "url": "http://oami.chiryouin.biz/",
+      "area": "大網白里市"
+    },
+    {
+      "name": "天王台北口整骨院",
+      "url": "https://tennodaikita.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://tennodaikita.chiryouin.biz/"
+      ],
+      "area": "我孫子市"
+    },
+    {
+      "name": "天王台北口整骨院セカンド",
+      "url": "https://curacion.jp/tennodaikita/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/tennodaikita"
+      ],
+      "area": "我孫子市"
+    },
+    {
+      "name": "天王台駅前整骨院",
+      "url": "http://tennodai.chiryouin.biz/",
+      "area": "我孫子市"
+    },
+    {
+      "name": "天神国体道路接骨院",
+      "url": "http://tenjin.chiryouin.biz/",
+      "area": "福岡市"
+    },
+    {
+      "name": "天神橋三丁目接骨院",
+      "url": "https://tenjinbashi.chiryou-in.biz/",
+      "area": "大阪府",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "太洋メディカル採用サイト",
+      "url": "https://taiyo-m.com/recruit/"
+    },
+    {
+      "name": "妻沼なまい接骨院",
+      "url": "https://namai-nijiiro.com/"
+    },
+    {
+      "name": "姉ヶ崎駅前接骨院",
+      "url": "https://chiryouin.biz/anegasaki",
+      "area": "市原市"
+    },
+    {
+      "name": "姿勢堂 宮内鍼灸接骨院",
+      "url": "https://chiryouin.biz/miyauchi/"
+    },
+    {
+      "name": "姿勢堂 寺家鍼灸接骨院",
+      "url": "https://chiryouin.biz/jike/"
+    },
+    {
+      "name": "姿勢堂 府中鍼灸接骨院",
+      "url": "https://chiryouin.biz/fuchu/"
+    },
+    {
+      "name": "姿勢堂 段原鍼灸接骨院",
+      "url": "https://chiryouin.biz/danbara/"
+    },
+    {
+      "name": "姿勢堂 祇園鍼灸接骨院",
+      "url": "https://chiryouin.biz/gion/"
+    },
+    {
+      "name": "姿勢堂 西条鍼灸接骨院",
+      "url": "https://chiryouin.biz/saijo/"
+    },
+    {
+      "name": "宇都宮オリオン通り整骨院",
+      "url": "https://orion.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://orion.chiryouin.biz/"
+      ],
+      "area": "栃木県宇都宮市"
+    },
+    {
+      "name": "安倍川駅前総合治療院",
+      "url": "http://abekawa.chiryouin.biz/",
+      "area": "静岡市"
+    },
+    {
+      "name": "宜野湾うちどまり整骨院",
+      "url": "https://ginowan.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://ginowan.chiryouin.biz/"
+      ],
+      "area": "宜野湾市"
+    },
+    {
+      "name": "寿町なまい接骨院",
+      "url": "https://kawagoe-sekkotuin.com/"
+    },
+    {
+      "name": "小岩蔵前橋通り接骨院",
+      "url": "https://koiwakuramae.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://koiwakuramae.chiryouin.biz/"
+      ],
+      "area": "江戸川区",
+      "corporation": "フォース"
+    },
+    {
+      "name": "小平南口接骨院",
+      "url": "https://kodaira.chiryouin.biz/",
+      "area": "小平市"
+    },
+    {
+      "name": "山名なまい接骨院",
+      "url": "https://yamana-sekkotuin.com/"
+    },
+    {
+      "name": "岡山市交通事故治療.com",
+      "url": "http://chiryouin.biz/ziko/okayama/"
+    },
+    {
+      "name": "岡山駅前整骨院",
+      "url": "http://okayama.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/okayamaekimae/"
+      ],
+      "area": "岡山市"
+    },
+    {
+      "name": "川口東口整骨院",
+      "url": "https://kawaguchi.chiryou-in.biz/",
+      "area": "川口市"
+    },
+    {
+      "name": "川口駅前接骨院",
+      "url": "https://curacion.jp/kawaguchi/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/kawaguchi/"
+      ],
+      "area": "川口市",
+      "corporation": "フォース"
+    },
+    {
+      "name": "川西能勢口駅西口接骨院",
+      "url": "https://chiryouin.biz/kawanishinoseguchi/",
+      "area": "川西市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "川越クレアモール接骨院",
+      "url": "https://creamall.chiryouin.biz/",
+      "area": "川越市"
+    },
+    {
+      "name": "川越霞ヶ関駅前接骨院",
+      "url": "https://kasumigaseki.chiryouin.biz/",
+      "area": "川越市"
+    },
+    {
+      "name": "川間駅前接骨院",
+      "url": "https://kawama.chiryouin.biz/"
+    },
+    {
+      "name": "市川げんき整骨院",
+      "url": "https://genki.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://genki.chiryouin.biz/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "市川さくら整骨院",
+      "url": "https://curacion.jp/sakura/",
+      "area": "市川市"
+    },
+    {
+      "name": "市川南口整骨院",
+      "url": "https://ichikawaminami.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/ichikawaminami/",
+        "https://karada.clinic/tsuganishi/",
+        "http://www.curacion.jp/ichikawaminami/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "市川市交通事故治療.com",
+      "url": "http:/xn--3kq2b200eheb072i97mrrsff7c.com/"
+    },
+    {
+      "name": "市川真間駅前接骨院",
+      "url": "http://ichikawamama.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://ichikawamama.chiryouin.biz"
+      ]
+    },
+    {
+      "name": "市川駅前十字路接骨院",
+      "url": "https://ichikawa.chiryou-in.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "幕張交通事故治療.com",
+      "url": "http:/xn--3kq2b512evza15tptl2hqey2c.com/"
+    },
+    {
+      "name": "幕張北口整骨院",
+      "url": "http://makuhari.chiryouin.biz/",
+      "area": "千葉市",
+      "corporation": "ケイズ"
+    },
+    {
+      "name": "幕張南口整骨院",
+      "url": "https://www.curacion.jp/makuhariminami/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/makuhariminami"
+      ],
+      "area": "千葉市"
+    },
+    {
+      "name": "庚午スマイル",
+      "url": "https://kougo.chiryouin.biz/"
+    },
+    {
+      "name": "庚午スマイル整骨院",
+      "url": "http://kougo.chiryouin.biz/",
+      "area": "広島県 広島市"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 名張整骨院",
+      "url": "https://chiryou-in.biz/nabari/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 和歌山市有本院",
+      "url": "https://chiryou-in.biz/arimoto/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 国体道路手平院",
+      "url": "https://chiryou-in.biz/tebira/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 大津市整骨院",
+      "url": "https://chiryou-in.biz/otsu/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 大津市石山整骨院",
+      "url": "https://chiryou-in.biz/ishiyama/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 富田林旧170号線院",
+      "url": "http://chiryou-in.biz/tondabayashi/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 河内長野市 外環状線院",
+      "url": "https://chiryou-in.biz/sotokan/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 河内長野市310号線院",
+      "url": "https://chiryou-in.biz/kawachinagano/"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 西大津院",
+      "url": "https://chiryou-in.biz/nishiotsu/"
+    },
+    {
+      "name": "忍ヶ丘駅前整骨院（変更前：たいよう鍼灸整骨院 忍ケ丘）",
+      "url": "https://chiryou-in.biz/shinobugaoka/"
+    },
+    {
+      "name": "志木駅前接骨院",
+      "url": "https://shiki.chiryouin.biz/",
+      "area": "志木市"
+    },
+    {
+      "name": "恵庭駅前接骨院",
+      "url": "https://eniwa.chiryouin.biz/",
+      "area": "恵庭市"
+    },
+    {
+      "name": "成田公津の杜整骨院",
+      "url": "http://kozu.chiryouin.biz/",
+      "area": "成田市"
+    },
+    {
+      "name": "成田富里接骨院",
+      "url": "https://tomisato.chiryouin.biz/",
+      "area": "富里市"
+    },
+    {
+      "name": "成田市交通事故治療.com",
+      "url": "http:/xn--3kq2bu70ev2dnzep2n4mo15bf92h.com/"
+    },
+    {
+      "name": "成田美郷台接骨院",
+      "url": "http://misatodai.chiryouin.biz/",
+      "area": "成田市"
+    },
+    {
+      "name": "成田駅前整骨院",
+      "url": "http://narita.chiryouin.biz/",
+      "area": "成田市"
+    },
+    {
+      "name": "成田駅前整骨院セカンド",
+      "url": "http:/www.curacion.jp/narita",
+      "area": "成田市"
+    },
+    {
+      "name": "我孫子北口整骨院",
+      "url": "http://abiko.chiryouin.biz/",
+      "area": "我孫子市"
+    },
+    {
+      "name": "我孫子北口整骨院セカンド",
+      "url": "https://curacion.jp/abiko/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/abiko/"
+      ],
+      "area": "我孫子市"
+    },
+    {
+      "name": "我孫子駅前整骨院",
+      "url": "http://abikoekimae.chiryouin.biz/",
+      "area": "我孫子市"
+    },
+    {
+      "name": "手稲駅北口接骨院",
+      "url": "https://teine.chiryouin.biz/",
+      "area": "札幌市",
+      "corporation": "クラシオン"
+    },
+    {
+      "name": "拝島駅南口接骨院",
+      "url": "https://haijima.chiryouin.biz/",
+      "area": "昭島市",
+      "corporation": "フォース"
+    },
+    {
+      "name": "整骨院workers",
+      "url": "http:/chiryouin.biz/workers/"
+    },
+    {
+      "name": "新サイト（karada.clinic)",
+      "url": "https://karada.clinic/"
+    },
+    {
+      "name": "新小岩南口トップ接骨院",
+      "url": "http://shinkoiwa.chiryouin.biz/",
+      "area": "東京都 江戸川区"
+    },
+    {
+      "name": "新松戸けやき整骨院",
+      "url": "http://keyaki.chiryouin.biz/"
+    },
+    {
+      "name": "新松戸クラシオン整骨院",
+      "url": "https://shinmatsudo.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://shinmatsudo.chiryouin.biz/"
+      ],
+      "area": "松戸市"
+    },
+    {
+      "name": "新松戸中央",
+      "url": "http://shinmatsudochuo.chiryouin.biz/"
+    },
+    {
+      "name": "新検見川駅前整骨院",
+      "url": "https://shinkemigawa.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://shinkemigawa.chiryouin.biz/"
+      ],
+      "area": "千葉県 千葉市"
+    },
+    {
+      "name": "新橋西口整骨院",
+      "url": "https://shinbashi.chiryou-in.biz/",
+      "area": "港区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "新橋駅前整骨院",
+      "url": "http://shinbashi.chiryouin.biz/",
+      "area": "港区"
+    },
+    {
+      "name": "新浜松駅前接骨院",
+      "url": "https://chiryouin.biz/shinhamamatsu/",
+      "area": "浜松市"
+    },
+    {
+      "name": "新潟こうど接骨院",
+      "url": "https://kohdo.chiryouin.biz/",
+      "area": "新潟市"
+    },
+    {
+      "name": "新潟亀田大通り接骨院",
+      "url": "https://chiryouin.biz/kameda/",
+      "area": "新潟市"
+    },
+    {
+      "name": "新潟寺尾東接骨院",
+      "url": "http://terao.chiryouin.biz/",
+      "area": "新潟市"
+    },
+    {
+      "name": "新潟市交通事故治療.com",
+      "url": "http://chiryouin.biz/ziko/niigatashi/"
+    },
+    {
+      "name": "新潟松崎接骨院",
+      "url": "https://matsusaki.chiryouin.biz/",
+      "area": "新潟市"
+    },
+    {
+      "name": "新潟関屋整骨院",
+      "url": "http://sekiya.chiryouin.biz",
+      "area": "新潟市"
+    },
+    {
+      "name": "新狭山駅北口接骨院",
+      "url": "https://shinsayama.chiryouin.biz/",
+      "area": "狭山市"
+    },
+    {
+      "name": "新田西口整骨院",
+      "url": "http://shinden.chiryouin.biz",
+      "area": "埼玉県 草加市"
+    },
+    {
+      "name": "新道東駅接骨院",
+      "url": "https://chiryouin.biz/shindohigashi/",
+      "area": "札幌市"
+    },
+    {
+      "name": "新都心あじゃ接骨院",
+      "url": "http://aja.chiryouin.biz/",
+      "area": "那覇市"
+    },
+    {
+      "name": "新静岡けやき通り接骨院",
+      "url": "https://curacion.jp/shinshizuoka/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/shinshizuoka/"
+      ],
+      "area": "静岡市"
+    },
+    {
+      "name": "新静岡駅前接骨院",
+      "url": "http://shizuoka.chiryouin.biz/",
+      "area": "静岡市",
+      "corporation": "アポロ"
+    },
+    {
+      "name": "服部天神駅前接骨院",
+      "url": "http://hattori.chiryouin.biz/",
+      "area": "大阪府",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "朝霞エキナカ整骨院",
+      "url": "https://asaka.chiryou-in.biz/",
+      "area": "朝霞市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "朝霞駅南口接骨院",
+      "url": "https://curacion.jp/asaka/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/asaka/"
+      ],
+      "area": "朝霞市"
+    },
+    {
+      "name": "本八幡北口接骨院",
+      "url": "http://curacion.jp/motoyawata",
+      "area": "市川市"
+    },
+    {
+      "name": "本八幡南口接骨院",
+      "url": "http://motoyawata.chiryou-in.biz/",
+      "other_urls_seen": [
+        "https://motoyawata.chiryou-in.biz/",
+        "https://karada.clinic/motoyawataminami/"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "本八幡駅前整骨院",
+      "url": "https://motoyawata.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://yawata.chiryouin.biz/",
+        "http://motoyawata.chiryouin.biz/"
+      ],
+      "area": "市川市",
+      "corporation": "クラシオン"
+    },
+    {
+      "name": "本八幡駅北口接骨院",
+      "url": "https://curacion.jp/motoyawata/",
+      "other_urls_seen": [
+        "http://curacion.jp/motoyawata"
+      ],
+      "area": "市川市"
+    },
+    {
+      "name": "本庄なまい接骨院",
+      "url": "https://honjyonamai.com/"
+    },
+    {
+      "name": "札幌北円山接骨院",
+      "url": "http://kitamaruyama.chiryouin.biz/",
+      "area": "札幌市",
+      "corporation": "クラシオン"
+    },
+    {
+      "name": "札幌琴似本通り接骨院",
+      "url": "https://curacion.jp/kotonihondori/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/kotonihondori"
+      ],
+      "area": "札幌市"
+    },
+    {
+      "name": "東十条駅前整骨院",
+      "url": "http://higashijujo.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/higashijujo/"
+      ],
+      "area": "北区"
+    },
+    {
+      "name": "東小金井駅北口接骨院",
+      "url": "https://higashikoganei.chiryouin.biz/",
+      "area": "小金井市"
+    },
+    {
+      "name": "松戸市交通事故治療.com",
+      "url": "http:/xn--3kq2bu70eg7dxpeo5dmqmrztff7c.com/"
+    },
+    {
+      "name": "柏の葉キャンパス駅前接骨院",
+      "url": "https://kashiwanoha.chiryouin.biz/"
+    },
+    {
+      "name": "柏の葉キャンパス駅前整骨院",
+      "url": "https://kashiwanoha.chiryouin.biz/",
+      "area": "柏市"
+    },
+    {
+      "name": "柏南口整骨院",
+      "url": "https://curacion.jp/kashiwaminami/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/kashiwaminamiguchi/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "柏南口整骨院(chiryou-in)",
+      "url": "http://chiryou-in.biz/kashiwaminami/"
+    },
+    {
+      "name": "柏南口整骨院(chiryou-in)　↑リダイレクト",
+      "url": "https://chiryou-in.biz/kashiwaminami/",
+      "area": "柏市"
+    },
+    {
+      "name": "柏東口整骨院",
+      "url": "https://karada.clinic/kashiwahigashiguchi/",
+      "other_urls_seen": [
+        "http://kashiwahigashiguchi.chiryouin.biz/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "柏東口整骨院→柏駅東口接骨院",
+      "url": "https://kashiwahigashiguchi.chiryouin.biz/",
+      "area": "柏市"
+    },
+    {
+      "name": "柴又駅前整骨院",
+      "url": "http://shibamata.chiryouin.biz/",
+      "area": "葛飾区"
+    },
+    {
+      "name": "株式会社サニタ",
+      "url": "https://sanitagroup.jp/"
+    },
+    {
+      "name": "梅郷山崎接骨院",
+      "url": "https://umesato.chiryouin.biz/"
+    },
+    {
+      "name": "棟高なまい接骨院",
+      "url": "https://munadakanamai.com/"
+    },
+    {
+      "name": "榎戸駅前接骨院",
+      "url": "http://enokido.chiryouin.biz/",
+      "area": "八街市"
+    },
+    {
+      "name": "横浜市交通事故治療サイト",
+      "url": "https://sanitagroup.jp/ziko/yokohama"
+    },
+    {
+      "name": "機能訓練型デイサービス",
+      "url": "http:/egaoreha.jp/"
+    },
+    {
+      "name": "武蔵なまい接骨院",
+      "url": "https://musashinamai-sekkotuin.com/"
+    },
+    {
+      "name": "武蔵境駅北口接骨院",
+      "url": "https://chiryouin.biz/musashisakai/",
+      "area": "武蔵野市"
+    },
+    {
+      "name": "水戸堀町整骨院",
+      "url": "https://sanitagroup.jp/mito"
+    },
+    {
+      "name": "池下エキナカ接骨院",
+      "url": "http://ikeshita.chiryouin.biz",
+      "area": "名古屋市"
+    },
+    {
+      "name": "池袋ときわ通り整骨院",
+      "url": "http://ikebukuro.chiryouin.biz/",
+      "area": "豊島区"
+    },
+    {
+      "name": "池袋駅前接骨院",
+      "url": "https://ikebukuro.chiryou-in.biz/",
+      "area": "豊島区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "池袋駅前整骨院",
+      "url": "https://ikebukuro.chiryou-in.biz/",
+      "area": "豊島区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "沖縄あわせ接骨院",
+      "url": "https://awase.chiryouin.biz/",
+      "area": "沖縄市"
+    },
+    {
+      "name": "沖縄北谷北前接骨院",
+      "url": "https://chiryouin.biz/chatan/",
+      "area": "中頭郡"
+    },
+    {
+      "name": "河内いわふね駅前整骨院（旧：いわふね岡田鍼灸整骨院）",
+      "url": "https://chiryou-in.biz/iwafune/"
+    },
+    {
+      "name": "流山おおたかの森西口接骨院",
+      "url": "https://chiryouin.biz/otakanomori",
+      "area": "流山市"
+    },
+    {
+      "name": "流山東深井接骨院",
+      "url": "https://higashifukai.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://higashifukai.chiryouin.biz/"
+      ],
+      "area": "流山市"
+    },
+    {
+      "name": "浅草橋駅前鍼灸接骨院",
+      "url": "https://asakusabashi.chiryouin.biz/",
+      "area": "東京都 台東区"
+    },
+    {
+      "name": "浦添宮城接骨院",
+      "url": "http://urasoe.chiryouin.biz/",
+      "area": "浦添市"
+    },
+    {
+      "name": "浦添港川ピーズタウン接骨院",
+      "url": "http://www.curacion.jp/urasoe/",
+      "area": "浦添市"
+    },
+    {
+      "name": "海神駅前整骨院",
+      "url": "http://kaijin.chiryouin.biz/",
+      "area": "船橋市"
+    },
+    {
+      "name": "深谷なまい接骨院",
+      "url": "https://fukayanamai.com/"
+    },
+    {
+      "name": "淵野辺駅北口接骨院",
+      "url": "https://fuchinobe.chiryouin.biz",
+      "area": "相模原市"
+    },
+    {
+      "name": "熊本尾ノ上接骨院",
+      "url": "https://onoue.chiryouin.biz/",
+      "area": "熊本市"
+    },
+    {
+      "name": "熊本白山接骨院",
+      "url": "https://hakuzan.chiryouin.biz/",
+      "area": "熊本市"
+    },
+    {
+      "name": "狭山ヶ丘駅前接骨院",
+      "url": "https://sayamagaoka.chiryouin.biz/",
+      "area": "所沢市"
+    },
+    {
+      "name": "琴似駅前整骨院",
+      "url": "http://kotoni.chiryouin.biz/",
+      "area": "札幌市"
+    },
+    {
+      "name": "瑞江駅前接骨院",
+      "url": "https://mizue.chiryouin.biz/",
+      "area": "江戸川区"
+    },
+    {
+      "name": "町田ひまわり整骨院",
+      "url": "http://machida.chiryou-in.biz/"
+    },
+    {
+      "name": "町田シバヒロ接骨院",
+      "url": "https://machida.chiryou-in.biz/",
+      "other_urls_seen": [
+        "http://machida.chiryou-in.biz/"
+      ],
+      "area": "町田市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "痩せる専門店アテナ下総中山店",
+      "url": "http://athena.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "痩せる専門店アテナ馬橋店",
+      "url": "http://athena.chiryouin.biz/",
+      "area": "松戸市"
+    },
+    {
+      "name": "直営店舗一覧（旧あいメディカルサイト）",
+      "url": "http://chiryou-in.biz/"
+    },
+    {
+      "name": "矢部ひまわり整骨院",
+      "url": "http://yabe.chiryou-in.biz/"
+    },
+    {
+      "name": "矢部北口接骨院",
+      "url": "https://yabe.chiryou-in.biz/",
+      "other_urls_seen": [
+        "http://yabe.chiryou-in.biz/"
+      ],
+      "area": "相模原市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "砂町銀座整骨院",
+      "url": "http://sunamachi.chiryouin.biz/",
+      "area": "江東区"
+    },
+    {
+      "name": "秋山駅前整骨院",
+      "url": "https://akiyama.chiryouin.biz/",
+      "area": "千葉県 松戸市"
+    },
+    {
+      "name": "秋田駅東口接骨院",
+      "url": "https://chiryouin.biz/akita"
+    },
+    {
+      "name": "稲毛作草部整骨院",
+      "url": "https://sakusabe.chiryouin.biz/",
+      "area": "千葉県 千葉市"
+    },
+    {
+      "name": "稲毛海岸中央整骨院",
+      "url": "https://inagekaigan.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://inagekaigan.chiryouin.biz/"
+      ],
+      "area": "千葉市"
+    },
+    {
+      "name": "立石駅前整体院",
+      "url": "http://bodyseitai.com/tateishi/",
+      "area": "葛飾区"
+    },
+    {
+      "name": "立石駅前整骨院",
+      "url": "http://tateishi.chiryouin.biz/",
+      "area": "葛飾区"
+    },
+    {
+      "name": "立石駅前通り整骨院",
+      "url": "https://tateishi.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://tateishi.chiryouin.biz/"
+      ],
+      "area": "葛飾区"
+    },
+    {
+      "name": "竹の塚トップ鍼灸接骨院",
+      "url": "http://takenotsuka.chiryouin.biz/",
+      "area": "東京都 足立区"
+    },
+    {
+      "name": "第3なまい接骨院",
+      "url": "https://daisan-namai.com/"
+    },
+    {
+      "name": "第２なまい接骨院",
+      "url": "https://daininamai.net/"
+    },
+    {
+      "name": "籠原なまい接骨院",
+      "url": "https://hibikinamai.com/"
+    },
+    {
+      "name": "臼井接骨院（旧：直営、臼井王子台）",
+      "url": "https://td-group.jp/usui/"
+    },
+    {
+      "name": "臼井王子台接骨院",
+      "url": "https://usui.chiryouin.biz/",
+      "area": "佐倉市"
+    },
+    {
+      "name": "船橋北口接骨院",
+      "url": "https://funabashi.chiryouin.biz/",
+      "area": "船橋市"
+    },
+    {
+      "name": "茂原駅前整骨院",
+      "url": "http://mobara.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/mobara"
+      ],
+      "area": "千葉県 茂原市"
+    },
+    {
+      "name": "茂原駅前整骨院セカンド",
+      "url": "http://www.curacion.jp/mobara",
+      "other_urls_seen": [
+        "http://mobara.chiryouin.biz/"
+      ],
+      "area": "千葉県 茂原市"
+    },
+    {
+      "name": "茅場町駅前整骨院",
+      "url": "https://kayabacho.chiryou-in.biz/",
+      "area": "中央区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "茨木阪急本通接骨院",
+      "url": "http://ibaraki.chiryouin.biz/",
+      "area": "大阪府",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "荻窪北口接骨院",
+      "url": "http://ogikubo.chiryouin.biz/"
+    },
+    {
+      "name": "菊川駅前接骨院",
+      "url": "https://kikugawa.chiryouin.biz/",
+      "area": "静岡市"
+    },
+    {
+      "name": "蒲生東口整骨院",
+      "url": "http://gamou.chiryouin.biz/",
+      "area": "埼玉県 越谷市"
+    },
+    {
+      "name": "薬園台駅東口接骨院（旧：いずみ整骨院）",
+      "url": "https://chiryouin.biz/yakuendai/"
+    },
+    {
+      "name": "西新中央商店街接骨院",
+      "url": "https://nishijin.chiryouin.biz/",
+      "area": "福岡市"
+    },
+    {
+      "name": "西荻窪中央整骨院",
+      "url": "https://nishiogikubo.chiryou-in.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/nishiogikubo/"
+      ],
+      "area": "杉並区",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "西鉄二日市駅接骨院",
+      "url": "https://futsukaichi.chiryouin.biz",
+      "area": "筑紫野市"
+    },
+    {
+      "name": "誉田南口整骨院",
+      "url": "http://honda.chiryouin.biz/",
+      "area": "千葉市"
+    },
+    {
+      "name": "誉田南口駅前接骨院→誉田南口整骨院",
+      "url": "http://curacion.jp/honda/",
+      "area": "千葉市"
+    },
+    {
+      "name": "谷津駅前整骨院",
+      "url": "http://yatsu.chiryouin.biz/"
+    },
+    {
+      "name": "谷町四丁目接骨院",
+      "url": "https://tanimachi.chiryou-in.biz/",
+      "area": "大阪府",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "豊四季中央接骨院",
+      "url": "https://www.curacion.jp/toyoshiki/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/toyoshiki/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "豊四季北口整骨院",
+      "url": "https://toyoshiki.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://toyoshiki.chiryouin.biz/"
+      ],
+      "area": "柏市"
+    },
+    {
+      "name": "逆井駅前整骨院",
+      "url": "https://td-group.jp/sakasai/",
+      "other_urls_seen": [
+        "https://sakasai.chiryouin.biz/",
+        "http://sakasai.chiryouin.biz/"
+      ],
+      "area": "柏市",
+      "corporation": "トップソルブ"
+    },
+    {
+      "name": "逆井駅前整骨院（旧：直営）",
+      "url": "https://sakasai.chiryouin.biz/",
+      "area": "千葉県 柏市"
+    },
+    {
+      "name": "連取なまい接骨院",
+      "url": "https://tsunatorinamai.com/"
+    },
+    {
+      "name": "郡山若葉町接骨院",
+      "url": "https://koriyama.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://koriyama.chiryouin.biz",
+        "http://koriyama.chiryouin.biz"
+      ],
+      "area": "郡山市",
+      "corporation": "ケイズ"
+    },
+    {
+      "name": "郡山駅西口接骨院",
+      "url": "https://curacion.jp/koriyama/",
+      "area": "郡山市",
+      "corporation": "ケイズ"
+    },
+    {
+      "name": "都賀中央整骨院",
+      "url": "http://tsugachuo.chiryouin.biz/",
+      "area": "千葉市"
+    },
+    {
+      "name": "都賀交通事故治療.com",
+      "url": "http:/xn--3kq2bx53hk0gpmm706aw5e20b.com/"
+    },
+    {
+      "name": "都賀西口整体院",
+      "url": "http://www.curacion.jp/tsuganishi/",
+      "area": "千葉市"
+    },
+    {
+      "name": "都賀西口整骨院",
+      "url": "https://tsuganishi.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://karada.clinic/tsuganishi/",
+        "http://tsuganishi.chiryouin.biz/"
+      ],
+      "area": "千葉市"
+    },
+    {
+      "name": "都賀西口整骨院セカンド",
+      "url": "http://www.curacion.jp/tsuganishi/",
+      "area": "千葉市"
+    },
+    {
+      "name": "都賀駅前整骨院",
+      "url": "https://tsuga.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://tsuga.chiryouin.biz/"
+      ],
+      "area": "千葉市"
+    },
+    {
+      "name": "酒々井交通事故治療.com",
+      "url": "http://chiryouin.biz/ziko/shisui/"
+    },
+    {
+      "name": "酒々井西口整骨院",
+      "url": "http://shisui.chiryouin.biz/",
+      "area": "印旛郡"
+    },
+    {
+      "name": "金町南口整骨院",
+      "url": "http://kanamachi.chiryouin.biz/",
+      "other_urls_seen": [
+        "https://topsolve.co.jp/kanamachi/"
+      ],
+      "area": "東京都 葛飾区"
+    },
+    {
+      "name": "鍼灸サロン　はにかむ",
+      "url": "http://www.honeycome.co.jp/"
+    },
+    {
+      "name": "鎌ヶ谷西口整骨院",
+      "url": "https://kamagaya.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://kamagaya.chiryouin.biz/"
+      ],
+      "area": "鎌ヶ谷市"
+    },
+    {
+      "name": "鎌ヶ谷駅前接骨院",
+      "url": "https://curacion.jp/kamagaya/",
+      "other_urls_seen": [
+        "http://www.curacion.jp/kamagaya/"
+      ],
+      "area": "鎌ヶ谷市"
+    },
+    {
+      "name": "長町南駅前接骨院",
+      "url": "https://nagamachi.chiryouin.biz"
+    },
+    {
+      "name": "長町南駅前整骨院",
+      "url": "https://nagamachi.chiryouin.biz",
+      "area": "仙台市"
+    },
+    {
+      "name": "長谷川FC",
+      "url": "http:/orion.chiryouin.biz/"
+    },
+    {
+      "name": "院JOB",
+      "url": "http:/injob.jp/"
+    },
+    {
+      "name": "院JOB LP",
+      "url": "http:/injob.jp/lp/"
+    },
+    {
+      "name": "院jobサテライトサイト",
+      "url": "http:/kyujin.djapan.biz/"
+    },
+    {
+      "name": "陸前高砂駅前接骨院",
+      "url": "http://takasago.chiryouin.biz/",
+      "area": "仙台市",
+      "corporation": "ケイズ"
+    },
+    {
+      "name": "静岡さわやか接骨院 静岡市駿河区石田院",
+      "url": "https://ishida.chiryou-in.biz/"
+    },
+    {
+      "name": "順漢堂整骨院",
+      "url": "http://junkando.chiryouin.biz/",
+      "area": "静岡県 沼津市"
+    },
+    {
+      "name": "馬橋東口整骨院",
+      "url": "https://mabashi.chiryouin.biz/",
+      "other_urls_seen": [
+        "http://mabashi.chiryouin.biz/"
+      ],
+      "area": "松戸市"
+    },
+    {
+      "name": "駅前整骨院",
+      "url": "http://ekimae.chiryouin.biz/",
+      "area": "市川市"
+    },
+    {
+      "name": "駅前整骨院セカンド",
+      "url": "http://www.curacion.jp/ekimae/",
+      "area": "市川市"
+    },
+    {
+      "name": "高根木戸北口整骨院",
+      "url": "http://takanekido.chiryouin.biz/",
+      "area": "船橋市"
+    },
+    {
+      "name": "鴨居ひまわり整骨院",
+      "url": "http://kamoi.chiryou-in.biz/"
+    },
+    {
+      "name": "鴨居南口接骨院",
+      "url": "https://kamoi.chiryou-in.biz/",
+      "other_urls_seen": [
+        "http://kamoi.chiryou-in.biz/"
+      ],
+      "area": "横浜市",
+      "corporation": "ドリームジャパン"
+    },
+    {
+      "name": "鴻巣なまい接骨院",
+      "url": "https://kounosushi-sekkotuin.com/"
+    }
+  ]
+}

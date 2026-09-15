@@ -79,10 +79,41 @@ one place, so no commit ever contains another task's half-finished work.
 If a session genuinely must commit (it is the only one running), stage explicit paths.
 Never `git add -A` while other sessions are working in the same clone.
 
+### Across several PCs: the learnings still have to be pushed
+
+The rules above keep sessions in **one clone** from clobbering each other. They do not, on
+their own, carry one PC's learning to another. A `learnings/` file written on PC A lives on
+PC A's disk; a consolidation pass running anywhere else cannot see it, so that note is
+silently stranded no matter how faithfully the session wrote it. With the user routinely
+working across several machines, this is the failure mode that actually loses knowledge.
+
+So each PC has one more job: **push its own `learnings/` and `*_log.d/` files to the
+remote.** Every PC does this for its own files — it is not an exception to the rule above
+but the same one-writer principle applied to git. Those files are new, and their names carry
+a session id, so no two PCs ever write the same path and the pushes merge without conflict.
+
+What keeps it safe is staging explicit paths:
+
+```
+git add .claude/skills/*/learnings/ *_log.d/
+git commit -m "Add learnings from <PC名>"
+git push
+```
+
+Never `git add -A` for this — that is exactly what sweeps another session's half-finished
+work into your commit. Prefer a moment when that PC's other sessions are idle, so no file is
+captured mid-write; a note committed while still being written is a nuisance, not a disaster
+(the next push corrects it).
+
+Only once every PC has pushed does consolidation have the full queue to work from.
+
 ## Consolidation (single writer)
 
 Later, one session — and only one — folds the queue in:
 
+0. Pull first, so the queue includes what the other PCs pushed. Consolidating without
+   pulling folds in only the local machine's notes and then deletes them, which looks like
+   success and quietly leaves every other PC's learning unmerged
 1. Read every file in `learnings/`, grouped by which reference file it targets
 2. Reconcile: drop duplicates, and where two notes disagree, keep the one with the stronger
    evidence and write down that the other was seen (a contradiction is itself information —
