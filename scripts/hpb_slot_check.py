@@ -293,6 +293,8 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
     if apply:
         print("\n📝 シートへ一括保存しています...")
         worksheet.update(range_name=range_label, values=bulk_updates)
+        completion_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        worksheet.update(range_name="K2", values=[[f"最終更新: {completion_timestamp}"]])
         if history_rows:
             history_ws = get_or_create_history_worksheet(spreadsheet)
             history_ws.append_rows(history_rows)
