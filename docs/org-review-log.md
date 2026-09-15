@@ -2194,3 +2194,26 @@ Skillへ畳む作業をしていたが、それが組織図のどこの仕事な
      アカウントでの再ログインが必要)
   3. 原因が特定できない場合の、Google Workspaceサポートへの問い合わせ文面の作成
      (未着手)
+
+---
+
+## 2026-09-15 リラックスWordPress環境の実機調査
+
+- `docs/backlog.md`「リラックス WordPress環境の実態調査」の確認事項に、ローカルセッションが
+  claude-in-chrome経由でXServerサーバーパネル・WP管理画面(浜田山店・阿佐ヶ谷店)を直接見て
+  回答した。SSHは使っていない(SSH自体、サーバーパネルで「現在、SSH設定はありません」=未開通
+  だったため)
+- 見つかった事実: All in One SEOはv4系(4.4.0.1)、25店舗は同名テーマの中身違い、
+  `front-page.php`は存在せず`home.php`がフロントページ役、PHPは7.4.33(EOL済み)、
+  Sprocket/Optimize NextはGTM経由で埋め込まれておりCSSセレクタも実ファイルから確認できた、
+  共通ディレクトリは`public_html/00_relax_kyoutsu/`。加えて、各店舗フォルダが完全に独立した
+  WordPressインストールであること、`asagaya-g`等の店舗名+`-g`の別サイトが複数存在すること
+  (用途未確認)という、backlogのチェックリストになかった発見もあった。詳細は
+  `brands/relax/CLAUDE.md`「実機調査」参照
+- 併せて依頼された、relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント作成
+  (XServerサーバーパネルでの新規FTPアカウント発行)は、**アカウント作成にあたるため
+  実施しなかった**。認証情報を扱う操作は代行せず、栗林さんご本人に手順を案内する対応とした
+- 対応状況: backlogの当初6項目には回答済み。DBテーブルの直接確認(phpMyAdmin認証の壁)、
+  25店舗全部への横展開確認、`-g`サイトの用途、他ページ・他店舗のSprocket施策の洗い出しは
+  未対応として`docs/backlog.md`に残した。変更したファイル: `brands/relax/CLAUDE.md`、
+  `docs/backlog.md`、`docs/org-review-log.md`(本記録)
