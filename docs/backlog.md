@@ -61,15 +61,24 @@ claude-in-chrome経由でXServerサーバーパネル・WP管理画面を直接�
 セレクタ一覧は[brands/relax/CLAUDE.md](../brands/relax/CLAUDE.md)参照。セレクタは「契約」
 として扱うこと。
 
-### relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント作成、栗林さんの対応待ち
+### relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント、起点ディレクトリの是正待ち
 
-[relaxリポジトリ](https://github.com/t-kuribayashi-keiz/relax)のセットアップ手順1
-(XServerサーバーパネルで浜田山店専用のFTPアカウントを、起点ディレクトリ
-`public_html/hamadayama/wp-content/themes/hamadayama/`に限定して新規作成する)は、
-アカウント作成にあたるためClaudeが代行できず未着手。栗林さんご本人がサーバーパネルの
-「FTP → FTPアカウント設定 → FTPアカウント追加」から作成し、生成したユーザー名/パスワードを
-このリポジトリのGitHub Secrets/Environmentに登録するところから再開する(手順2以降は
-[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#セットアップ手順店舗を追加するたびに繰り返す)参照)。
+栗林さんがFTPアカウント`claude@refresh-relax.com`(サーバー`sv14437.xserver.jp`)を作成し
+GitHub Secrets/Environmentへの登録も完了、`pull`ワークフローを実行したところ、
+**このアカウントの起点ディレクトリが浜田山店のテーマフォルダではなく、サーバーアカウント
+全体になっている**ことが判明した(`ls -la .`で`refresh-relax.com`だけでなく
+`luna-pilates.com`=別ブランドLUNAのサイト、`Maildir.3`=メール、`ssl`等が同列に見える状態)。
+
+ミラー転送の前段にある安全確認ステップ(ファイル数の閾値チェック)で検知し、**実際のファイル
+転送は実行していない**。このままではLUNAのサイトやメールまで自動デプロイの影響範囲に入って
+しまうため、転送は保留中。
+
+**再開に必要な対応**: XServerサーバーパネルで`claude@refresh-relax.com`の起点ディレクトリを
+`refresh-relax.com/public_html/hamadayama/wp-content/themes/hamadayama/`に限定するよう
+編集(またはこの起点で作り直す)。手順は
+[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#セットアップ手順店舗を追加するたびに繰り返す)
+参照。是正後、パスワードを変更していなければSecretsの再登録は不要(起点ディレクトリの変更は
+XServer側の設定のみ)。
 
 ### salonboard-operatorの非交渉ルール2(登録の一括承認≠反映の承認)の実地検証
 
