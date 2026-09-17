@@ -114,7 +114,11 @@ HPB集客数**が入っている(2026年最新月でグッド合計75件・1院�
   スマイルの`brands/smile/CLAUDE.md`にあるような「完全除外店舗」「HPB掲載院/非掲載院」の
   区分がグッドに存在するかどうかは未確認
 - Google PPC・meta広告の配信範囲・予算等の実際の広告運用ファクト
-- GA4・Google Search Console等の分析ツール連携状況
+- GA4・Google Search Console本体の実指標取得(2026-09-17着手。`smile-good-reporter-2`
+  サービスアカウントへのGA4/GSC権限付与が前提。詳細は
+  [brands/smile/CLAUDE.md](../smile/CLAUDE.md)の「GA4/GSC本体の取得」節を参照
+  ——スマイルと同じスプレッドシート・サービスアカウントを共有しているため、
+  このファイルには重複して書かない)
 - 「グッド・スマイル月次報告」シートの共有設定(「一般的なアクセス」が「リンクを知っている
   全員が編集者」になっている)の見直し要否(`brands/smile/CLAUDE.md`・`docs/backlog.md`と
   共通の未確認事項)

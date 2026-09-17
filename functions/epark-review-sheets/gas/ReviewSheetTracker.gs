@@ -1350,13 +1350,36 @@ function chatworkFetch_(path, params) {
   return JSON.parse(res.getContentText());
 }
 
-/** ルーム内の全ファイル一覧を取得する。since指定でそれ以降のみに絞る。 */
+/**
+ * ルームメンバー一覧を取得する。
+ * (2026-09-15判明): /rooms/{id}/files は upload_time_since / upload_time_before を
+ * 一切無視し、ルーム開設以来の最古100件だけを返し続ける(このルームでは2026-08-23で頭打ち)。
+ * 一方 account_id によるフィルタは正しく機能するため、メンバー単位で分割取得する。
+ */
+function chatworkRoomMembers_() {
+  return chatworkFetch_('/rooms/' + CHATWORK.ROOM_ID + '/members', null) || [];
+}
+
+/**
+ * ルーム内の全ファイル一覧を取得する。since指定でそれ以降のみに絞る。
+ * メンバー単位でaccount_id指定して取得・合算する(理由は chatworkRoomMembers_ 参照)。
+ * 1人あたりの投稿数がAPIの100件上限を超えることは想定していない。
+ */
 function chatworkListFiles_(sinceUnix) {
-  var params = {};
-  if (sinceUnix) params.upload_time_since = String(sinceUnix);
-  var files = chatworkFetch_('/rooms/' + CHATWORK.ROOM_ID + '/files', params) || [];
-  files.sort(function (a, b) { return a.upload_time - b.upload_time; });
-  return files;
+  var members = chatworkRoomMembers_();
+  var byId = {};
+  for (var i = 0; i < members.length; i++) {
+    var accountId = String(members[i].account_id);
+    var files = chatworkFetch_('/rooms/' + CHATWORK.ROOM_ID + '/files', { account_id: accountId }) || [];
+    for (var j = 0; j < files.length; j++) {
+      byId[files[j].file_id] = files[j];
+    }
+  }
+  var all = [];
+  for (var fid in byId) all.push(byId[fid]);
+  if (sinceUnix) all = all.filter(function (f) { return f.upload_time >= sinceUnix; });
+  all.sort(function (a, b) { return a.upload_time - b.upload_time; });
+  return all;
 }
 
 /** 直近100件のメッセージを取得し、message_id -> 本文 のマップを作る(院名特定に使う)。 */

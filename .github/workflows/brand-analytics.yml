@@ -1,0 +1,153 @@
+name: Brand analytics (generic)
+
+# relax-analytics.yml と同じスクリプト(scripts/analytics_discover.py・analytics_pull.py・
+# ga4_metrics_probe.py)を使う、ブランド非依存版のワークフロー。リラックス以外のブランド
+# (スマイル・グッド等)にGA4/GSC連携を広げる際は、ブランドごとにワークフローを複製せず
+# こちらを使う(root CLAUDE.mdの「APIの読み書き手順はブランド非依存のSkill/ワークフローに
+# まとめ、ブランド固有情報は入力パラメータに切り出す」方針に合わせた)。
+#
+# relax-analytics.yml は稼働実績のある既存パイプラインなので、リスクを避けるため
+# 変更していない(このワークフローに一本化するかどうかは別途検討)。
+#
+#   mode=discover … どのプロパティ/サイトが見えるかの疎通確認だけ(実指標は取らない)
+#   mode=pull     … 対象月のセッション数・表示回数等の実指標を取得し、TSVを成果物に出す
+#   mode=probe-metrics … GA4 Data APIで実際に使える指標名(apiName)をgetMetadataで確認する
+#
+# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない
+# (TSVはこのジョブのログとワークフローの成果物(Artifact、7日で自動削除)にのみ出す)。
+#
+# 鍵はリポジトリシークレットにのみ置く(input `key_env` で指定するシークレット名)。
+# Claudeのセッションには渡らない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      brand:
+        description: "院マスタのブランド名(例: スマイル、グッド)"
+        required: true
+        type: string
+      key_env:
+        description: "サービスアカウント鍵を入れたリポジトリシークレット名(例: GCP_SMILE_GOOD_KEY)"
+        required: true
+        type: string
+      mode:
+        description: "discover=疎通確認だけ / pull=対象月の実指標を取得 / probe-metrics=使える指標名の確認"
+        required: true
+        type: choice
+        options:
+          - discover
+          - pull
+          - probe-metrics
+        default: discover
+      metrics_grep:
+        description: "mode=probe-metricsのときだけ使う。カンマ区切りのキーワード(apiName/uiName/descriptionに部分一致)"
+        required: false
+        type: string
+        default: "user,conversion,key"
+      scope:
+        description: "確認・取得する対象(discover/pull共通)"
+        required: true
+        type: choice
+        options:
+          - both
+          - ga4
+          - gsc
+        default: both
+      month:
+        description: "mode=pull のときだけ使う対象年月号(例 2026年08月号)。monthsを指定した場合はそちらが優先"
+        required: false
+        type: string
+        default: ""
+      months:
+        description: "mode=pullのときだけ使う。複数月を一括取得する場合にカンマ区切りで指定(例: 2025年08月号,2025年09月号,...)。結果はログではなくワークフローの成果物(Artifact)としてTSVを出力する"
+        required: false
+        type: string
+        default: ""
+      stores:
+        description: "mode=pullのときだけ使う。カンマ区切りで店舗を絞る(省略時は全店。出力が大きくログが途中で切れるときの分割実行用)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install --quiet google-auth google-api-python-client jpholiday
+
+      - name: Check the parts that need no credentials
+        run: python3 -m unittest discover -s tests
+
+      - name: Discover
+        if: inputs.mode == 'discover'
+        env:
+          ANALYTICS_KEY: ${{ secrets[inputs.key_env] }}
+          TZ: Asia/Tokyo
+        run: |
+          case "${{ inputs.scope }}" in
+            ga4) flag="--skip-gsc" ;;
+            gsc) flag="--skip-ga4" ;;
+            *)   flag="" ;;
+          esac
+          python3 scripts/analytics_discover.py --brand "${{ inputs.brand }}" \
+            --key-env ANALYTICS_KEY $flag
+
+      - name: Pull
+        if: inputs.mode == 'pull'
+        env:
+          ANALYTICS_KEY: ${{ secrets[inputs.key_env] }}
+          TZ: Asia/Tokyo
+        run: |
+          MONTHS="${{ inputs.months }}"
+          if [ -z "$MONTHS" ]; then
+            MONTHS="${{ inputs.month }}"
+          fi
+          if [ -z "$MONTHS" ]; then
+            echo "mode=pull には month または months の指定が必要です(例: 2026年08月号)" >&2
+            exit 1
+          fi
+          case "${{ inputs.scope }}" in
+            ga4) flag="--skip-gsc" ;;
+            gsc) flag="--skip-ga4" ;;
+            *)   flag="" ;;
+          esac
+          mkdir -p out
+          IFS=',' read -ra MONTH_ARR <<< "$MONTHS"
+          for m in "${MONTH_ARR[@]}"; do
+            m_trimmed="$(echo "$m" | xargs)"
+            [ -z "$m_trimmed" ] && continue
+            echo "=== $m_trimmed ==="
+            python3 scripts/analytics_pull.py --brand "${{ inputs.brand }}" \
+              --key-env ANALYTICS_KEY \
+              --month "$m_trimmed" --stores "${{ inputs.stores }}" $flag \
+              --out "out/${m_trimmed}.tsv"
+            cat "out/${m_trimmed}.tsv"
+          done
+
+      - name: Probe metrics
+        if: inputs.mode == 'probe-metrics'
+        env:
+          ANALYTICS_KEY: ${{ secrets[inputs.key_env] }}
+          TZ: Asia/Tokyo
+        run: |
+          python3 scripts/ga4_metrics_probe.py --brand "${{ inputs.brand }}" \
+            --key-env ANALYTICS_KEY --grep "${{ inputs.metrics_grep }}"
+
+      - name: Upload results
+        if: inputs.mode == 'pull'
+        uses: actions/upload-artifact@v4
+        with:
+          name: brand-analytics-pull-${{ inputs.brand }}
+          path: out/
+          retention-days: 7
+          if-no-files-found: error

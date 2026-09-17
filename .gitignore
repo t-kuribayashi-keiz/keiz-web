@@ -18,3 +18,7 @@ gcp-*.json
 # Transient output of scripts/chatwork_watcher.py (becomes an Issue body, never a commit)
 chatwork-report.md
 __pycache__/
+
+# 作業用スクラッチ。顧客の口コミ本文・投稿者名などPIIを含むエクスポート(例: MEOチェキの
+# CSV出力)を一時的に置く場所のため、コミット対象に含めない。
+.scratch/

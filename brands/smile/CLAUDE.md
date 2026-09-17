@@ -145,6 +145,56 @@ HPBブロックに**既に入っているもの**: 院別×月次のHPB集客数
   クリックパスに従った(このシートについてはSheets APIのみで、GA4/GSC Admin APIは
   未使用)
 
+### GA4/GSC本体の取得(2026-09-17、栗林さんの指示で着手。MEO内製化・SEO順位内製化と
+### 並行して、全ブランドへの展開はスマイル・グッドから開始することに決定)
+
+上記(2026-09-02)は「グッド・スマイル月次報告」シートを**読む**ためのサービスアカウント
+だったが、これとは別に、GA4・GSC**本体**(セッション数・表示回数・クリック数等の実指標)を
+直接APIで取得する仕組みがまだ無い。[functions/meo-internal/CLAUDE.md](../../functions/meo-internal/CLAUDE.md)
+のMEO内製化、GRCのSEO順位データ連携基盤(Drive共有フォルダ経由)と合わせて、
+GA4/GSCも同じ「自社で完結するデータ基盤」に組み込む方針。
+
+**使うサービスアカウント**: 紛らわしいことに、このブランドには既に2つのサービスアカウントが
+ある。
+
+| サービスアカウント | 鍵の保管場所 | 現在の用途 |
+|---|---|---|
+| `smile-good-reporter@keizgroup-automation.iam.gserviceaccount.com` | ローカルPCのみ(`claude\keys\smile-good-reporter.json`)。**リポジトリシークレット未登録** | 「グッド・スマイル月次報告」シート読み取り |
+| `smile-good-reporter-2@keizgroup-automation.iam.gserviceaccount.com` | リポジトリシークレット`GCP_SMILE_GOOD_KEY`(2026-09-08登録済み) | 五箱社の「Web広告プランニング」シート読み取り |
+
+GA4/GSCのAPI取得は**GitHub Actions(クラウド実行)で定期的に回す想定**なので、
+**既にリポジトリシークレットとして登録済みの`smile-good-reporter-2`
+(`GCP_SMILE_GOOD_KEY`)をそのまま流用する**方針とした(新規に3つ目のサービスアカウントを
+作らない。鍵をシークレット登録する手間が省ける)。
+
+**栗林さんに対応いただく必要がある作業(ブラウザ操作、Claude Codeでは代行不可)**:
+
+1. スマイル・グッドのGA4管理画面 → 左「アカウント」列 →「アカウントのアクセス管理」→「+」→
+   `smile-good-reporter-2@keizgroup-automation.iam.gserviceaccount.com` を追加 →
+   権限「閲覧者」(**アカウント単位**で付与。プロパティ単位だと店舗ごとに繰り返しが必要になり、
+   リラックスのときに最初に間違えた選択肢なので注意——
+   [ga4-gsc-service-account-setup.md](../../.claude/skills/customer-acquisition-consulting/references/ga4-gsc-service-account-setup.md)参照)
+2. スマイル・グッドのSearch Console管理画面 → 対象プロパティごとに「設定」→「ユーザーと
+   権限」→「ユーザーを追加」→ 同じメールアドレス → 権限「フル」(GSCはアカウント単位の
+   一括付与が無いため、プロパティの数だけ繰り返しが必要)
+
+付与が完了したら、新設した汎用ワークフロー
+[`.github/workflows/brand-analytics.yml`](../../.github/workflows/brand-analytics.yml)
+(`brand=スマイル`, `key_env=GCP_SMILE_GOOD_KEY`, `mode=discover`)を実行し、
+`scripts/analytics_discover.py`でGA4アカウント構成・GSCサイト一覧を自動列挙して
+店舗名との突き合わせを確認する(プロパティIDやサイトURLを人が手で書き写さない、
+リラックスと同じ手順)。GA4プロパティ名の店舗名照合でリラックスと同様の
+不一致(管理連番や表記ゆれ)が出た場合は、`scripts/ga4_properties.py`側で解消する
+(推測で埋めない)。
+
+**出力先(今後決める)**: リラックスの現行パイプラインはTSVをGitHub Actionsの
+ログ・7日で消えるArtifactに出すだけで、恒久保存先になっていない。MEO内製化で
+Google Sheetsへの投入(IMPORTRANGE経由)が実際に機能することが確認できたため、
+GA4/GSCの実指標もSheetsの長形式ログ(年月・店舗・チャネル・指標・値、
+`.claude/skills/customer-acquisition-consulting/references/data-architecture.md`の
+設計を踏襲)に溜める方向で検討する。スマイル・グッドでdiscover/pullの疎通確認が
+取れてから着手する。
+
 ## 月次集客レポート(2026-09-08新設、同日中にv2へ全面統合、2026-09-09にv3でブランド別に再分離)
 
 CRM「集患媒体集計」(集計値のみ)・HPBリボンデータ(HPB掲載5院)・SEO/MEO順位・直営関西
