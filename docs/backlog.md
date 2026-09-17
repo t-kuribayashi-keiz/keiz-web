@@ -61,15 +61,24 @@ claude-in-chrome経由でXServerサーバーパネル・WP管理画面を直接�
 セレクタ一覧は[brands/relax/CLAUDE.md](../brands/relax/CLAUDE.md)参照。セレクタは「契約」
 として扱うこと。
 
-### relax-hpリポジトリ(浜田山店パイロット)のFTPアカウント作成、栗林さんの対応待ち
+### relax-hpリポジトリ: FTPアカウントは全店舗共有方針で確定(2026-09-15)
 
-[relaxリポジトリ](https://github.com/t-kuribayashi-keiz/relax)のセットアップ手順1
-(XServerサーバーパネルで浜田山店専用のFTPアカウントを、起点ディレクトリ
-`public_html/hamadayama/wp-content/themes/hamadayama/`に限定して新規作成する)は、
-アカウント作成にあたるためClaudeが代行できず未着手。栗林さんご本人がサーバーパネルの
-「FTP → FTPアカウント設定 → FTPアカウント追加」から作成し、生成したユーザー名/パスワードを
-このリポジトリのGitHub Secrets/Environmentに登録するところから再開する(手順2以降は
-[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#セットアップ手順店舗を追加するたびに繰り返す)参照)。
+栗林さんがFTPアカウント`claude@refresh-relax.com`(サーバー`sv14437.xserver.jp`)を作成し
+GitHub Secrets/Environmentへの登録も完了、`pull`ワークフローを実行したところ、このアカウントの
+起点ディレクトリが浜田山店のテーマフォルダではなくサーバーアカウント全体(`luna-pilates.com`=
+LUNAのサイト、`Maildir.3`=メール等も同列に見える状態)になっていることが判明した。
+
+これについて栗林さんに確認したところ、**意図的な設計であり社内確認済み**との回答だった:
+「リラックスの全部のアカウントを今後管理していく前提でそのディレクトリまですべて範囲として
+管理できるFTPを作っている。今後はLUNAに関してもアカウントを一元化したい」。
+
+これを受けてrelaxリポジトリ側の設計を変更した: FTPアカウントの権限(起点ディレクトリ)には
+頼らず、**ワークフロー(`pull.yml`/`deploy.yml`)側で対象パスを明示的に固定**する
+(`refresh-relax.com/public_html/<store>/wp-content/themes/<store>`のみをmirror対象にし、
+転送前に対象パスの存在確認・ファイル数上限チェックを行う)。GitHub Secrets/Environmentも
+店舗ごとではなく共通の`relax`1つに統一した。詳細は
+[relaxリポジトリのREADME](https://github.com/t-kuribayashi-keiz/relax#設計-共有ftpアカウント1つワークフロー側で対象パスを明示的に絞る2026-09-15改訂)
+参照。
 
 ### salonboard-operatorの非交渉ルール2(登録の一括承認≠反映の承認)の実地検証
 
@@ -110,7 +119,12 @@ claude-in-chrome経由でXServerサーバーパネル・WP管理画面を直接�
   確認して判明)
 
 - ~~**高円寺店の自社サイトURL**~~ → 2026-09-07に栗林さんから回答(`https://refresh-relax.com/koenji/`)、
-  `data/clinics.json`に登録済み。住所・電話はまだ未取得
+  `data/clinics.json`に登録済み。
+- ~~**高円寺店の住所・電話**~~ → 2026-09-05に公式サイトから取得して`data/clinics.json`に登録済み。
+  **ただしサイト記載の郵便番号(〒142-0051)は誤り**: これは品川区平塚(=戸越銀座店の郵便番号)
+  で、サイト側のコピペミスと判断。実際の所在地である杉並区高円寺南の166-0003を郵便番号APIで
+  確認のうえ採用した。**サイト側の修正依頼はまだ出していない**(栗林さんから運営元への連絡が
+  必要)。店舗用email(`<店舗>@relax-net.net`形式)も未取得のまま
 - ~~**★栗林さんの作業: リラックスGSCの残り11店舗への個別付与**~~ → 2026-09-07に完了。
   `relax-analytics.yml`(scope=gsc)を再実行して確認したところ、URLプレフィックスサイトが
   25件(25店舗全て)に到達していた。[サチコ権限付与チェックリスト](https://claude.ai/code/artifact/9e2ab330-b42f-48d2-ae14-b6ed84773648)
