@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --quiet google-auth google-api-python-client jpholiday
-      - name: Pull last 28 days (all stores, GA4+GSC, page-level GSC)
+      - name: Pull Aug 1 - Sep 17 (14 established stores only, GA4+GSC, page-level GSC)
         env:
           GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
         run: |
@@ -27,10 +27,17 @@ jobs:
           from analytics_pull import ga4_property_ids
 
           BRAND = "リラックス"
+          # 2026年08月に既にGSCデータが取れていた(=データ収集が古くから安定している)14店舗のみ。
+          # 2026年08月〜現在だけだと店舗によって収集開始時期が違い信頼性が無いため、
+          # 8月1日から現在までの約48日間、この14店舗に絞って見る(2026-09-17、栗林さんの判断)。
+          ESTABLISHED_STORES = {
+              "たまプラーザ東急百貨店", "イオン入間店", "中野坂上店", "中野新橋店",
+              "仙川店", "千歳烏山店", "幡ヶ谷店", "新山下店", "方南町店",
+              "桜上水店", "梅ヶ丘店", "武蔵小山店", "浦和店", "阿佐ヶ谷店",
+          }
           creds = credentials("GCP_RELAX_KEY")
-          today = datetime.date.today()
-          start = (today - datetime.timedelta(days=28)).isoformat()
-          end = today.isoformat()
+          start = "2026-08-01"
+          end = datetime.date.today().isoformat()
           print(f"period: {start} .. {end}", file=sys.stderr)
 
           # --- GA4: newUsers/convertedUsers per store, summed across channels ---
@@ -43,6 +50,8 @@ jobs:
 
           ga4_out = {}
           for store, display_name in sorted(result["matched"].items()):
+              if store not in ESTABLISHED_STORES:
+                  continue
               property_id = id_map.get(display_name)
               if not property_id:
                   continue
@@ -82,7 +91,7 @@ jobs:
           for site in sites:
               url = site.get("siteUrl", "").rstrip("/")
               store = by_url.get(url)
-              if not store:
+              if not store or store not in ESTABLISHED_STORES:
                   continue
               resp = search_console.searchanalytics().query(
                   siteUrl=site["siteUrl"],
@@ -111,13 +120,13 @@ jobs:
                   "top_queries": home_queries[:8],
               }
 
-          print("=== GA4 (newUsers / convertedUsers, 直近28日) ===")
+          print("=== GA4 (newUsers / convertedUsers, 2026年08月〜現在) ===")
           for store in sorted(ga4_out):
               g = ga4_out[store]
               print(f"{store}\tnewUsers={g['newUsers']}\tconvertedUsers={g['convertedUsers']}")
 
           print()
-          print("=== GSC 店舗合計(直近28日) ===")
+          print("=== GSC 店舗合計(2026年08月〜現在) ===")
           for store in sorted(gsc_out):
               g = gsc_out[store]
               ctr = f"{g['ctr']:.4f}" if g['ctr'] is not None else "-"
@@ -125,7 +134,7 @@ jobs:
               print(f"{store}\timpressions={g['impressions']}\tclicks={g['clicks']}\tctr={ctr}\tposition={pos}")
 
           print()
-          print("=== GSC トップページのクエリ上位(直近28日) ===")
+          print("=== GSC トップページのクエリ上位(2026年08月〜現在) ===")
           for store in sorted(gsc_out):
               print(f"--- {store} ---")
               for q, impr, clicks, pos in gsc_out[store]["top_queries"]:
