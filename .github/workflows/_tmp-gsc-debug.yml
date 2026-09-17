@@ -1,0 +1,55 @@
+name: _tmp-gsc-debug
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: "調査対象のGSCサイトURL(例: https://refresh-relax.com/hamadayama/)"
+        required: true
+        type: string
+      month:
+        description: "対象年月号(例: 2026年08月号)"
+        required: true
+        type: string
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet google-auth google-api-python-client
+      - name: Raw GSC query
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+          SITE_URL: ${{ inputs.site_url }}
+          MONTH: ${{ inputs.month }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, calendar, re
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+
+          site_url = os.environ["SITE_URL"]
+          month_label = os.environ["MONTH"]
+          m = re.search(r"(\d{4})年(\d{1,2})月", month_label)
+          year, month = int(m.group(1)), int(m.group(2))
+          last_day = calendar.monthrange(year, month)[1]
+          start, end = f"{year:04d}-{month:02d}-01", f"{year:04d}-{month:02d}-{last_day:02d}"
+
+          info = json.loads(os.environ["GCP_RELAX_KEY"])
+          creds = service_account.Credentials.from_service_account_info(
+              info, scopes=["https://www.googleapis.com/auth/webmasters.readonly"])
+          sc = build("searchconsole", "v1", credentials=creds, cache_discovery=False)
+
+          resp = sc.searchanalytics().query(
+              siteUrl=site_url,
+              body={"startDate": start, "endDate": end, "dimensions": ["page"], "rowLimit": 20},
+          ).execute()
+          print(f"site_url={site_url!r} start={start} end={end}")
+          print(f"rows count: {len(resp.get('rows', []))}")
+          print(json.dumps(resp, indent=2, ensure_ascii=False)[:3000])
+          EOF
+        shell: bash
