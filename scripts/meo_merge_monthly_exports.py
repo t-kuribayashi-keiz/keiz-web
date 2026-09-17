@@ -5,6 +5,12 @@
 パーティションに60日の自動有効期限があり、1〜8月分のデータが投入直後に消える
 ことが判明したため、Google Sheetsへの保存に切り替える(2026-09-17)。
 
+**store_idの変換(2026-09-17追加)**: MEOチェキの「案件名」は店舗の表示名であって
+data/clinics.jsonのidではない。data/meo-store-id-map.json(scripts/store_matcher.pyで
+事前に突き合わせ済み)を使って、可能な行はidに変換する。**対応表に無い案件名の行は
+捨てずに残す**(store_idを案件名のまま出力し、末尾に警告を出す)——合計行数が
+黙って減ると、取り込み漏れなのか元々存在しない店舗なのか区別できなくなるため。
+
 使い方:
     python scripts/meo_merge_monthly_exports.py <CSVファイル...> --out-dir .scratch/meo_export
 
@@ -14,7 +20,20 @@
 """
 import argparse
 import csv
+import json
+import sys
 from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+STORE_ID_MAP_PATH = REPO / "data" / "meo-store-id-map.json"
+
+
+def load_store_id_map(path: Path = STORE_ID_MAP_PATH) -> dict[str, str]:
+    """MEOチェキの案件名 → data/clinics.json の id。無ければ空のマップを返す
+    (対応表がまだ無い環境でもこのスクリプト自体は動く。ただしstore_idは案件名のまま)。"""
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("matched", {})
 
 
 def main() -> None:
@@ -24,6 +43,9 @@ def main() -> None:
     args = parser.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
+    store_id_map = load_store_id_map()
+    unmapped_names: set[str] = set()
+
     rank_rows = []
     keyword_first_seen = {}
 
@@ -31,7 +53,11 @@ def main() -> None:
         with csv_path.open(encoding="utf-8-sig", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                store_id = row["案件名"]
+                raw_name = row["案件名"]
+                store_id = store_id_map.get(raw_name)
+                if store_id is None:
+                    store_id = raw_name
+                    unmapped_names.add(raw_name)
                 keyword = row["検索キーワード"]
                 rank_raw = row["順位"]
                 y, m, d = row["日付"].split("-")
@@ -75,6 +101,14 @@ def main() -> None:
 
     print(f"rank_checks_combined: {len(rank_rows)} rows -> {rank_path}")
     print(f"keywords_master_combined: {len(keyword_first_seen)} rows -> {kw_path}")
+    if unmapped_names:
+        print(
+            f"WARNING: store_id未変換のまま出力した案件名が{len(unmapped_names)}件あります"
+            " (data/meo-store-id-map.jsonに無い): ",
+            file=sys.stderr,
+        )
+        for name in sorted(unmapped_names):
+            print(f"  {name}", file=sys.stderr)
 
 
 if __name__ == "__main__":

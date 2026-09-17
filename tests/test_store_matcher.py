@@ -62,6 +62,14 @@ class TestNormalization(unittest.TestCase):
             normalize_store_name("高円寺店"),
         )
 
+    def test_relax_seitai_prefix_in_the_other_word_order_is_also_stripped(self):
+        """MEOチェキの案件名は『整体院リラックス 笹塚店』(整体院が先)。院マスタは『笹塚店』。
+        語順違いの冠は既存のstrip_prefixesでは拾えなかった(2026-09-17、実データで発覚)。"""
+        self.assertEqual(
+            normalize_store_name("整体院リラックス 笹塚店"),
+            normalize_store_name("笹塚店"),
+        )
+
     def test_shin_kyu_spelling_variants_unify(self):
         self.assertEqual(
             normalize_store_name("すまいる針灸接骨院 六甲道院"),

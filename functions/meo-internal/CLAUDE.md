@@ -331,12 +331,73 @@ CSVをそのままGoogle Sheetsに取り込む方法として、まず`IMPORTDAT
 
 上記「未解決・次のステップ」節の1〜6に加えて:
 
-7. [scripts/meo_import_rank_export.py](../../scripts/meo_import_rank_export.py)を、
-   BigQuery向けNDJSON出力からGoogle Sheets(IMPORTRANGE用の中間CSV、または将来的には
-   Sheets APIでの直接書き込み)向けに書き換える
+7. ~~`scripts/meo_import_rank_export.py`を書き換える~~ **2026-09-17完了・方針変更**:
+   実際にSheets投入で使ったのは`meo_import_rank_export.py`(BigQuery向けNDJSON出力)
+   ではなく`scripts/meo_merge_monthly_exports.py`(CSV→CSV統合、ストレージ層に依存しない)
+   だったと判明したため、`meo_import_rank_export.py`は**死んだコード**(誰も呼ばない、
+   参照するBigQueryテーブルも使わない方針)と判断し削除した。代わりに
+   `meo_merge_monthly_exports.py`側にstore_id変換を追加(下記「store_id突き合わせ」参照)
 8. `meo-automation-490007`のBigQueryデータセット(`meo_internal`)を削除するか、
-   このまま放置(サンドボックスのため課金は発生しない)するか、栗林さんと決める
-9. 月次の運用フロー(MEOチェキから新しい月のCSVをダウンロード→
-   `meo_merge_monthly_exports.py`で統合→Drive変換→`IMPORTRANGE`の行オフセットを
-   延長)を、手作業でもすぐ回せる手順書としてこのファイルに追記するか、
-   半自動化スクリプトにするか検討する
+   このまま放置(サンドボックスのため課金は発生しない)するか、**栗林さんと相談中
+   (2026-09-17時点で未決定)**
+9. 月次の運用フローの手順書化 **2026-09-17完了** — 下記「月次運用フロー(手順書)」参照
+
+### store_id突き合わせ完了(2026-09-17、上記1に対応)
+
+`scripts/store_matcher.py`(広告費シート等の名寄せで既に実績のあるツール)で、
+MEOチェキの「案件名」199件を`data/clinics.json`の店舗に自動で突き合わせた。結果は
+[data/meo-store-id-map.json](../../data/meo-store-id-map.json)に保存済み:
+
+- **196/199件が1対1で決定**(曖昧一致=0件。曖昧なものは`store_matcher.py`の設計上
+  自動では採用しない)
+- **残り3件は意図的に対応表から外し、`unresolved`に理由付きで記録**:
+  - `やまもと鍼灸接骨院 はつしば院` — `brands/smile/CLAUDE.md`記載の閉院済み店舗(完全除外店舗)
+  - `リフレッシュセンターリラックス 元住吉店` — `data/clinics.json`のnotesに記載の
+    閉院確認済み店舗(`relax-motosumiyoshi`は既に削除済み)
+  - `宇都宮オリオン通り整骨院` — 院マスタに該当なし。**栗林さんへの確認待ち**
+    (同一エリアの「宇都宮東口駅前店」が別途閉院済みと記録されているが、同一店舗かは
+    未確認のため推測で紐付けていない)
+- 副産物: 表記ゆれ突き合わせの過程で、`整体院リラックス 笹塚店`(MEOチェキ側の語順)が
+  既存の`strip_prefixes`(`リラックス整体`という逆の語順のみ登録されていた)で
+  吸収できていないことを発見。`data/store-name-aliases.json`に`整体院リラックス`を
+  追加して解消(`tests/test_store_matcher.py`にも再発防止のテストを追加)
+- `scripts/meo_merge_monthly_exports.py`を、この対応表を使って`store_id`を
+  案件名からclinics.jsonのidへ変換するよう更新した。**対応表に無い案件名の行は
+  捨てずに案件名のまま出力し、標準エラー出力に警告を出す**(合計行数が黙って
+  減らないようにするため)。新しい店舗がMEOチェキ側に追加されたら、同じ手順
+  (`store_matcher.py`での再突き合わせ)で`data/meo-store-id-map.json`を作り直すこと
+
+## 月次運用フロー(手順書、2026-09-17時点)
+
+**現状は手作業。** この実行環境からはSheetsの特定タブ(gid)を直接指定して開けない、
+GoogleのPicker/IMPORTDATAも不安定という制約(上記「ストレージ層をBigQueryから
+Google Sheetsに変更」参照)があるため、月次の取り込みはブラウザ操作を含む手作業のまま。
+半自動化(取り込みまでをスクリプト化し、Drive変換とIMPORTRANGEの行オフセット延長だけ
+手作業に残す等)は今後の検討課題。
+
+1. **MEOチェキから新しい月のCSVをダウンロード**: https://app.ranktoolap.com の
+   `/reports/exports_csv` →「【順位】順位データ全案件ダウンロード」で対象月を指定して
+   実行 → `info-meo@ranktoolap.com`からのメール本文のS3署名付きURL(**有効期限30分**)を
+   Gmail Web UI上でクリックして取得(quoted-printable本文からの直接抽出は不具合あり、
+   上記「全店舗一括CSVエクスポート」節参照)
+2. **`meo_merge_monthly_exports.py`で統合**:
+   ```
+   python scripts/meo_merge_monthly_exports.py <新しい月のCSV> [<既存の統合済みCSVも渡せば追加統合可>] --out-dir .scratch/meo_export
+   ```
+   出力される`rank_checks_combined.csv`・`keywords_master_combined.csv`のstore_idは
+   `data/meo-store-id-map.json`で自動変換済み。標準エラー出力に警告が出た場合
+   (対応表に無い案件名がある場合)は、新規出店やMEOチェキ側の表記変更の可能性があるため、
+   内容を確認してから次に進むこと
+3. **行数が1ファイルのSheets行数上限に収まるように分割**(前回は31,454行を10分割、
+   50,000行ずつが目安。1ファイルなら分割不要)
+4. **Google Driveの「アプリで開く」→「Google スプレッドシート」でCSVをネイティブSheetsに
+   変換**(`IMPORTDATA`・Pickerは不安定なため使わない。上記「試して失敗した投入方法」参照)
+5. **「MEO順位ログ_2026」スプレッドシートの該当タブに`IMPORTRANGE`で連結**。前回投入分の
+   末尾行番号を確認し、そこから続くように行オフセットを計算する。`IMPORTRANGE`は
+   参照先ごとに初回のみ「アクセスを許可」の同意が必要(セルクリック直後には出ないことが
+   あるため、ページの再読み込みを挟むと確実)
+6. **Name Box+数式バーのズームで検証**: セル参照ボックスへの高速入力はまれに数式が
+   入らない/ずれたセルに入るサイレントな失敗をする。セルへ移動した直後に数式バーを
+   ズームで確認する(過去に2箇所で実際に発生・検出・修正した教訓)
+7. 一時的にCSVの共有設定を「リンクを知っている全員」にした場合は、**投入完了後に
+   必ず「制限付き」へ戻す**
