@@ -1,5 +1,5 @@
 {
-  "_comment": "MEOチェキの「案件名」(表記そのまま)から data/clinics.json の id への対応表。scripts/store_matcher.py で自動生成した(2026-09-17)。新しい店舗がMEOチェキ側に追加されたら、.scratch上で同じ手順(店舗名一覧の抽出→StoreMatcherでの突き合わせ)を再実行してこのファイルを作り直すこと。**手で個別に書き足さない**(推測で埋めると気づかれない取り違えが起きるため)。",
+  "_comment": "MEOチェキの「案件名」(表記そのまま)から data/clinics.json の id への対応表。scripts/store_matcher.py で自動生成した(2026-09-17)。新しい店舗がMEOチェキ側に追加されたら、.scratch上で同じ手順(店舗名一覧の抽出→StoreMatcherでの突き合わせ)を再実行してこのファイルを作り直すこと。**手で個別に書き足さない**(推測で埋めると気づかれない取り違えが起きるため)。scripts/meo_merge_monthly_exports.pyが読む用途専用。検索地点(駅名/住所)・順位・カテゴリも含む同種のより広いスナップショットは data/meo-search-locations.json 参照(同じ店舗一覧・同じ突き合わせ手法だが、DataForSEO連携検討用に別途生成したもの。2つのファイルは生成元が同じMEOチェキ店舗一覧のため、店舗が増減したら両方を作り直すこと)。",
   "generated_from": "keywords_master_combined.csv の案件名列(199件、2026-09-17時点)",
   "matched": {
     "LUNA Pilates Studio 戸越銀座店": "luna-togoshiginza",

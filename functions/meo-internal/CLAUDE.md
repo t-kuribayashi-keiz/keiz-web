@@ -342,6 +342,38 @@ CSVをそのままGoogle Sheetsに取り込む方法として、まず`IMPORTDAT
    (2026-09-17時点で未決定)**
 9. 月次の運用フローの手順書化 **2026-09-17完了** — 下記「月次運用フロー(手順書)」参照
 
+## 順位計測の有料SERP API化検討(2026-09-18、栗林さんの指示で着手)
+
+無料スクレイピング([scripts/meo_rank_check.py](../../scripts/meo_rank_check.py))は
+キーワードにエリア名を含めるだけで、実際の緯度経度による地点指定ではない。栗林さんから
+「地点情報登録した状態での順位が欲しい」との要望があり、DataForSEO等の有料SERP API
+(`location_coordinate`パラメータ対応)への切り替えを検討中。
+
+### コスト見積り(DataForSEO公式ページ調査、2026-09-18)
+
+Google Maps APIの料金は1SERPあたり Standard $0.0006 / Priority $0.0012 / Live $0.002。
+定期実行にはLiveモードの即時性は不要なためStandardで十分:
+
+- パイロット規模(例: 5店舗×5キーワード、1日1回): 月間約750件 → 約$0.45/月
+- MEOチェキの現行規模(199店舗×平均9.3キーワード、1日1回): 月間約55,680件 → 約$33/月
+
+無料トライアルアカウント(決済情報不要)で実際のリクエストを試し、消費クレジットを
+検証する予定。**アカウント作成は栗林さんご本人対応**(決済・登録情報はClaude Codeでは
+扱えない)。
+
+### 検索地点データの取得(2026-09-18完了)
+
+MEOチェキ管理画面(`https://app.ranktoolap.com/d/businesses`)の「検索地点」列
+(駅名または住所。店舗ごとに登録されている、DataForSEOへ切り替える際の元データ)を
+全199件ブラウザで取得し、[data/meo-search-locations.json](../../data/meo-search-locations.json)
+に保存した。`scripts/store_matcher.py`で`data/clinics.json`のidに自動突き合わせ済み
+(196/199一致。残り3件は[data/meo-store-id-map.json](../../data/meo-store-id-map.json)の
+`unresolved`と同じ3件——理由もそちらに記載済み)。
+
+**次のステップ**: この検索地点(駅名/住所の文字列)をジオコーディングして緯度経度に変換
+すれば、DataForSEOにそのまま渡せる状態になる。ジオコーディング自体はGoogle Geocoding API
+(店舗数分の1回限りの変換、数百円程度)で対応可能。栗林さんのDataForSEOアカウント作成待ち。
+
 ### store_id突き合わせ完了(2026-09-17、上記1に対応)
 
 `scripts/store_matcher.py`(広告費シート等の名寄せで既に実績のあるツール)で、

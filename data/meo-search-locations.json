@@ -1,0 +1,1399 @@
+{
+  "_comment": "MEOチェキ(app.ranktoolap.com)の店舗一覧から取得した「検索地点」の一覧(2026-09-18)。DataForSEO等で緯度経度指定の順位取得に切り替える際、この検索地点(駅名または住所)をジオコーディングして使う想定。clinic_idはdata/clinics.jsonのidで、scripts/store_matcher.pyによる自動突き合わせ。nullは院マスタに無い(閉院済み、または未登録)店舗。",
+  "generated_from": "https://app.ranktoolap.com/d/businesses (全199件、2026-09-18取得)",
+  "stores": [
+    {
+      "name": "姪浜駅南2丁目接骨院",
+      "location": "姪浜駅",
+      "rank": "15位",
+      "category": "整体",
+      "clinic_id": "chokuei-meinohama"
+    },
+    {
+      "name": "アクロスモール守谷接骨院",
+      "location": "守谷駅",
+      "rank": "20位圏外",
+      "category": "整体",
+      "clinic_id": "chokuei-moriya"
+    },
+    {
+      "name": "LUNA Pilates Studio 戸越銀座店",
+      "location": "戸越銀座駅",
+      "rank": "2位",
+      "category": "ピラティス スタジオ",
+      "clinic_id": "luna-togoshiginza"
+    },
+    {
+      "name": "リラックス高円寺店",
+      "location": "日本、東京都杉並区, 高円寺駅",
+      "rank": "4位",
+      "category": "整体",
+      "clinic_id": "relax-koenji"
+    },
+    {
+      "name": "みずほ台駅東口接骨院",
+      "location": "みずほ台駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-mizuhodai"
+    },
+    {
+      "name": "一宮白旗通接骨院",
+      "location": "一宮",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ichinomiya"
+    },
+    {
+      "name": "みらい平駅前接骨院",
+      "location": "日本、〒300-2358 茨城県つくばみらい市陽光台１丁目, みらい平駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-miraidaira"
+    },
+    {
+      "name": "宇都宮オリオン通り整骨院",
+      "location": "宇都宮駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": null
+    },
+    {
+      "name": "武蔵境駅北口接骨院",
+      "location": "武蔵境駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-musashisakai"
+    },
+    {
+      "name": "ミライ接骨院 ヒラマツ城東店",
+      "location": "和歌山市",
+      "rank": "8位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-hiramatsu-joto"
+    },
+    {
+      "name": "千種本山接骨院",
+      "location": "本山駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-motoyama"
+    },
+    {
+      "name": "拝島駅南口接骨院",
+      "location": "拝島駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-haijima"
+    },
+    {
+      "name": "菊川駅前接骨院",
+      "location": "菊川駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kikugawa"
+    },
+    {
+      "name": "川越クレアモール接骨院",
+      "location": "本川越駅",
+      "rank": "10位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-creamall"
+    },
+    {
+      "name": "四街道北口接骨院",
+      "location": "四街道駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-yotsukaido-k"
+    },
+    {
+      "name": "手稲駅北口接骨院",
+      "location": "手稲駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-teine"
+    },
+    {
+      "name": "郡山駅西口接骨院",
+      "location": "郡山駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-koriyama-n"
+    },
+    {
+      "name": "姉ヶ崎駅前接骨院",
+      "location": "姉ヶ崎駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-anegasaki"
+    },
+    {
+      "name": "北山駅前接骨院",
+      "location": "北山駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kitayama"
+    },
+    {
+      "name": "流山おおたかの森西口接骨院",
+      "location": "流山おおたかの森駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-otakanomori"
+    },
+    {
+      "name": "川西能勢口駅西口接骨院",
+      "location": "川西能勢口駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kawanishinoseguchi"
+    },
+    {
+      "name": "すまいる針灸接骨院 甲南山手院",
+      "location": "甲南山手駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-konanyamate"
+    },
+    {
+      "name": "すまいる針灸接骨院 六甲道院",
+      "location": "六甲道駅",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "smile-rokkomichi"
+    },
+    {
+      "name": "金剛まるまる針灸整骨院",
+      "location": "金剛駅",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "smile-kongou"
+    },
+    {
+      "name": "すまいる鍼灸接骨院 泉が丘院",
+      "location": "泉ヶ丘駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-izumigaoka"
+    },
+    {
+      "name": "岸和田まるまる針灸接骨院",
+      "location": "東岸和田駅",
+      "rank": "20位圏外",
+      "category": "整体",
+      "clinic_id": "smile-kishiwada"
+    },
+    {
+      "name": "すまいる針灸接骨院 きたのだ院",
+      "location": "北野田駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-kitanoda"
+    },
+    {
+      "name": "すまいる針灸接骨院 春木院",
+      "location": "春木駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-haruki"
+    },
+    {
+      "name": "すまいる鍼灸接骨院 ながよし院",
+      "location": "出戸駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-nagayoshi"
+    },
+    {
+      "name": "やまもと鍼灸接骨院 さかいし院",
+      "location": "堺市駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "smile-sakaishi"
+    },
+    {
+      "name": "やまもと鍼灸接骨院 はつしば院",
+      "location": "初芝駅",
+      "rank": "19位",
+      "category": "接骨院",
+      "clinic_id": null
+    },
+    {
+      "name": "やまもと鍼灸接骨院 おおとり院",
+      "location": "鳳駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "smile-otori"
+    },
+    {
+      "name": "山本接骨院 なかもず院",
+      "location": "中百舌鳥駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "smile-nakamozu"
+    },
+    {
+      "name": "姿勢堂 西条鍼灸接骨院",
+      "location": "広島県東広島市西条町土与丸",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "good-saijo"
+    },
+    {
+      "name": "ひなた鍼灸接骨院",
+      "location": "下深川駅",
+      "rank": "1位",
+      "category": "鍼灸院",
+      "clinic_id": "good-kamezaki"
+    },
+    {
+      "name": "姿勢堂 祇園鍼灸接骨院",
+      "location": "下祇園駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "good-gion"
+    },
+    {
+      "name": "姿勢堂 府中鍼灸接骨院",
+      "location": "天神川駅",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "good-fuchu"
+    },
+    {
+      "name": "姿勢堂 段原鍼灸接骨院",
+      "location": "広島市南区段原",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "good-danbara"
+    },
+    {
+      "name": "姿勢堂 寺家鍼灸接骨院",
+      "location": "寺家",
+      "rank": "1位",
+      "category": "鍼灸院",
+      "clinic_id": "good-jike"
+    },
+    {
+      "name": "姿勢堂 宮内鍼灸接骨院",
+      "location": "宮内",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "good-miyauchi"
+    },
+    {
+      "name": "二条駅前整骨院",
+      "location": "二条駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nijyo"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 大津市石山整骨院",
+      "location": "石山駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-otsu-ishiyama"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 大津市整骨院",
+      "location": "マックスバリュ大津月輪店",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-otsu"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 西大津院",
+      "location": "大津京駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-nishiotsu"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 和歌山市有本院",
+      "location": "紀伊中ノ島駅",
+      "rank": "4位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-wakayama-arimoto"
+    },
+    {
+      "name": "堺市美原区整骨院",
+      "location": "大阪府堺市",
+      "rank": "20位圏外",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-sakai-mihara"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 富田林市旧170号線院",
+      "location": "川西駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-tondabayashi-170"
+    },
+    {
+      "name": "弁慶はりきゅう整骨院 河内長野市310号線院",
+      "location": "河内長野駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-kawachinagano-310"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 branch松井山手",
+      "location": "松井山手駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-matsuiyamate"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 深江橋院",
+      "location": "深江橋駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-fukaebashi"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 南茨木院",
+      "location": "南茨木駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-minami-ibaraki"
+    },
+    {
+      "name": "忍ヶ丘駅前整骨院",
+      "location": "忍ヶ丘駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-shinobugaoka"
+    },
+    {
+      "name": "ひまわり鍼灸整骨院 高槻院",
+      "location": "高槻市",
+      "rank": "20位圏外",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-takatsuki"
+    },
+    {
+      "name": "河内いわふね駅前整骨院",
+      "location": "河内磐船駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-kawachi-iwafune"
+    },
+    {
+      "name": "たいよう鍼灸整骨院 枚方公園院",
+      "location": "枚方公園駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-hirakata-koen"
+    },
+    {
+      "name": "あやめ鍼灸整骨院 枚方長尾院",
+      "location": "長尾駅",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-hirakata-nagao"
+    },
+    {
+      "name": "おかだ鍼灸整骨院 枚方御殿山院",
+      "location": "御殿山駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-hirakata-gotenyama"
+    },
+    {
+      "name": "新道東駅接骨院",
+      "location": "新道東駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shindohigashi"
+    },
+    {
+      "name": "新潟亀田大通り接骨院",
+      "location": "亀田駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kameda"
+    },
+    {
+      "name": "北仙台駅前接骨院",
+      "location": "北仙台駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kitasendai"
+    },
+    {
+      "name": "中村公園駅前接骨院",
+      "location": "中村公園駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nakamurakouen"
+    },
+    {
+      "name": "南平岸駅前接骨院",
+      "location": "南平岸駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-minamihiragishi"
+    },
+    {
+      "name": "下総中山駅北口整骨院",
+      "location": "下総中山駅",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shimosakitaguchi"
+    },
+    {
+      "name": "新浜松駅前接骨院",
+      "location": "新浜松駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shinhamamatsu"
+    },
+    {
+      "name": "リラックス戸越銀座店",
+      "location": "戸越銀座駅",
+      "rank": "3位",
+      "category": "整体",
+      "clinic_id": "relax-togoshiginza"
+    },
+    {
+      "name": "リラックス仙川店",
+      "location": "仙川駅",
+      "rank": "6位",
+      "category": "指圧・マッサージ",
+      "clinic_id": "relax-sengawa"
+    },
+    {
+      "name": "リラックス新山下店",
+      "location": "本牧",
+      "rank": "3位",
+      "category": "整体",
+      "clinic_id": "relax-shinyamashita"
+    },
+    {
+      "name": "リラックス中野坂上店",
+      "location": "中野坂上駅",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-nakanosakaue"
+    },
+    {
+      "name": "リラックス武蔵小山店",
+      "location": "武蔵小山駅",
+      "rank": "2位",
+      "category": "指圧・マッサージ",
+      "clinic_id": "relax-musashikoyama"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 千歳烏山店",
+      "location": "千歳烏山駅",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-chitose-karasuyama"
+    },
+    {
+      "name": "整体院リラックス 笹塚店",
+      "location": "東京都渋谷区笹塚１丁目５７",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-sasazuka"
+    },
+    {
+      "name": "リラックス西新宿店",
+      "location": "東京都新宿区西新宿５丁目２５",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-nishishinjuku"
+    },
+    {
+      "name": "リラックス 梅ヶ丘店",
+      "location": "東京都世田谷区梅丘１丁目３２",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-umegaoka"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 方南町店",
+      "location": "東京都杉並区方南２丁目２１",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-honancho"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 浜田山店",
+      "location": "東京都杉並区浜田山３丁目３１",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-hamadayama"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 幡ヶ谷店",
+      "location": "東京都渋谷区幡ケ谷２丁目１４",
+      "rank": "3位",
+      "category": "整体",
+      "clinic_id": "relax-hatagaya"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 中野新橋店",
+      "location": "東京都中野区弥生町２丁目２５",
+      "rank": "3位",
+      "category": "整体",
+      "clinic_id": "relax-nakanoshinbashi"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 祖師谷店",
+      "location": "東京都世田谷区祖師谷１丁目８",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-soshigaya"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 水戸京成百貨店",
+      "location": "茨城県水戸市泉町１丁目６",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-mito"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 桜上水店",
+      "location": "東京都世田谷区桜上水５丁目２９",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-sakurajosui"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 元住吉店",
+      "location": "神奈川県川崎市中原区木月１丁目３６",
+      "rank": "4位",
+      "category": "整体",
+      "clinic_id": null
+    },
+    {
+      "name": "リフレッシュセンターリラックス 久我山店",
+      "location": "東京都杉並区久我山４丁目１",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-kugayama"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 下高井戸店",
+      "location": "東京都世田谷区松原３丁目２９",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-shimotakaido"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 浦和店",
+      "location": "埼玉県さいたま市浦和区東仲町１丁目１６",
+      "rank": "4位",
+      "category": "整体",
+      "clinic_id": "relax-urawa"
+    },
+    {
+      "name": "リフレッシュセンターリラックス 阿佐ヶ谷店",
+      "location": "東京都杉並区阿佐谷北２丁目１",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-asagaya"
+    },
+    {
+      "name": "リフレッシュセンターリラックス たまプラーザ東急百貨店",
+      "location": "神奈川県横浜市青葉区青葉台２丁目",
+      "rank": "5位",
+      "category": "整体",
+      "clinic_id": "relax-tamaplaza"
+    },
+    {
+      "name": "リフレッシュセンターリラックス サクラス戸塚店",
+      "location": "神奈川県横浜市戸塚区戸塚町",
+      "rank": "2位",
+      "category": "整体",
+      "clinic_id": "relax-totsuka"
+    },
+    {
+      "name": "リフレッシュセンターリラックス イオン入間店",
+      "location": "埼玉県入間市上藤沢",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-iruma"
+    },
+    {
+      "name": "リフレッシュセンターリラックス FKDインターパーク店",
+      "location": "栃木県宇都宮市",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "relax-fkd-interpark"
+    },
+    {
+      "name": "和歌山駅東口接骨院",
+      "location": "和歌山県和歌山市",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "sunsmirai-wakayama-higashiguchi"
+    },
+    {
+      "name": "瑞江駅前接骨院",
+      "location": "東京都江戸川区瑞江２丁目２",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-mizue"
+    },
+    {
+      "name": "千歳駅南接骨院",
+      "location": "北海道千歳市千代田町７丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-chitose"
+    },
+    {
+      "name": "クラシオン接骨院 MEGAドン・キホーテ長野高田院",
+      "location": "長野県長野市栗田",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-takada"
+    },
+    {
+      "name": "四街道もねの里接骨院",
+      "location": "物井",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-monenosato"
+    },
+    {
+      "name": "志木駅前接骨院",
+      "location": "埼玉県新座市東北２丁目３８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shiki"
+    },
+    {
+      "name": "五井駅東口接骨院",
+      "location": "千葉県市原市五井中央西２丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-goi-h"
+    },
+    {
+      "name": "京成八幡駅前整骨院",
+      "location": "千葉県市川市八幡２丁目１７",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-keiseiyawata"
+    },
+    {
+      "name": "勝田台北口接骨院",
+      "location": "千葉県八千代市勝田台北１丁目１",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-katsutadai"
+    },
+    {
+      "name": "長町南駅前接骨院",
+      "location": "宮城県仙台市太白区長町南３丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nagamachi"
+    },
+    {
+      "name": "郡山若葉町接骨院",
+      "location": "福島県郡山市燧田",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-koriyama"
+    },
+    {
+      "name": "六実駅前整骨院",
+      "location": "六実駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-mutsumi"
+    },
+    {
+      "name": "馬橋東口整骨院",
+      "location": "馬橋駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-mabashi"
+    },
+    {
+      "name": "新潟こうど接骨院",
+      "location": "新潟県新潟市東区河渡本町１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kohdo"
+    },
+    {
+      "name": "淵野辺駅北口接骨院",
+      "location": "神奈川県相模原市中央区淵野辺３丁目29",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-fuchinobe"
+    },
+    {
+      "name": "新潟松崎接骨院",
+      "location": "新潟県新潟市東区新松崎２丁目３",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-matsusaki"
+    },
+    {
+      "name": "東十条駅前整骨院",
+      "location": "東十条駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-higashijujo"
+    },
+    {
+      "name": "恵庭駅前接骨院",
+      "location": "北海道恵庭市相生町１丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-eniwa"
+    },
+    {
+      "name": "静岡さわやか接骨院 静岡市駿河区石田院",
+      "location": "駿河区",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ishida"
+    },
+    {
+      "name": "池袋駅前接骨院",
+      "location": "東京都豊島区南池袋１丁目２８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ikebukuro"
+    },
+    {
+      "name": "誉田南口整骨院",
+      "location": "誉田駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-honda"
+    },
+    {
+      "name": "札幌琴似本通り接骨院",
+      "location": "北海道札幌市西区琴似１条３４丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sapporokotoni"
+    },
+    {
+      "name": "狭山ヶ丘駅前接骨院",
+      "location": "埼玉県所沢市狭山ケ丘１丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sayamagaoka"
+    },
+    {
+      "name": "東小金井駅北口接骨院",
+      "location": "東京都小金井市梶野町５丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-higashikoganei"
+    },
+    {
+      "name": "佐倉ユーカリが丘接骨院",
+      "location": "千葉県佐倉市ユーカリが丘４丁目８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sakurayukarigaoka"
+    },
+    {
+      "name": "新狭山駅北口接骨院",
+      "location": "埼玉県狭山市新狭山３丁目１２",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shinsayama"
+    },
+    {
+      "name": "川越霞ヶ関駅前接骨院",
+      "location": "埼玉県川越市霞ケ関東１丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kawagoekasumigaseki"
+    },
+    {
+      "name": "川間駅前接骨院",
+      "location": "千葉県野田市尾崎",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-e-kawama"
+    },
+    {
+      "name": "柏の葉キャンパス駅前接骨院",
+      "location": "千葉県柏市若柴",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-c-kashiwanoha"
+    },
+    {
+      "name": "柏駅東口接骨院",
+      "location": "千葉県柏市末広町３",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kashiwahigashi"
+    },
+    {
+      "name": "朝霞駅南口接骨院",
+      "location": "朝霞駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-asaka"
+    },
+    {
+      "name": "船橋北口接骨院",
+      "location": "千葉県船橋市本町７丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-n-funabashi"
+    },
+    {
+      "name": "川口駅前接骨院",
+      "location": "埼玉県川口市栄町３丁目１",
+      "rank": "2位",
+      "category": "Bonesetting house",
+      "clinic_id": "chokuei-kawaguchiekimae"
+    },
+    {
+      "name": "沖縄あわせ接骨院",
+      "location": "泡瀬",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-awase"
+    },
+    {
+      "name": "梅郷山崎接骨院",
+      "location": "千葉県野田市山崎",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-umesato"
+    },
+    {
+      "name": "八幡宿駅西口接骨院",
+      "location": "千葉県市原市八幡",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-yawatajuku-n"
+    },
+    {
+      "name": "小平南口接骨院",
+      "location": "東京都小平市美園町１丁目３４",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kodaira"
+    },
+    {
+      "name": "西新中央商店街接骨院",
+      "location": "福岡県福岡市早良区西新４１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nishijin"
+    },
+    {
+      "name": "倉敷インター接骨院",
+      "location": "岡山県倉敷市平田",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kurashiki"
+    },
+    {
+      "name": "今池南接骨院",
+      "location": "愛知県名古屋市千種区千種通７",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-imaike"
+    },
+    {
+      "name": "四条烏丸中央整骨院",
+      "location": "京都府京都市下京区長刀鉾町",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-karasuma"
+    },
+    {
+      "name": "井尻駅前接骨院",
+      "location": "福岡県福岡市南区井尻１丁目４０",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ijiri"
+    },
+    {
+      "name": "天神橋三丁目接骨院",
+      "location": "大阪府大阪市北区天神橋２丁目５",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-tenjinbashi"
+    },
+    {
+      "name": "北小金南口駅前接骨院",
+      "location": "千葉県松戸市小金",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-kitakogane"
+    },
+    {
+      "name": "成田富里接骨院",
+      "location": "千葉県富里市七栄",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-tomisato"
+    },
+    {
+      "name": "ふじみ野駅西口接骨院",
+      "location": "埼玉県富士見市ふじみ野西１丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-fujimino"
+    },
+    {
+      "name": "池下エキナカ接骨院",
+      "location": "愛知県名古屋市千種区池下町２丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ikeshita"
+    },
+    {
+      "name": "南仙台東口接骨院",
+      "location": "宮城県仙台市太白区中田５丁目２",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-e-minamisendai"
+    },
+    {
+      "name": "新潟寺尾東接骨院",
+      "location": "新潟県新潟市西区寺尾上２丁目１（寺尾駅）",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-teraohigashi"
+    },
+    {
+      "name": "新都心あじゃ接骨院",
+      "location": "安謝",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-aja"
+    },
+    {
+      "name": "上板橋駅前接骨院",
+      "location": "東京都板橋区上板橋２丁目３６（上板橋駅）",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-e-kamiitabashi"
+    },
+    {
+      "name": "豊四季中央接骨院",
+      "location": "豊四季駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-toyoshikichuo"
+    },
+    {
+      "name": "成田美郷台接骨院",
+      "location": "成田市",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-naritamisatodai"
+    },
+    {
+      "name": "ハローズ花尻接骨院",
+      "location": "北長瀬",
+      "rank": "3位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-hanajiri"
+    },
+    {
+      "name": "北千住西口接骨院",
+      "location": "東京都足立区千住２丁目",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kitasenju"
+    },
+    {
+      "name": "流山東深井接骨院",
+      "location": "千葉県流山市東深井",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-higashifukai"
+    },
+    {
+      "name": "下赤塚北口接骨院",
+      "location": "東京都板橋区赤塚新町１丁目２３",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shimoakatsuka"
+    },
+    {
+      "name": "服部天神駅前接骨院",
+      "location": "大阪府豊中市服部元町１丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-hattoritenjin"
+    },
+    {
+      "name": "浦添宮城接骨院",
+      "location": "沖縄県浦添市宮城２丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-urasoe"
+    },
+    {
+      "name": "札幌北円山接骨院",
+      "location": "北海道札幌市中央区北４条西２８丁目１",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sapporo"
+    },
+    {
+      "name": "小岩蔵前橋通り接骨院",
+      "location": "東京都江戸川区南小岩７丁目２４（JR小岩駅）",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-koiwakuramae"
+    },
+    {
+      "name": "陸前高砂駅前接骨院",
+      "location": "宮城県仙台市宮城野区福室２丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-rikuzen"
+    },
+    {
+      "name": "新静岡駅前接骨院",
+      "location": "静岡県静岡市葵区鷹匠１丁目８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shinshizuoka"
+    },
+    {
+      "name": "元住吉ブレーメン通り接骨院",
+      "location": "神奈川県川崎市中原区木月１丁目３６",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-motosumiyoshi"
+    },
+    {
+      "name": "下井草駅前接骨院",
+      "location": "東京都杉並区井草１丁目２",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shimoigusa"
+    },
+    {
+      "name": "大山駅前接骨院",
+      "location": "東京都板橋区大山町４（大山駅）",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ooyama"
+    },
+    {
+      "name": "本八幡南口接骨院",
+      "location": "千葉県市川市八幡２丁目１７",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-motoyawata"
+    },
+    {
+      "name": "立石駅前通り整骨院",
+      "location": "東京都葛飾区立石４丁目２５",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-tateishiekimae"
+    },
+    {
+      "name": "鴨居南口接骨院",
+      "location": "神奈川県横浜市緑区鴨居１丁目１５",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kamoi"
+    },
+    {
+      "name": "町田シバヒロ接骨院",
+      "location": "東京都町田市原町田６丁目１",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-machida"
+    },
+    {
+      "name": "新潟関屋整骨院",
+      "location": "新潟県新潟市中央区関屋大川前２丁目３（関屋駅）",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sekiya"
+    },
+    {
+      "name": "名取西口整骨院",
+      "location": "名取駅",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-natori"
+    },
+    {
+      "name": "谷町四丁目接骨院",
+      "location": "大阪府大阪市中央区天満橋京町１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-taniyon"
+    },
+    {
+      "name": "三国エキナカ接骨院",
+      "location": "大阪府大阪市淀川区三国本町３丁目３７（三国駅）",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-mikuni"
+    },
+    {
+      "name": "新橋西口整骨院",
+      "location": "東京都港区新橋２丁目１７",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shinbashi"
+    },
+    {
+      "name": "西荻窪中央整骨院",
+      "location": "東京都杉並区西荻南３丁目２５",
+      "rank": "1位",
+      "category": "Bonesetting house",
+      "clinic_id": "chokuei-nishiogikubo"
+    },
+    {
+      "name": "朝霞エキナカ整骨院",
+      "location": "埼玉県朝霞市本町２丁目１３",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-asaka"
+    },
+    {
+      "name": "十条銀座整骨院",
+      "location": "十条駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-jujo"
+    },
+    {
+      "name": "岡山駅前整骨院",
+      "location": "岡山駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-okayama"
+    },
+    {
+      "name": "琴似駅前整骨院",
+      "location": "北海道札幌市西区琴似１条４丁目２（東西線琴似駅）",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kotoni"
+    },
+    {
+      "name": "八王子北口整骨院",
+      "location": "八王子駅",
+      "rank": "1位",
+      "category": "整体",
+      "clinic_id": "chokuei-hachioji"
+    },
+    {
+      "name": "宜野湾うちどまり整骨院",
+      "location": "沖縄県宜野湾市宇地泊１丁目１８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ginowan"
+    },
+    {
+      "name": "安倍川駅前総合治療院",
+      "location": "静岡県静岡市駿河区鎌田",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-abekawa"
+    },
+    {
+      "name": "大網駅前整骨院",
+      "location": "大網駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-ooami"
+    },
+    {
+      "name": "八千代大和田整骨院",
+      "location": "八千代中央駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-owada"
+    },
+    {
+      "name": "豊四季北口整骨院",
+      "location": "千葉県柏市豊四季",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-toyoshiki"
+    },
+    {
+      "name": "幕張南口整骨院",
+      "location": "幕張駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-makuhari"
+    },
+    {
+      "name": "成田駅前整骨院",
+      "location": "市川駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-narita"
+    },
+    {
+      "name": "市川南口整骨院",
+      "location": "千葉県市川市市川１丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-s-ichikawa"
+    },
+    {
+      "name": "新松戸クラシオン整骨院",
+      "location": "千葉県松戸市大金平４丁目",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shinmatsudo"
+    },
+    {
+      "name": "成田公津の杜整骨院",
+      "location": "公津の杜",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kozu"
+    },
+    {
+      "name": "ライフガーデン茂原整骨院",
+      "location": "茂原駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-lifegarden"
+    },
+    {
+      "name": "八街駅前整骨院",
+      "location": "八街駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-yachimata"
+    },
+    {
+      "name": "佐倉志津整骨院",
+      "location": "千葉県佐倉市上志津",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-shizu"
+    },
+    {
+      "name": "南流山駅前整骨院",
+      "location": "南流山駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nagareyama"
+    },
+    {
+      "name": "下総中山駅前整骨院",
+      "location": "千葉県船橋市本中山２丁目１７",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-nakayama"
+    },
+    {
+      "name": "佐倉駅前整骨院",
+      "location": "千葉県佐倉市六崎",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sakuraekimae"
+    },
+    {
+      "name": "我孫子駅前整骨院",
+      "location": "千葉県我孫子市本町２丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-abikoekimae"
+    },
+    {
+      "name": "柏南口整骨院",
+      "location": "千葉県柏市柏１丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kashiwaminamiguchi"
+    },
+    {
+      "name": "天王台駅前整骨院",
+      "location": "千葉県我孫子市柴崎台１丁目１９",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-tennodai"
+    },
+    {
+      "name": "初石駅前整骨院",
+      "location": "初石駅",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-hatsuishi"
+    },
+    {
+      "name": "二和向台駅前整骨院",
+      "location": "千葉県船橋市二和東５丁目３８",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-futawa"
+    },
+    {
+      "name": "稲毛海岸中央整骨院",
+      "location": "千葉県千葉市美浜区高洲３丁目２４",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-inagekaigan"
+    },
+    {
+      "name": "鎌ヶ谷西口整骨院",
+      "location": "千葉県鎌ケ谷市道野辺中央２丁目１",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-kamagaya"
+    },
+    {
+      "name": "市川げんき整骨院",
+      "location": "千葉県市川市市川１丁目１",
+      "rank": "2位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-genki"
+    },
+    {
+      "name": "南柏駅前整骨院",
+      "location": "千葉県柏市南柏中央",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-minamikashiwa"
+    },
+    {
+      "name": "市川さくら整骨院",
+      "location": "千葉県市川市市川１丁目１",
+      "rank": "6位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-sakura"
+    },
+    {
+      "name": "都賀駅前整骨院",
+      "location": "千葉県千葉市若葉区都賀３丁目３",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-tsuga"
+    },
+    {
+      "name": "わかば整骨院",
+      "location": "東京都江戸川区北小岩２丁目１０",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-wakaba"
+    },
+    {
+      "name": "本八幡駅前整骨院",
+      "location": "千葉県市川市八幡２丁目１６",
+      "rank": "1位",
+      "category": "接骨院",
+      "clinic_id": "chokuei-motoyawata"
+    }
+  ]
+}
