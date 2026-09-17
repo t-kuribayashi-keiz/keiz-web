@@ -1,0 +1,109 @@
+name: _tmp-ga4-conversion-debug
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet google-auth google-api-python-client
+      - name: Compare key-event config and raw event volume (方南町・浦和 vs たまプラーザ)
+        env:
+          GCP_RELAX_KEY: ${{ secrets.GCP_RELAX_KEY }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, datetime
+          sys.path.insert(0, "scripts")
+          import ga4_properties as ga4
+          from analytics_discover import credentials, build, ga4_account_summaries
+          from analytics_pull import ga4_property_ids
+
+          BRAND = "リラックス"
+          TARGET_STORES = ["方南町店", "浦和店", "たまプラーザ東急百貨店"]
+
+          creds = credentials("GCP_RELAX_KEY")
+          admin = build("analyticsadmin", "v1beta", creds)
+          data_api = build("analyticsdata", "v1beta", creds)
+
+          summaries = ga4_account_summaries(creds)
+          names = [p["displayName"] for s in summaries for p in s.get("propertySummaries", [])
+                   if p.get("displayName")]
+          id_map = ga4_property_ids(summaries)
+          result = ga4.resolve(names, BRAND)
+
+          today = datetime.date.today()
+          start = (today - datetime.timedelta(days=90)).isoformat()
+          end = today.isoformat()
+
+          for store in TARGET_STORES:
+              display_name = result["matched"].get(store)
+              property_id = id_map.get(display_name) if display_name else None
+              print(f"\n===== {store} ({display_name}, {property_id}) =====")
+              if not property_id:
+                  print("プロパティが見つかりません")
+                  continue
+
+              print("--- 設定されているキーイベント(properties.keyEvents.list) ---")
+              try:
+                  ke = admin.properties().keyEvents().list(parent=property_id).execute()
+                  events = ke.get("keyEvents", [])
+                  if not events:
+                      print("  (キーイベントが1件も設定されていません)")
+                  for e in events:
+                      print(f"  eventName={e.get('eventName')!r} "
+                            f"countingMethod={e.get('countingMethod')} "
+                            f"custom={e.get('custom')} "
+                            f"deletable={e.get('deletable')}")
+              except Exception as err:
+                  print(f"  取得失敗: {err}")
+
+              print(f"--- 直近90日 ({start}〜{end}) の実イベント別カウント(上位20) ---")
+              try:
+                  resp = data_api.properties().runReport(
+                      property=property_id,
+                      body={
+                          "dateRanges": [{"startDate": start, "endDate": end}],
+                          "dimensions": [{"name": "eventName"}],
+                          "metrics": [{"name": "eventCount"}, {"name": "totalUsers"}],
+                          "orderBys": [{"metric": {"metricName": "eventCount"}, "desc": True}],
+                          "limit": 20,
+                      },
+                  ).execute()
+                  for row in resp.get("rows", []):
+                      name = row["dimensionValues"][0]["value"]
+                      count = row["metricValues"][0]["value"]
+                      users = row["metricValues"][1]["value"]
+                      print(f"  {name:<30} eventCount={count:>8} totalUsers={users:>8}")
+              except Exception as err:
+                  print(f"  取得失敗: {err}")
+
+              print("--- 直近90日のactiveUsers / conversions(isKeyEvent=true)総数 ---")
+              try:
+                  resp = data_api.properties().runReport(
+                      property=property_id,
+                      body={
+                          "dateRanges": [{"startDate": start, "endDate": end}],
+                          "metrics": [{"name": "activeUsers"}],
+                      },
+                  ).execute()
+                  active = resp.get("rows", [{}])[0].get("metricValues", [{}])[0].get("value", "0") if resp.get("rows") else "0"
+                  resp2 = data_api.properties().runReport(
+                      property=property_id,
+                      body={
+                          "dateRanges": [{"startDate": start, "endDate": end}],
+                          "metrics": [{"name": "conversions"}],
+                      },
+                  ).execute()
+                  conv = resp2.get("rows", [{}])[0].get("metricValues", [{}])[0].get("value", "0") if resp2.get("rows") else "0"
+                  print(f"  activeUsers={active}  conversions(全キーイベント合計イベント数)={conv}")
+              except Exception as err:
+                  print(f"  取得失敗: {err}")
+          PYEOF
