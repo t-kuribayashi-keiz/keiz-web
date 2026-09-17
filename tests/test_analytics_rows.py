@@ -173,10 +173,10 @@ class TestGa4Rows(unittest.TestCase):
 
 class TestTsv(unittest.TestCase):
     def test_header_and_one_row(self):
-        text = rows.to_tsv([{"month": "2026-08", "store": "浦和店",
+        text = rows.to_tsv([{"month": "2026-08", "store": "浦和店", "source": "GSC",
                              "channel": "SEO", "metric": "クリック", "value": 40.0}])
-        self.assertEqual(text.splitlines()[0], "年月\t店舗\tチャネル\t指標\t値")
-        self.assertEqual(text.splitlines()[1], "2026-08\t浦和店\tSEO\tクリック\t40")
+        self.assertEqual(text.splitlines()[0], "年月\t店舗\tソース\tチャネル\t指標\t値")
+        self.assertEqual(text.splitlines()[1], "2026-08\t浦和店\tGSC\tSEO\tクリック\t40")
 
 
 if __name__ == "__main__":

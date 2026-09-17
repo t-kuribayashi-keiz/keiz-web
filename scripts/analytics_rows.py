@@ -79,14 +79,14 @@ def gsc_rows(month: str, response: dict, paths: dict[str, str]) -> list[dict]:
     rows = []
     for store, bucket in sorted(totals.items()):
         impressions = bucket["impressions"]
-        rows.append({"month": month, "store": store, "channel": "SEO",
+        rows.append({"month": month, "store": store, "source": "GSC", "channel": "SEO",
                      "metric": "クリック", "value": bucket["clicks"]})
-        rows.append({"month": month, "store": store, "channel": "SEO",
+        rows.append({"month": month, "store": store, "source": "GSC", "channel": "SEO",
                      "metric": "表示回数", "value": impressions})
         if impressions:
-            rows.append({"month": month, "store": store, "channel": "SEO",
+            rows.append({"month": month, "store": store, "source": "GSC", "channel": "SEO",
                          "metric": "CTR", "value": bucket["clicks"] / impressions})
-            rows.append({"month": month, "store": store, "channel": "SEO",
+            rows.append({"month": month, "store": store, "source": "GSC", "channel": "SEO",
                          "metric": "平均掲載順位",
                          "value": bucket["position_weighted"] / impressions})
     return rows
@@ -113,17 +113,17 @@ def ga4_rows(month: str, store: str, response: dict) -> list[dict]:
             except (TypeError, ValueError):
                 # 数値でない指標は落とす。文字列を数値の列に混ぜない。
                 continue
-            rows.append({"month": month, "store": store, "channel": channel,
+            rows.append({"month": month, "store": store, "source": "GA4", "channel": channel,
                          "metric": name, "value": value})
     return rows
 
 
 def to_tsv(rows: list[dict]) -> str:
     """統合ログの行をTSVにする。シートへ貼るのも、差分を見るのもこれで足りる。"""
-    lines = ["年月\t店舗\tチャネル\t指標\t値"]
+    lines = ["年月\t店舗\tソース\tチャネル\t指標\t値"]
     for row in rows:
         value = row["value"]
         text = f"{value:g}" if isinstance(value, float) else str(value)
-        lines.append(f"{row['month']}\t{row['store']}\t{row['channel']}\t"
+        lines.append(f"{row['month']}\t{row['store']}\t{row['source']}\t{row['channel']}\t"
                      f"{row['metric']}\t{text}")
     return "\n".join(lines) + "\n"

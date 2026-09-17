@@ -13,8 +13,13 @@ name: Brand analytics (generic)
 #   mode=pull     … 対象月のセッション数・表示回数等の実指標を取得し、TSVを成果物に出す
 #   mode=probe-metrics … GA4 Data APIで実際に使える指標名(apiName)をgetMetadataで確認する
 #
-# **読み取り専用。** GA4にもSearch Consoleにも書き込まない。リポジトリにも書き込まない
-# (TSVはこのジョブのログとワークフローの成果物(Artifact、7日で自動削除)にのみ出す)。
+# **GA4にもSearch Consoleにもリポジトリにも一切書き込まない。** TSVはこのジョブのログと
+# ワークフローの成果物(Artifact、7日で自動削除)にのみ出す——ここまでは常に読み取り専用。
+#
+# mode=pull で `sheet_id` を指定した場合のみ、例外的にGoogle Sheetsへの書き込みが発生する
+# (scripts/analytics_sync_sheet.py。年月・ブランド・店舗・ソース・チャネル・指標をキーに、
+# 既存行を上書きしてシート全体を書き戻す長形式ログ)。Artifactは7日で消えるため、恒久的に
+# 残したい場合にこちらを使う。設計は brands/smile/CLAUDE.md の「GA4/GSC本体の取得」節を参照。
 #
 # 鍵はリポジトリシークレットにのみ置く(input `key_env` で指定するシークレット名)。
 # Claudeのセッションには渡らない。
@@ -68,6 +73,16 @@ on:
         required: false
         type: string
         default: ""
+      sheet_id:
+        description: "mode=pullのときだけ使う(任意)。指定すると、取得結果を長形式ログとしてこのスプレッドシートIDにも書き込む(analytics_sync_sheet.py)。空なら従来通りArtifactのみ"
+        required: false
+        type: string
+        default: ""
+      sheet_tab:
+        description: "sheet_id指定時のタブ名"
+        required: false
+        type: string
+        default: "ログ"
 
 permissions:
   contents: read
@@ -132,6 +147,14 @@ jobs:
               --month "$m_trimmed" --stores "${{ inputs.stores }}" $flag \
               --out "out/${m_trimmed}.tsv"
             cat "out/${m_trimmed}.tsv"
+
+            if [ -n "${{ inputs.sheet_id }}" ]; then
+              echo "--- Sheetsへ書き込み: ${{ inputs.sheet_id }} / ${{ inputs.sheet_tab }} ---"
+              python3 scripts/analytics_sync_sheet.py --brand "${{ inputs.brand }}" \
+                --key-env ANALYTICS_KEY \
+                --sheet-id "${{ inputs.sheet_id }}" --tab "${{ inputs.sheet_tab }}" \
+                --rows "out/${m_trimmed}.tsv"
+            fi
           done
 
       - name: Probe metrics

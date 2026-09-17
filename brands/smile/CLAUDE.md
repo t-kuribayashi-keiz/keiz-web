@@ -187,13 +187,49 @@ GA4/GSCのAPI取得は**GitHub Actions(クラウド実行)で定期的に回す�
 不一致(管理連番や表記ゆれ)が出た場合は、`scripts/ga4_properties.py`側で解消する
 (推測で埋めない)。
 
-**出力先(今後決める)**: リラックスの現行パイプラインはTSVをGitHub Actionsの
-ログ・7日で消えるArtifactに出すだけで、恒久保存先になっていない。MEO内製化で
-Google Sheetsへの投入(IMPORTRANGE経由)が実際に機能することが確認できたため、
-GA4/GSCの実指標もSheetsの長形式ログ(年月・店舗・チャネル・指標・値、
-`.claude/skills/customer-acquisition-consulting/references/data-architecture.md`の
-設計を踏襲)に溜める方向で検討する。スマイル・グッドでdiscover/pullの疎通確認が
-取れてから着手する。
+**2026-09-17、discover/pull疎通確認完了**: `smile-good-reporter-2`にスマイル11院・
+グッド7院すべてのGSC「フル」権限を付与済み(GA4はアカウント単位の付与で既に全店舗分
+見えていた)。`brand-analytics.yml`の`mode=pull`をスマイル・グッド両方で実行し、
+2026年8月分のGA4(チャネル別 newUsers/convertedUsers)・GSC(クリック・表示回数・CTR・
+平均掲載順位)が全18院で正しく取得できることを確認した。
+
+その過程で見つかった副産物のバグ: `data/clinics.json`の`good-fuchu`(姿勢堂 府中整体院)
+の`website`が`http://chiryouin.biz/fuchu/`だったが、GSC側の実際のプロパティは
+`https://`。`scripts/analytics_pull.py`のGSCサイト突き合わせは完全一致のため、
+府中だけデータが取れずにいた。`https://`に修正済み(コミット`0036952`)。**院マスタの
+元データ(Googleスプレッドシート「診療時間」)側も同じ誤りを持っている可能性が高く、
+次回`scripts/clinic_master.py --apply`で上書きされると再発する。元シート側の修正要否は
+未確認**。
+
+**出力先(2026-09-17、設計・実装完了)**: リラックスの現行パイプラインはTSVをGitHub
+Actionsのログ・7日で消えるArtifactに出すだけで、恒久保存先になっていない。MEO内製化で
+Google Sheetsへの投入が実際に機能することが確認できたのを受け、GA4/GSCの実指標も
+Sheetsの長形式ログに溜める仕組みを作った
+(`.claude/skills/customer-acquisition-consulting/references/data-architecture.md`の
+「年月・店舗・チャネル・指標・値」設計を踏襲、ブランドをまたいで使えるよう`ブランド`・
+`ソース`(GA4/GSC)・`取得日時`を追加)。
+
+- **スプレッドシート**: 「GA4-GSC内製化 統合ログ」
+  (https://docs.google.com/spreadsheets/d/1LDfOXgo0pG7Zvstzr6S3AMG3XOneluHiplw7NG4SsnU/) —
+  MEOの`rank_checks_*.csv`と同じ共有フォルダ(Drive ID `0AKGkwGey6trlUk9PVA`)に新規作成。
+  `smile-good-reporter-2`をwriter権限で共有済み
+- **タブ**: `ログ`(1タブ、全ブランド共通の1本のログ。ブランド列でフィルタする設計。
+  MEOのように行数が増えてタブ分割が必要になったら、その時点で`rank_checks_part01`方式に
+  倣って分ける——今はまだその必要がない規模)
+- **列**: `年月`・`ブランド`・`店舗`・`ソース`(GA4/GSC)・`チャネル`・`指標`・`値`・`取得日時`
+- **書き込み方式**: [scripts/analytics_sync_sheet.py](../../scripts/analytics_sync_sheet.py)。
+  シート全体を読み込み、`(年月・ブランド・店舗・ソース・チャネル・指標)`をキーに新しい行で
+  上書き(無ければ追加)してからシート全体を書き戻す(MEOのSheets移行と同じ「全読み込み→
+  メモリでマージ→全書き戻し」方式)。同じ月を再実行しても行が増えない
+- **権限分離**: GA4/GSC読み取り(`analytics_discover.py`・`analytics_pull.py`)とSheets
+  書き込み(`analytics_sync_sheet.py`)はスコープを分離(前者は`analytics.readonly`+
+  `webmasters.readonly`、後者は`spreadsheets`のみ)。読み取り専用の既存2スクリプトの
+  「鍵が持つ権限は小さいほうがよい」方針を崩さないため
+- **起動方法**: `brand-analytics.yml`の`mode=pull`に`sheet_id`(上記スプレッドシートID)・
+  `sheet_tab`(既定`ログ`)を渡すと、TSV出力に加えてSheetsへも書き込む。`sheet_id`を
+  空のままにすれば従来通りArtifactのみ(リラックスは今のところこの新引数を使わない想定)
+- **未着手**: 定期実行(cron)化。現状はworkflow_dispatchの手動実行のみ。過去分の
+  バックフィル(2026年何月分から遡って投入するか)も栗林さんと相談してから着手する
 
 ## 月次集客レポート(2026-09-08新設、同日中にv2へ全面統合、2026-09-09にv3でブランド別に再分離)
 
