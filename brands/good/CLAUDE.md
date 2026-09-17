@@ -118,7 +118,14 @@ HPB集客数**が入っている(2026年最新月でグッド合計75件・1院�
   サービスアカウントへのGA4/GSC権限付与が前提。詳細は
   [brands/smile/CLAUDE.md](../smile/CLAUDE.md)の「GA4/GSC本体の取得」節を参照
   ——スマイルと同じスプレッドシート・サービスアカウントを共有しているため、
-  このファイルには重複して書かない)
+  このファイルには重複して書かない)。
+  **2026-09-17判明・修正済み**: `data/clinics.json`の`good-fuchu`(姿勢堂 府中整体院)の
+  `website`が`http://chiryouin.biz/fuchu/`だったが、GSC側に登録されているプロパティは
+  `https://chiryouin.biz/fuchu/`(httpではアクセス権なしエラー)。プロトコル不一致のため
+  `scripts/analytics_pull.py`がGSCデータを店舗に紐づけられずにいたのを`https://`に修正して
+  解消。**院マスタの元データ(Googleスプレッドシート「診療時間」)側も同じ誤りを持っている
+  可能性が高く、次回`scripts/clinic_master.py --apply`で上書きされると再発する。元シート側の
+  修正要否は未確認**
 - 「グッド・スマイル月次報告」シートの共有設定(「一般的なアクセス」が「リンクを知っている
   全員が編集者」になっている)の見直し要否(`brands/smile/CLAUDE.md`・`docs/backlog.md`と
   共通の未確認事項)
