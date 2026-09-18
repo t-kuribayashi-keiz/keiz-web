@@ -337,9 +337,9 @@ CSVをそのままGoogle Sheetsに取り込む方法として、まず`IMPORTDAT
    だったと判明したため、`meo_import_rank_export.py`は**死んだコード**(誰も呼ばない、
    参照するBigQueryテーブルも使わない方針)と判断し削除した。代わりに
    `meo_merge_monthly_exports.py`側にstore_id変換を追加(下記「store_id突き合わせ」参照)
-8. `meo-automation-490007`のBigQueryデータセット(`meo_internal`)を削除するか、
-   このまま放置(サンドボックスのため課金は発生しない)するか、**栗林さんと相談中
-   (2026-09-17時点で未決定)**
+8. ~~`meo-automation-490007`のBigQueryデータセット(`meo_internal`)を削除するか判断~~
+   **2026-09-18完了**: 栗林さんの承認を得て`bq rm -r -f -d meo-automation-490007:meo_internal`
+   で削除済み。以後`meo-automation-490007`プロジェクトにBigQueryデータセットは存在しない
 9. 月次の運用フローの手順書化 **2026-09-17完了** — 下記「月次運用フロー(手順書)」参照
 
 ## 順位計測の有料SERP API化検討(2026-09-18、栗林さんの指示で着手)
