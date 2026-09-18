@@ -1,0 +1,75 @@
+name: Smile/Good analytics monthly sync
+
+# スマイル・グッドのGA4/GSC長形式ログ(brand-analytics.yml)を毎月自動実行する。
+# 2026-09-18、栗林さんと合意した頻度・時刻:「月1回・毎月5日05:00 JST・前月分」。
+#
+# 対象がスマイル・グッドだけなのは、この2ブランドだけがGSC/GA4のアクセス権付与
+# (brands/smile/CLAUDE.md参照)を済ませているため。他ブランドに広げる場合は、
+# 同じ権限付与を済ませてから、このワークフローにジョブを追加するかブランドごとに
+# 複製するかを検討すること。
+#
+# smile→goodの順に**逐次実行**にしている(並列にしない)。analytics_sync_sheet.pyは
+# シート全体を読み込んでメモリでマージしてから書き戻す方式のため、同じシートに
+# 2つのジョブが同時に書き込むと片方の変更が失われる恐れがある(2026-09-17の
+# 手動バックフィル作業でも同じ理由で逐次実行した)。
+#
+# 実際のGA4/GSC読み取り・Sheets書き込みロジックはbrand-analytics.ymlに一本化して
+# あり、ここでは呼び出しと「対象年月号(前月)」の計算だけを行う。
+
+on:
+  schedule:
+    - cron: "0 20 4 * *" # 毎月5日 05:00 JST = UTC 4日20:00
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "対象年月号を明示指定したい場合(例: 2026年08月号)。空なら前月を自動計算"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  compute-month:
+    runs-on: ubuntu-latest
+    outputs:
+      month: ${{ steps.calc.outputs.month }}
+    steps:
+      - id: calc
+        env:
+          TZ: Asia/Tokyo
+        run: |
+          if [ -n "${{ inputs.month }}" ]; then
+            month="${{ inputs.month }}"
+          else
+            month="$(date -d 'last month' +'%Y年%m月号')"
+          fi
+          echo "month=$month" >> "$GITHUB_OUTPUT"
+          echo "対象年月号: $month"
+
+  smile:
+    needs: compute-month
+    uses: ./.github/workflows/brand-analytics.yml
+    with:
+      brand: "スマイル"
+      key_env: "GCP_SMILE_GOOD_KEY"
+      mode: "pull"
+      scope: "both"
+      month: ${{ needs.compute-month.outputs.month }}
+      sheet_id: "1LDfOXgo0pG7Zvstzr6S3AMG3XOneluHiplw7NG4SsnU"
+      sheet_tab: "ログ"
+    secrets: inherit
+
+  good:
+    needs: [compute-month, smile]
+    uses: ./.github/workflows/brand-analytics.yml
+    with:
+      brand: "グッド"
+      key_env: "GCP_SMILE_GOOD_KEY"
+      mode: "pull"
+      scope: "both"
+      month: ${{ needs.compute-month.outputs.month }}
+      sheet_id: "1LDfOXgo0pG7Zvstzr6S3AMG3XOneluHiplw7NG4SsnU"
+      sheet_tab: "ログ"
+    secrets: inherit

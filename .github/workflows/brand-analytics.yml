@@ -83,6 +83,50 @@ on:
         required: false
         type: string
         default: "ログ"
+  # workflow_dispatchと同じinputsをworkflow_callとしても公開する(cronで定期実行する
+  # 呼び出し元ワークフロー——例: smile-good-analytics-monthly.yml——から`uses:`で
+  # 呼べるようにするため)。workflow_callのinputsはtype: choiceを使えないので、
+  # 選択肢の妥当性チェックは呼び出し元・スクリプト側に委ねる。
+  workflow_call:
+    inputs:
+      brand:
+        required: true
+        type: string
+      key_env:
+        required: true
+        type: string
+      mode:
+        required: true
+        type: string
+        default: discover
+      metrics_grep:
+        required: false
+        type: string
+        default: "user,conversion,key"
+      scope:
+        required: true
+        type: string
+        default: both
+      month:
+        required: false
+        type: string
+        default: ""
+      months:
+        required: false
+        type: string
+        default: ""
+      stores:
+        required: false
+        type: string
+        default: ""
+      sheet_id:
+        required: false
+        type: string
+        default: ""
+      sheet_tab:
+        required: false
+        type: string
+        default: "ログ"
 
 permissions:
   contents: read
