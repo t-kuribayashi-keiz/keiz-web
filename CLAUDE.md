@@ -18,6 +18,7 @@
 | スマイル マーケティング参謀 | [smile-marketing-strategist.md](.claude/agents/smile-marketing-strategist.md) | スマイルブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドで同様の役割が必要になれば同じ型で追加する) |
 | グッド マーケティング参謀 | [good-marketing-strategist.md](.claude/agents/good-marketing-strategist.md) | グッドブランド専属のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。スマイルと同型だが、店舗ステータス区分・広告実額等のグッド固有ファクトは未確認のまま複製していない) |
 | LUNA マーケティング参謀 | [luna-marketing-strategist.md](.claude/agents/luna-marketing-strategist.md) | LUNAブランド専属(ピラティススタジオ・戸越銀座店1店舗)のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。他ブランドと異なりHPBを使わず、GA4/GSC/Clarityが集客データ基盤。このリポジトリ側に直接API接続は無く、既存の運用専用Claude Codeセッションが公開するArtifactを一次情報として`brands/luna/CLAUDE.md`に転記する運用) |
+| リラックス マーケティング参謀 | [relax-marketing-strategist.md](.claude/agents/relax-marketing-strategist.md) | リラックスブランド専属(マッサージ・リラクゼーション店、25店舗)のWEB集客データ分析・戦略立案・執筆指示書作成(ブランド固有。整骨院ブランドとは業態が違う自費のみの店。GA4/GSC/GRCのデータ基盤はGitHub Actions経由で他ブランドより整っているが、広告媒体内訳・HPB掲載有無・SEOルール等の施策系ファクトは未確認のまま複製していない。WordPressサイトへの自動公開手段もまだ無い) |
 | コンテンツライター | [content-writer.md](.claude/agents/content-writer.md) | 承認済みの執筆指示書を、ブログ・広告文・口コミ返信等の完成コンテンツに仕上げる(ブランド非依存) |
 | 横断オーケストレーター | [cross-functional.md](.claude/agents/cross-functional.md) | 複数業務・複数院にまたがる重複/共通パターンを検出し、棚卸しを行う |
 
@@ -58,6 +59,19 @@ Meta広告内訳・スマホ行動分析等の実データが集まったこと�
 セッションが公開するArtifactを事後的に一次情報として取り込む運用)という点で、
 スマイル・グッドとは前提が異なる。この型のエージェントを増やす際は、都度この違いを
 確認してから複製すること(単純な使い回しは禁物)。
+
+2026-09-19、`brands/relax/CLAUDE.md`にリラックス(マッサージ・リラクゼーション店25店舗)の
+GA4/GSC(店舗ごと別プロパティ、GitHub Actions経由でクラウド実行環境からも取得可能)・
+「新規客経路集計」シート・広告費実額・GRC自動化(SEO順位)等の実データ基盤が積み上がった
+ことを受け、4ブランド目として`relax-marketing-strategist`を新設した。リラックスは
+**データ基盤自体はスマイル・グッドより整っている**(鍵がローカルPC限定でなくリポジトリ
+シークレット)が、逆に**マーケティング施策そのものに関わるファクト(広告媒体内訳、HPB
+掲載有無、SEOルール、自社の強み)は未確認のまま**という、good-marketing-strategist型の
+「正直に空欄を残す」姿勢を踏襲している。加えて業態が整骨院と異なる(保険外・自費のみ)ため
+スマイルの訴求ファクトをそのまま流用できない点、WordPressサイトへの自動公開手段がまだ
+無い点、Sprocket/Optimize NextのA/Bテストに関わるDOM/CSSセレクタを触ってはいけない点が
+他の3ブランドに無い固有の制約。この型のエージェントを増やす際は、都度この違いを確認して
+から複製すること(単純な使い回しは禁物)。
 
 ## 業務フロー(横串の刺し方)
 
