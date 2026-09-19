@@ -65,6 +65,10 @@ description: Use this skill for automating the monthly WordPress blog post workf
 
 ## 次のアクション(フェーズ1)
 
+**この2点はローカル実行必須(claude-in-chrome + 実Chrome)。** クラウド実行環境には
+ブラウザ操作手段が無く、WordPressへのログインもできないため、このフェーズ1調査は
+`salonboard-operator`と同様にユーザーのローカルPC上のセッションに依頼する必要がある。
+
 1. スタッフ紹介トピック用のHTMLひな形を「ブログ更新仕様書」内の該当セクション、または
    実際に公開済みのスタッフ紹介記事のページソースから確認する
 2. 1店舗で実際にWordPressにログインし、ユーザープロフィールからApplication Passwordが
@@ -73,6 +77,35 @@ description: Use this skill for automating the monthly WordPress blog post workf
    投稿→院ブログ更新表への記録」を1店舗分、人の最終確認付きで通しで実装・実行する
 4. 実行基盤はGoogle Apps Script推奨(理由: 対象スプレッドシートが112MBありこのセッションの
    Driveツールでは扱えないが、GASなら`SpreadsheetApp`で対象タブ・行だけ直接読み書きできる)
+
+### ローカルセッションへの依頼文(コピー用)
+
+栗林さんがローカルのClaude Codeでこのリポジトリを開いた際に、以下をそのまま貼り付ければ
+着手できる:
+
+> 直営WordPressブログ自動化の調査をお願いします。まず
+> `.claude/skills/chokuei-wp-blog-automation/SKILL.md` と
+> `data/proposals/2026-09-18_chokuei-wp-blog-automation.md` を読んでください。
+> その上で、claude-in-chrome(実Chrome)を使って以下2点を確認してください。
+>
+> 1. 「ブログ更新仕様書」スプレッドシート
+>    (https://docs.google.com/spreadsheets/d/1VjA5jwLLHES1U1RPtO_WhwS0BJJ3sXXSoLx4ah4Ac6k)
+>    に記載のWordPress共通ログインで、いずれか1店舗の管理画面にログインし、
+>    「ユーザー→プロフィール」にApplication Passwords(アプリケーションパスワード)の
+>    発行欄があるか確認してください。あれば実際に1つ発行して、
+>    `/wp-json/wp/v2/posts`へのPOSTが通るか(下書き投稿で可)を試してください。
+> 2. スタッフ紹介トピックのブログ記事が実際に公開されている店舗ページを1つ開き、
+>    ページソース(投稿本文のHTML構造)を確認してください。可能なら同じ仕様書スプレッド内の
+>    ひな形セクションも探してください。`curacion系`テーマの店舗があれば、同様に症状記事の
+>    ひな形も確認できると理想です。
+>
+> **WordPressのユーザー名・パスワード・発行したApplication Passwordは、このリポジトリの
+> どのファイルにも書き込まないでください**(CLAUDE.mdの認証情報ルール)。確認できた
+> HTML構造(ひな形そのもの、プレースホルダーの位置)や「REST APIが使えた/使えなかった」
+> という結果だけを、SKILL.mdの「未確認」リストとdata/proposals/の該当ブロッカー欄に
+> 反映してください。テンプレートHTML自体は
+> `.claude/skills/chokuei-wp-blog-automation/templates/`配下に保存してよい
+> (これは仕様書自体に含まれる情報で、ログイン情報ではないため)。
 
 ## 関連ドキュメント
 
