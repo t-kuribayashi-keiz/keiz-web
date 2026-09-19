@@ -19,8 +19,19 @@ tools: Read, Write, Grep, Glob, Bash
 | 予約枠K/Lチェック | **2026-09-11停止中**(手動実行のみ。詳細は下記) | 「HPB予約枠確認」の`AIチェック用ver.2`のK/L列と「K,L履歴」タブ | `.claude/skills/hpb-reservation-slot-check/` |
 | KPI集計 | ワークフロー | 「【2026年_月次報告】集客数」 | `functions/kpi-aggregation/` |
 | Chatwork依頼検知 | ワークフロー | GitHub Issue | `functions/chatwork-integration/` |
+| GA4/GSC自動取得(スマイル・グッド) | `smile-good-analytics-monthly.yml`(毎月5日05:00 JST) | GitHub Actionsのログ・Artifact(sheet_id指定時はSheetsの長形式ログ) | `skills/README.md`の`analytics-sync`行 |
+| HPB口コミ・ブログチェック | `hpb-review-blog-check.yml`(毎月1日10:00 JST) | 専用スプレッドシートB〜F列 + Chatwork通知 | `.claude/skills/hpb-review-blog-check/` |
+| HPBリボンKPI反映 | `hpb-ribbon-kpi.yml`(手動`workflow_dispatch`。cron常時発火ではない) | HPB_145店舗KPI Masterシート | `.claude/skills/hpb-ribbon-kpi/` |
 
-新しい定期実行が増えたらこの表に足す。
+新しい定期実行が増えたらこの表に足す(**2026-09-19の棚卸しで、上3件の月次cronが登録漏れの
+まま本番稼働していたことが判明。`docs/org-review-log.md`参照**)。
+
+**月次自動化を混ぜたことについての留保**: この役割はもともと「日次の判定ロジック(当日の
+時間帯制約、窓幅の揃った比較等)」に最適化して設計されている(予約枠K/Lチェックの節を参照)。
+月次cronは判断の性質が異なる(「今日ちゃんと動いたか」ではなく「今月分は成功したか」)ため、
+上記3件をこの役割にそのまま混ぜてよいか、それとも別の頻度別の役割/仕組みを起こすべきかは
+**未確定**。当面は「失敗時のChatwork通知が来ているか」程度の粗い確認に留め、判定ロジックの
+作り込みが必要になったらcross-functionalエージェントに役割定義自体の見直しを相談すること。
 
 ## 進め方(予約枠K/Lチェックの場合)
 

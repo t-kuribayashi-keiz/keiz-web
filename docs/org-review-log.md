@@ -2217,3 +2217,100 @@ Skillへ畳む作業をしていたが、それが組織図のどこの仕事な
   25店舗全部への横展開確認、`-g`サイトの用途、他ページ・他店舗のSprocket施策の洗い出しは
   未対応として`docs/backlog.md`に残した。変更したファイル: `brands/relax/CLAUDE.md`、
   `docs/backlog.md`、`docs/org-review-log.md`(本記録)
+
+---
+
+## 2026-09-18 専門業務Skillの切り出し状況の棚卸し(栗林さん「最適化されている?」への回答)
+
+- きっかけ: 栗林さんから「専門業務のスキルの切り出しとかそのへんは最適化されている?」との
+  質問。直前のセッションで`git fetch`により24件の新規コミット(GA4/GSC月次同期のcron化、
+  GRCのタスクスケジューラ自動化、MEOのBigQuery→Sheets移行等)が既に本流に入っていること、
+  かつ`.claude/skills/`配下に新規フォルダが追加されていない(genai-search-visibility以外)
+  ことが判明していたため、その実体確認と組織全体の棚卸しを行った。
+
+- 見つかった事実:
+  1. **直近1週間(2026-09-12〜18)で本番稼働に至った業務自動化が、いずれも`skills/README.md`
+     未登録のまま本流に入っていた。** 具体的には次の4件:
+     - GA4/GSC本体の自動取得(`.github/workflows/brand-analytics.yml`+
+       `smile-good-analytics-monthly.yml`、`scripts/analytics_discover.py`/
+       `analytics_pull.py`/`analytics_sync_sheet.py`/`ga4_metrics_probe.py`)。スマイル・
+       グッド向けに毎月5日05:00 JSTのcronで本番稼働中(2026-09-18確認)
+     - GRC順位データの自動エクスポート(`scripts/GRC_export_v2.ahk`、GRC計測PC上の
+       Windowsタスクスケジューラで毎日07:00実行、`brands/relax/CLAUDE.md`記載)
+     - MEO内製化(`functions/meo-internal/CLAUDE.md`、`scripts/meo_rank_check.py`・
+       `scripts/meo_merge_monthly_exports.py`。BigQueryのサンドボックス60日パーティション
+       消失事故を経てGoogle Sheets運用に切替済み、月次手順書あり)
+     - EPARK口コミシート提出状況管理(`functions/epark-review-sheets/CLAUDE.md`、
+       GAS実装済み、2026-09-12新設)
+  2. **`customer-acquisition-consulting`スキルとの関係は「技術設計は継承、ドキュメントは
+     未更新」という中間状態だった。** 上記GA4/GSC自動化は、このSkillの
+     `references/ga4-gsc-service-account-setup.md`(GA4=アカウント単位/GSC=プロパティ単位の
+     権限付与)・`references/data-architecture.md`(年月・店舗・チャネル・指標の長形式ログ
+     設計)を実際に踏襲して実装されており(`brands/smile/CLAUDE.md`内に該当参照あり)、
+     再実装や無視ではなく正しく「続き」として作られていた。一方で`SKILL.md`本体の
+     frontmatter descriptionは今も「T&Dグループ向けでクライアント権限待ちのまま止まった、
+     実運用実績のないフレームワーク」という前提のままで、2026-09-18時点で実際に
+     スマイル・グッドの月次cronとして本番稼働している事実が反映されていない。次にこの
+     Skillを読むセッションを「まだ何も動いていない」と誤導しかねない陳腐化
+  3. **GRC自動化は実装した本人(ローカルセッション)が既に置き場所の誤りを自己申告して
+     いた。** `brands/relax/CLAUDE.md`に「GRCはケイズグループ全体で使っている順位計測
+     ツールで、リラックス専用ではないため、本来はここではなく`functions/`配下の横断
+     ドキュメントに置くべき内容。次に整理する機会に移設すること」と明記されたまま未対応
+     で残っていた
+  4. **`functions/`配下への「実体だけ登録」という既存の型(`kpi-aggregation`)が、
+     その後増えた同種のケースに適用されていなかった。** `kpi-aggregation`は
+     `skills/README.md`に「Skillフォルダを新設せず`functions/kpi-aggregation/CLAUDE.md`を
+     実体として扱う例外」と明示的に登録されているが、同じ位置づけのはずの`meo-internal`・
+     `epark-review-sheets`はこの型の登録すら行われていなかった
+  5. **`.claude/skills/relax-monthly-report/SKILL.md`はSkillフォルダとして実在するが、
+     `skills/README.md`の表に独立行が無い。** `good-smile-monthly-report`行の説明文中に
+     「同種のrelax-monthly-reportとは別パイプライン」と一言触れられているのみで、
+     主担当業務・対応役割が読み手から見えない状態だった
+  6. **`daily-ops-monitor`の「対象パイプライン」表(3行のみ)も同様に陳腐化していた。**
+     CLAUDE.mdの「新しい定期実行を本番に乗せたら daily-ops-monitor の対象表にも足す」
+     というルールに反し、少なくとも`smile-good-analytics-monthly.yml`(月次cron)・
+     `hpb-review-blog-check.yml`(月次cron)・`hpb-ribbon-kpi.yml`が対象表から漏れていた。
+     `brands/smile/CLAUDE.md`自身が「月次自動化をそのまま対象に含めてよいかは未確認。
+     cross-functionalエージェントでの棚卸し時に判断してもらうこと」と、この判断を
+     本棚卸しに委ねる形で残していた
+  7. `relax-analytics.yml`と汎用化された`brand-analytics.yml`は、中身のスクリプト
+     (`analytics_discover.py`/`analytics_pull.py`/`ga4_metrics_probe.py`)を完全に共有
+     しながら、ワークフローファイルとしては2つ並存している。`brand-analytics.yml`自身の
+     コメントが「(relax-analytics.ymlを)このワークフローに一本化するかどうかは別途検討」
+     と未決を明記しており、意図的な移行期の重複ではあるが判断が宙に浮いたままだった
+
+- 判断(「最適化されているか」への回答): **していない。** 個々の実装(GA4/GSC自動化・
+  GRC自動化・MEO内製化・EPARK管理)自体の設計・実装品質に問題は見当たらないが、
+  「1業務=1Skillを原則にする」「追加したら必ずこの表に1行追加する」
+  (`skills/README.md`)というこの組織のルールに対して、**実装のスピードに棚卸し・登録が
+  追いついていない。** これは実装の質の問題ではなく、実装完了時に登録まで行うという
+  運用フックが徹底されていないという運用ギャップと判断した。
+
+- 提案(実装は行わず、栗林さんの承認後に別タスクで対応する):
+  1. `skills/README.md`に以下を追加登録する:
+     - GA4/GSC本体の自動取得(`brand-analytics.yml`系) — ブランド非依存の本番パイプライン。
+       `functions/analytics-sync/CLAUDE.md`のような形で実体を明文化し、
+       `customer-acquisition-consulting`のSKILL.mdから相互参照させる案
+     - GRC自動化(`GRC_export_v2.ahk`) — `brands/relax/CLAUDE.md`の自己申告通り、
+       `functions/`配下の横断ドキュメント(例: `functions/seo-rank-tracking/CLAUDE.md`)に
+       切り出した上で登録
+     - `functions/meo-internal/` — `kpi-aggregation`と同じ「Skillフォルダなし・
+       `functions/`を実体として登録」の型
+     - `functions/epark-review-sheets/` — 表への追加のみで足りる
+     - `relax-monthly-report` — 独立行として追加(現状`good-smile-monthly-report`の
+       説明文内にしか出てこない)
+  2. `customer-acquisition-consulting/SKILL.md`のdescriptionを、「未実証フレームワーク」
+     という前提から「スマイル・グッドで本番稼働実績あり」に更新する
+  3. `daily-ops-monitor`の対象パイプライン表に`smile-good-analytics-monthly.yml`・
+     `hpb-review-blog-check.yml`・`hpb-ribbon-kpi.yml`を追加する。ただし
+     `daily-ops-monitor`自体が「日次」の判断ロジック(窓の比較、当日の時間帯制約等)に
+     最適化された設計になっているため、月次自動化をそのまま同じ表に混ぜてよいかは
+     別途要検討(役割定義自体の見直しが要るかもしれない論点として残す)
+  4. `relax-analytics.yml`と`brand-analytics.yml`の統合要否は、リラックス側の運用実績が
+     十分積み上がってから判断する(現状維持)。ただし判断が宙に浮いたまま埋もれないよう、
+     `docs/backlog.md`に明示的な項目として残すことを提案する
+
+- 対応状況: 未対応(棚卸し・記録のみ)。上記4件の実装(`skills/README.md`追記、
+  `customer-acquisition-consulting`のdescription更新、`daily-ops-monitor`表の更新、
+  `docs/backlog.md`への追記)はいずれも栗林さんの承認を得てから別タスクで行う。
+  変更したファイル: `docs/org-review-log.md`(本記録)のみ

@@ -30,14 +30,23 @@ skill-kanriリポジトリ側で育ててから、同じ手順でこのリポジ
 | `genai-search-visibility` | Search Consoleの「生成AI機能(ベータ版)」レポート(AI Overviews表示回数)を直営・サンズミライ全店舗分収集・集計する。HPB(HotPepper Beauty)ではなく自社サイトのSearch Consoleが対象で、`hpb-`系Skillとは無関係(命名は当初誤って`hpb-genai-visibility`としてしまい、2026-09-15に訂正)。この指標はSearch Console APIに未対応(2026-09-15確認)でブラウザ操作必須のため、フェーズA(手順・店舗↔プロパティ対応表確定、通常モデル)→フェーズB(全店舗の反復巡回、ローカルセッションをHaikuに切り替えて実行)の2段構成にした点が他Skillと異なる。2026-09-15新設、対応表(`data/genai-search-visibility-properties.json`)・手順(`references/procedure.md`)ともに未確定(draft) | implementer(手順確定・対応表保守・Haikuフェーズの実行) |
 | `shinkyu-staff-check` | あはき柔整プラン5院に女性の鍼灸有資格者が在籍しているかの月次確認。HPB「雰囲気・メニューなど」の「女性鍼灸師在籍」バナーの出し下げ判断に使う。名簿が写真込みの巨大xlsxでテキスト抽出が旧版を返すため、**ブラウザで開いて顔写真ごと目視**する方式(要ローカルPC) | salonboard-operator(確認とバナー取り下げ) |
 | `hpb-ahaki-blog-rotation` | ライトプラン・あはき柔整プラン並行運用5院の、あはき柔整側ブログ投稿ローテーション。郡山若葉町鍼灸接骨院の投稿から精査した鍼灸専用テンプレート8種を店舗別に自動で差し替え、`hpb-salonboard-update`経由で投稿する(2026-09-12新設、ブログ投稿UIの実クリック手順は未検証)。 | salonboard-operator(投稿の実行、要ローカルのログイン済みChrome) |
+| `relax-monthly-report` | リラックス(25店舗)の集客レポート(単一HTML Artifact)の月次更新。HPBリボン(PV/CVR/ACR)・GA4(新規ユーザー数・コンバージョンユーザー数)・Search Console・「リラックス新規客経路集計」シートの集客数を店舗別・時系列で統合。`good-smile-monthly-report`とは別パイプライン・別Artifact(Skillフォルダは`.claude/skills/relax-monthly-report/`に実在していたが、2026-09-19までこの表に単独行が無かった) | implementer(自動化の保守) |
+| `analytics-sync`(Skillフォルダなし、実体は`.github/workflows/brand-analytics.yml`・`relax-analytics.yml`・`smile-good-analytics-monthly.yml`+`scripts/analytics_discover.py`・`analytics_pull.py`・`analytics_sync_sheet.py`・`ga4_metrics_probe.py`) | ブランド横断のGA4/GSC自動取得と、長形式ログとしてのSheets反映。スマイル・グッドは`smile-good-analytics-monthly.yml`で毎月5日05:00 JSTに自動実行(2026-09本番稼働開始)。リラックスは稼働実績のある`relax-analytics.yml`を維持しつつ、ブランド非依存の`brand-analytics.yml`と同じスクリプトを共有した状態で並存中(統合要否は未決、`docs/backlog.md`参照)。`customer-acquisition-consulting`スキルが設計した権限・長形式ログ方式を正しく継承した実装だが、`kpi-aggregation`のような専用`functions/`CLAUDE.mdはまだ無く(2026-09-19時点)、この表への登録のみで整合を取っている暫定状態 | implementer(自動化の保守) |
+| `GRC順位データ自動エクスポート`(Skillフォルダなし、実体は`scripts/GRC_export_v2.ahk`+GRC計測PCのタスクスケジューラ) | SEO順位計測ツールGRCのCSVエクスポートを、GRC本体にCSV自動保存機能が無いため(現契約はエキスパートライセンス)Windowsタスクスケジューラ+AutoHotkey(v2)のUI自動操作で代替。GRC計測PC上で毎日07:00に自動実行しGoogle Drive for Desktop同期フォルダへ保存(2026-09-18動作確認済み、出力はYahoo順位のみ)。ケイズグループ全体で使う順位計測ツールでリラックス専用ではないが、現状`brands/relax/CLAUDE.md`に暫定記載のまま(実装者自身が「本来`functions/`配下の横断ドキュメントに置くべき」と自己申告済み。移設は別タスク) | implementer(タスクスケジューラ・スクリプト保守) |
+| `meo-internal`(Skillフォルダなし、実体は`functions/meo-internal/CLAUDE.md`) | 外部SaaS「MEOチェキ」相当機能(マップ順位チェック・口コミ数/評価の推移・レポーティング)の内製化プロジェクト。ブランド横断の社内機能(2026-09-17着手、Google Business Profile API申請中) | implementer(基盤構築) |
+| `epark-review-sheets`(Skillフォルダなし、実体は`functions/epark-review-sheets/CLAUDE.md`) | 各院のEPARK口コミ投稿シートのGoogle Drive提出状況、および本社からEPARK担当への送付状況を自動集計。ブランド横断の社内機能(2026-09-12新設) | implementer(自動化の保守) |
 
 `kpi-aggregation`は`.claude/skills/`配下にSkillフォルダを新設せず、既存の
 `functions/kpi-aggregation/CLAUDE.md`(実装は`scripts/kpi_aggregate.py`・
 `scripts/store_matcher.py`・`.github/workflows/kpi-aggregate.yml`・`tests/`)をそのまま
-実体として扱う例外。他のブランド横断の社内機能(`functions/receipt-agency/`、
-`functions/recruiting/`、`functions/ad-spend-tracking/`)がCLAUDE.mdのみでSkill化されて
-いないのと異なり、この機能は既に本番自動化として稼働しコード資産が`functions/`側に
-育っているため、`.claude/skills/`への二重管理を避けてこの表への登録のみで整合を取る。
+実体として扱う例外。本番自動化として稼働しコード資産が`functions/`側に育っている機能は、
+`.claude/skills/`への二重管理を避けてこの表への登録のみで整合を取る運用とし、
+`meo-internal`・`epark-review-sheets`も同じ型で登録している。一方、まだ本番自動化に
+育っていないブランド横断の社内機能(`functions/receipt-agency/`、`functions/recruiting/`、
+`functions/ad-spend-tracking/`)はCLAUDE.mdのみでこの表には未登録のままにしている
+(自動化が動き出した時点でこの表に追加すること — **2026-09-19の棚卸しで、この「動き出したら
+登録する」運用が徹底されておらず後追いになっていたことが判明した。`docs/org-review-log.md`
+の同日の記載を参照**)。
 
 ## 移設手順(skill-kanriリポジトリの更新をこちらに反映する場合)
 
