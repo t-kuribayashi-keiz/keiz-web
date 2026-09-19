@@ -27,6 +27,35 @@ description: Use this skill for automating the monthly WordPress blog post workf
 1店舗・1トピックで人が最終確認しながら通しで動かし、確定してから対象を広げる
 (提案書「5. 段階導入計画」参照)。
 
+### クラウド環境から直接は進められないことを確認済み(2026-09-19)
+
+このクラウドセッションから、ログイン抜きで進められる部分(公開ブログページのHTML取得・
+`/wp-json/`のREST API疎通確認)だけでも自力で済ませようとしたが、`curl`で
+`https://motoyawata.chiryouin.biz/`(直営の実店舗サイト)に直接アクセスしたところ、
+ログインとは無関係に**403 Forbidden**(レスポンス本文は`Copyright XSERVER Inc.`の
+汎用エラーページ)が返ってきた。これはXserver側のホスティングレベルのアクセス制限で、
+このクラウド実行環境のIPアドレスそのものがブロックされているためと判断できる
+(ID・パスワードの正誤とは無関係)。**したがって公開ページの閲覧・REST API疎通確認・
+ログインのいずれも、実オフィス/自宅回線のIPからでないと進められない**。ローカルPCの
+claude-in-chrome(実Chromeの実際の回線)が必要な理由はこれで確定した。
+
+### 「サイトIDパスワード表」について(2026-09-19確認)
+
+栗林さんの指摘通り、ルートCLAUDE.mdに記載の「サイト情報一覧」ことスプレッドシート
+(ID: `1n06i3R6QYuQ4SUCid3RsT5rnNcmtc9jxOaqZPKNGnnc`、実際のファイル名は
+「サイトIDパスワード表」)が各店舗のWordPressログインURL・ID・パスワードの一次情報として
+存在することを確認した。**このセッションでは中身を読み込んでいない**: 実行環境の安全機構が
+このファイルの内容をファイルへ書き出す操作を「Credential Materialization」として自動的に
+拒否したため、それ以上の抽出を試みていない。140以上の実パスワードをこのセッションの会話
+コンテキストに持ち込むこと自体、たとえ技術的に回避できたとしても避けるべき操作と判断した。
+
+**この表そのものは自動化の直接の入力にしない設計を推奨する。** ローカルセッションが
+この表を見て1店舗ずつ手でログインし、WordPress標準機能(ユーザー→プロフィール→
+Application Passwords)でサイトごとに**発行し直した**アプリケーションパスワードだけを
+自動化に使う。理由: アプリケーションパスワードは失効・再発行が自由で、万一漏れても本体の
+ログインパスワードには影響しない。マスターのID・パスワード表自体をリポジトリやGAS
+Script Propertiesにコピーする必要は無く、そうすべきでもない。
+
 ## 確認済み事実(そのまま使ってよい)
 
 ### 校閲ルール(ChatGPTに代わってClaude自身が適用する)
@@ -78,34 +107,15 @@ description: Use this skill for automating the monthly WordPress blog post workf
 4. 実行基盤はGoogle Apps Script推奨(理由: 対象スプレッドシートが112MBありこのセッションの
    Driveツールでは扱えないが、GASなら`SpreadsheetApp`で対象タブ・行だけ直接読み書きできる)
 
-### ローカルセッションへの依頼文(コピー用)
+### ローカルセッションでの着手方法(貼り付け不要)
 
-栗林さんがローカルのClaude Codeでこのリポジトリを開いた際に、以下をそのまま貼り付ければ
-着手できる:
-
-> 直営WordPressブログ自動化の調査をお願いします。まず
-> `.claude/skills/chokuei-wp-blog-automation/SKILL.md` と
-> `data/proposals/2026-09-18_chokuei-wp-blog-automation.md` を読んでください。
-> その上で、claude-in-chrome(実Chrome)を使って以下2点を確認してください。
->
-> 1. 「ブログ更新仕様書」スプレッドシート
->    (https://docs.google.com/spreadsheets/d/1VjA5jwLLHES1U1RPtO_WhwS0BJJ3sXXSoLx4ah4Ac6k)
->    に記載のWordPress共通ログインで、いずれか1店舗の管理画面にログインし、
->    「ユーザー→プロフィール」にApplication Passwords(アプリケーションパスワード)の
->    発行欄があるか確認してください。あれば実際に1つ発行して、
->    `/wp-json/wp/v2/posts`へのPOSTが通るか(下書き投稿で可)を試してください。
-> 2. スタッフ紹介トピックのブログ記事が実際に公開されている店舗ページを1つ開き、
->    ページソース(投稿本文のHTML構造)を確認してください。可能なら同じ仕様書スプレッド内の
->    ひな形セクションも探してください。`curacion系`テーマの店舗があれば、同様に症状記事の
->    ひな形も確認できると理想です。
->
-> **WordPressのユーザー名・パスワード・発行したApplication Passwordは、このリポジトリの
-> どのファイルにも書き込まないでください**(CLAUDE.mdの認証情報ルール)。確認できた
-> HTML構造(ひな形そのもの、プレースホルダーの位置)や「REST APIが使えた/使えなかった」
-> という結果だけを、SKILL.mdの「未確認」リストとdata/proposals/の該当ブロッカー欄に
-> 反映してください。テンプレートHTML自体は
-> `.claude/skills/chokuei-wp-blog-automation/templates/`配下に保存してよい
-> (これは仕様書自体に含まれる情報で、ログイン情報ではないため)。
+このSKILL.md自体に手順・確認事項・禁止事項(認証情報を書き込まない等)を全て書いてあるので、
+長い指示文を毎回貼り付ける必要はない。ローカルPCでこのリポジトリのClaude Codeを開き、
+`git pull`した上で「直営ブログ自動化のフェーズ1を進めて」のような一言を伝えるだけでよい
+(このSkillのdescriptionがそのトリガーを拾い、このSKILL.mdが読み込まれる)。あとは
+claude-in-chromeで「サイトIDパスワード表」を見ながら1店舗ログインし、上記2点
+(Application Password発行可否、スタッフ紹介記事のHTML構造)を確認して、結果を
+このSKILL.mdとdata/proposals/の該当ブロッカー欄に反映するだけ。
 
 ## 関連ドキュメント
 
