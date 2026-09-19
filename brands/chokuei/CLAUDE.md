@@ -101,6 +101,19 @@ SEO/MEO/PPC等の集客数・UU数、店舗数)を、Sheets API + GitHub Actions
 - 広告費シート上の店舗名マッチングは`scripts/store_matcher.py`が担当(冠文字・整骨院→整体院
   改名・針灸/鍼灸表記ゆれ等を吸収する緩いマッチング)
 
+### 4. WordPressブログ月次更新の自動化(設計フェーズ、`chokuei-wp-blog-automation` Skill)
+
+2026-09-18、栗林さんからの依頼で調査。各院は自社WordPressサイトを持ち(ドメイン系統は上記
+「店舗ID・ドメインの命名規則」参照)、月次で「ホームページ用原稿資料」スプレッドシート
+(別ファイル、112MB・多数タブ)の原稿材料をChatGPTで整形しWordPressへ手動投稿している。
+全店共通のWordPressログイン(ユーザー名・パスワードは元マニュアルに直書き。**本ファイルにも
+一切転記していない**)。詳細・アーキテクチャ案は
+[data/proposals/2026-09-18_chokuei-wp-blog-automation.md](../../data/proposals/2026-09-18_chokuei-wp-blog-automation.md)、
+実装状況は
+[.claude/skills/chokuei-wp-blog-automation/SKILL.md](../../.claude/skills/chokuei-wp-blog-automation/SKILL.md)
+参照。2026-09-18時点では設計のみで、動くコードはまだ無い(トピックごとの原稿スキーマ・
+HTMLひな形の大半、WordPress REST API可否が未確認のため)。
+
 ## 集客チャネル・データ連携の状況
 
 - `data/clinics.json`の直営135院はいずれも`acquisition_channels`が**空配列のまま**
@@ -123,6 +136,9 @@ SEO/MEO/PPC等の集客数・UU数、店舗数)を、Sheets API + GitHub Actions
 
 ## 未確認事項
 
+- WordPressブログ自動化(上記4.): トピックごとの原稿材料タブのスキーマ(確認できたのは
+  スタッフ紹介のみ)、`curacion`系・スタッフ紹介用のHTMLひな形、各院でのWordPress REST
+  API/Application Passwordの利用可否、「アップ状況一覧」の店舗別ログインURLを集約した表
 - SalonBoard/HPBの対象院が直営のうち何院・どの院かの確定リスト
 - `hpb-crm-reconciliation`が直営を対象に含むかどうか
 - GA4連携状況(現時点で連携の記録なし)。Google Search Consoleはadmin@keizgroup.jpのブラウザ

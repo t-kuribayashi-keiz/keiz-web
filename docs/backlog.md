@@ -87,6 +87,19 @@ LUNAのサイト、`Maildir.3`=メール等も同列に見える状態)になっ
 はまだ検証できていない。クーポン1件程度の小さな文言変更で次回検証する必要がある。
 ローカルのclaude-in-chrome環境(実Chrome + `claude-in-chrome` MCP)が必要。
 
+### 直営WordPressブログ月次更新の自動化: フェーズ1に進むための2点が未確認
+
+2026-09-18、栗林さんの依頼で調査・設計まで実施(
+[data/proposals/2026-09-18_chokuei-wp-blog-automation.md](../data/proposals/2026-09-18_chokuei-wp-blog-automation.md)、
+[.claude/skills/chokuei-wp-blog-automation/SKILL.md](../.claude/skills/chokuei-wp-blog-automation/SKILL.md))。
+対象スプレッドシート(「ホームページ用原稿資料」、112MB)がこのセッションのGoogle Drive
+ツールでは全体を読めず、確認できたのはスタッフ紹介トピックの原稿スキーマと校閲ルールのみ。
+フェーズ1(1店舗・1トピックでの試験運用)に進むには次の2点の実機確認が必要:
+
+1. スタッフ紹介トピック用(および`curacion`系テーマ用の症状記事)のHTMLひな形の特定
+2. 少なくとも1店舗でWordPressにログインし、Application Password発行(REST API有効化)が
+   できるか確認
+
 ## 情報待ち(ユーザーからの回答が必要)
 
 - **「グッド・スマイル月次報告」の最新月タブにHPB印のブロックが2つある** — 2026-09-06に
