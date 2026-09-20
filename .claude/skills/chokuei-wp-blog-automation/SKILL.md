@@ -1,6 +1,6 @@
 ---
 name: chokuei-wp-blog-automation
-description: Use this skill for automating the monthly WordPress blog post workflow for 直営(135院、8法人)— turning raw material staff enter monthly in the "ホームページ用原稿資料" spreadsheet into a polished blog article (applying the 景品表示法対応 correction rules) and publishing it to the store's own WordPress site. Trigger on "直営のブログ更新を自動化して", "今月のブログ投稿を回して", "ブログ更新仕様書の通りに投稿して", or requests to extend this pipeline to a new blog topic (トピック) or new store. STATUS (2026-09-18): design-only, no working code yet — see data/proposals/2026-09-18_chokuei-wp-blog-automation.md for the full investigation and phased rollout plan. Do NOT assume a working publisher exists; only the スタッフ紹介トピックの原稿スキーマと校閲ルールが確認済み. Do NOT use this for SalonBoard/HotPepper Beauty blog work (that's hpb-salonboard-update / hpb-ahaki-blog-rotation) or for リラックスブランドのWordPress調査(別ブランド・別インフラ、docs/backlog.mdの該当項目を参照) — this skill is chiryouin.biz/chiryou-in/curacion系ドメインを使う直営専用.
+description: Use this skill for automating the monthly WordPress blog post workflow for 直営(135院、8法人)— turning raw material staff enter monthly in the "ホームページ用原稿資料" spreadsheet into a polished blog article (applying the 景品表示法対応 correction rules) and publishing it to the store's own WordPress site. Trigger on "直営のブログ更新を自動化して", "今月のブログ投稿を回して", "ブログ更新仕様書の通りに投稿して", or requests to extend this pipeline to a new blog topic (トピック) or new store. STATUS (2026-09-20): design-only, no working code yet — see data/proposals/2026-09-18_chokuei-wp-blog-automation.md for the full investigation and phased rollout plan. Do NOT assume a working publisher exists: Application Password発行はできるがREST API認証がこのホスティング環境(Xserver)で通らないことを確認済み、かつスタッフ紹介トピックは通常のブログ投稿ではなくテーマのトップページ埋め込み(更新経路不明)であることが判明した(2026-09-20). Do NOT use this for SalonBoard/HotPepper Beauty blog work (that's hpb-salonboard-update / hpb-ahaki-blog-rotation) or for リラックスブランドのWordPress調査(別ブランド・別インフラ、docs/backlog.mdの該当項目を参照) — this skill is chiryouin.biz/chiryou-in.biz/curacion.jp系ドメインを使う直営専用(ドメイン名とテーマ系統は1対1対応ではない点に注意).
 ---
 
 # 直営 WordPressブログ月次更新 自動化
@@ -19,8 +19,10 @@ description: Use this skill for automating the monthly WordPress blog post workf
 
 - トピック(院長挨拶・腰痛・肩こり…80種以上)ごとの原稿材料タブの列構成
   (確認できたのはスタッフ紹介トピックの1タブのみ)
-- スタッフ紹介トピック用・`curacion`系テーマ用のHTMLひな形
+- スタッフ紹介トピックが実際にどこに・どうやって公開されているか(2026-09-20調査で
+  「ブログ投稿ではない」ことが判明。詳細は下記「フェーズ1調査結果」参照)
 - 各店舗のWordPress REST API / Application Passwordの利用可否
+  (2026-09-20調査で「発行はできるが認証が通らない」ことが判明。詳細は下記参照)
 - 「アップ状況一覧」の店舗別ログインURL列を集約した、店舗→テーマ系統の対応表
 
 **このSkillを使う人は、上記が埋まっていないトピック・店舗に対して見切り発車で投稿しないこと。**
@@ -55,6 +57,76 @@ Application Passwords)でサイトごとに**発行し直した**アプリケー
 自動化に使う。理由: アプリケーションパスワードは失効・再発行が自由で、万一漏れても本体の
 ログインパスワードには影響しない。マスターのID・パスワード表自体をリポジトリやGAS
 Script Propertiesにコピーする必要は無く、そうすべきでもない。
+
+### フェーズ1調査結果(2026-09-20、ローカルセッション・claude-in-chrome実施)
+
+栗林さんのローカルPCから、六実駅前整骨院(mutsumi.chiryouin.biz)で以下2点を実施した。
+**この店舗を選んだのは任意の1店舗であり、他店舗・他テーマ系統でも同じ結論とは限らない**
+(むしろ以下の通りテーマ系統ごとに構造が違うことが分かったので、店舗を変えて確認する際は
+毎回この手順を踏み直すこと)。
+
+**1. Application Password発行 → REST API疎通は「発行できるが認証が通らない」**
+
+- 「サイトIDパスワード表」で当該店舗のログインURL・ID・パスワードを確認し、ブラウザで
+  ログイン成功。ユーザー→プロフィールに「アプリケーションパスワード」欄があり、実際に
+  1つ発行できた(`chokuei-wp-blog-automation-test`という名前で発行→確認後に取消済み)。
+- しかし、発行したApplication Passwordで`Authorization: Basic ...`ヘッダーを付けて
+  `/wp-json/wp/v2/posts`にPOSTすると**401**(`rest_cannot_create`)。念のため
+  `/wp-json/wp/v2/users/me`を同じ認証で叩いても**401 `rest_not_logged_in`**
+  (=そもそも認証されていない扱い)。一方、GET(公開エンドポイント)は同じ認証ヘッダーでも
+  普通に200で返る。
+- 対照実験として、ログイン中のブラウザセッションからCookie+Nonce(`wpApiSettings.nonce`)で
+  同じREST APIを叩いたところ、こちらは正常に認証され動作した(実際にこの方法で
+  Application Passwordの取消もできた)。
+- **結論(推定)**: WordPress側のApplication Password機能自体は有効だが、
+  **`Authorization`ヘッダーがサーバー(Xserver)からPHPに渡っていない**という、
+  共有ホスティングでよくある既知の問題が疑わしい。プラグイン一覧(19個)を確認したが、
+  これを妨げていそうなセキュリティ系プラグイン(Wordfence/SiteGuard等)は入っていない。
+  **未検証**: `.htaccess`に`RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]`
+  相当の設定を足せば直る可能性が高いが、サーバー側の設定変更が必要で今回は未実施。
+  この修正をしない限り、**Application Password + REST APIによる無人投稿という
+  提案アーキテクチャ(提案書4章)はこの店舗では動かない**。他店舗でも同じ設定である
+  可能性が高いが、店舗ごとに個別サーバー/契約の場合は要再確認。
+
+**2. スタッフ紹介は「ブログ投稿」ではなく、テーマのトップページに直接組み込まれていた**
+
+- 想定(提案書3.3節)は「①〜⑧の原稿材料をHTMLひな形の★★★部分に差し込んで**通常の
+  ブログ記事として投稿**」だったが、実際には六実駅前整骨院・五井駅東口整骨院(chiryou-in.biz
+  ドメイン)のどちらも、「当院のこだわり」等の既存カテゴリに個人名のブログ記事は
+  **1件も存在しなかった**(REST APIで全カテゴリ・全投稿を検索して確認)。
+- 実体は、トップページの「スタッフ一覧」セクション(`.c-profile-list`)に氏名・写真の
+  カードが並び、カードをクリックすると**モーダル(`.modal-content__inner-right`)**が開き、
+  その中に「Profile」見出し+複数のH4(絵文字アイコン)+本文段落という構造で
+  ⑥施術家になるまでの自分・⑦新人時代・⑧メッセージ相当の全文が入っていた
+  (原稿材料スキーマの列と一致する内容を確認)。
+- このモーダルの中身が**wp-adminのどの画面から編集できるのか特定できなかった**。
+  ACFプラグインは未導入、カスタム投稿タイプも無し(`/wp-json/wp/v2/types`で確認)、
+  固定ページ一覧(15件)にもスタッフ関連ページは無し、ホームページ表示設定は
+  「最新の投稿」(固定ページ指定なし)だった。**テーマのテンプレートファイルに
+  直接ハードコードされている可能性が高い**(=wp-admin経由では更新できず、
+  テーマファイルの編集または開発会社への確認が必要)。
+- **したがって「スタッフ紹介トピック」は、症状記事等の他トピックと同じ
+  投稿ベースの自動化方式が使えない可能性が高い。** フェーズ1の対象トピックを
+  スタッフ紹介のままにするか、この時点で症状記事トピック(通常のブログ投稿として
+  存在することを2で確認済み)に切り替えるかは、栗林さんと要すり合わせ。
+
+**3. `curacion`系テーマの症状記事ひな形を確認(店舗を変えて調査)**
+
+- `chiryou-in.biz`ドメイン(五井駅東口整骨院)は当初`curacion`系だと推測していたが、
+  実際には`chiryouin.biz`と**同じ`kakomi_3`テンプレート**だった(提案書3.3節の
+  ひな形がそのまま使える)。ドメイン名と使用テーマは1対1に対応していない。
+- `data/site-urls.json`から`curacion.jp`ドメインの店舗(市川さくら整骨院
+  `curacion.jp/sakura`)を見つけて確認したところ、こちらは全く別のクラス体系
+  (`article-body` > `article-outline` > `section.article` > `article-title` /
+  `article-flexbox` / `article-detail` / `article-image`)を使っていた。
+  実データ例(肘の痛み記事、投稿ID1567)で構造を確認済み。★★★相当の差し込み位置は
+  `article-detail`段落と推定されるが、プレースホルダー文字列自体は本文中に見当たらず
+  (既存記事は生成済みの完成文のみ)、**空のひな形(未執筆状態のテンプレート)を
+  別途確認する必要がある**。
+- この店舗のスタッフ紹介は「スタッフ一覧」的な個人カードすら見当たらず
+  (「私達スタッフは国家資格を持っています」という一般文言のみ)、
+  chiryouin.biz系とも構造が異なる。**curacion.jp系はスタッフ紹介の掲載有無・方法が
+  そもそも他系統と違う可能性がある**。
 
 ## 確認済み事実(そのまま使ってよい)
 
@@ -92,17 +164,19 @@ Script Propertiesにコピーする必要は無く、そうすべきでもない
 転記しない。** 実行環境では環境変数(例: `CHOKUEI_WP_USERNAME` / `CHOKUEI_WP_APP_PASSWORD`)
 またはGAS Script Propertiesから読むこと。
 
-## 次のアクション(フェーズ1)
+## 次のアクション(フェーズ1.5)
 
-**この2点はローカル実行必須(claude-in-chrome + 実Chrome)。** クラウド実行環境には
-ブラウザ操作手段が無く、WordPressへのログインもできないため、このフェーズ1調査は
-`salonboard-operator`と同様にユーザーのローカルPC上のセッションに依頼する必要がある。
+上記「フェーズ1調査結果(2026-09-20)」により、当初想定していたフェーズ1の2項目
+(ひな形確認・Application Password確認)は完了したが、**どちらも「単純にはいかない」
+という結果**だったため、次は栗林さんとの方針確認を挟む必要がある。
 
-1. スタッフ紹介トピック用のHTMLひな形を「ブログ更新仕様書」内の該当セクション、または
-   実際に公開済みのスタッフ紹介記事のページソースから確認する
-2. 1店舗で実際にWordPressにログインし、ユーザープロフィールからApplication Passwordが
-   発行できるか(REST APIが有効か)を確認する
-3. 上記2点が揃った時点で、はじめて「対象店舗特定→原稿取得→生成→禁止語チェック→
+1. **要すり合わせ**: スタッフ紹介トピックの自動化を諦めて症状記事トピックを
+   フェーズ1の対象に切り替えるか、スタッフ紹介の実際の更新経路(テーマファイル?)を
+   別途特定するか
+2. **要対応**: Application Password経由のREST投稿を使うなら、対象店舗のXserver設定に
+   `Authorization`ヘッダーを通す`.htaccess`修正が前提条件になる
+   (自動化コード側の問題ではなくホスティング側の設定なので、実装担当だけでは解決できない)
+3. 上記が定まった時点で、はじめて「対象店舗特定→原稿取得→生成→禁止語チェック→
    投稿→院ブログ更新表への記録」を1店舗分、人の最終確認付きで通しで実装・実行する
 4. 実行基盤はGoogle Apps Script推奨(理由: 対象スプレッドシートが112MBありこのセッションの
    Driveツールでは扱えないが、GASなら`SpreadsheetApp`で対象タブ・行だけ直接読み書きできる)
@@ -111,11 +185,10 @@ Script Propertiesにコピーする必要は無く、そうすべきでもない
 
 このSKILL.md自体に手順・確認事項・禁止事項(認証情報を書き込まない等)を全て書いてあるので、
 長い指示文を毎回貼り付ける必要はない。ローカルPCでこのリポジトリのClaude Codeを開き、
-`git pull`した上で「直営ブログ自動化のフェーズ1を進めて」のような一言を伝えるだけでよい
-(このSkillのdescriptionがそのトリガーを拾い、このSKILL.mdが読み込まれる)。あとは
-claude-in-chromeで「サイトIDパスワード表」を見ながら1店舗ログインし、上記2点
-(Application Password発行可否、スタッフ紹介記事のHTML構造)を確認して、結果を
-このSKILL.mdとdata/proposals/の該当ブロッカー欄に反映するだけ。
+`git pull`した上で「直営ブログ自動化を進めて」のような一言を伝えるだけでよい
+(このSkillのdescriptionがそのトリガーを拾い、このSKILL.mdが読み込まれる)。
+フェーズ1(ひな形確認・Application Password確認)は2026-09-20に完了済みなので、
+次に着手する場合は上の「次のアクション(フェーズ1.5)」から。
 
 ## 関連ドキュメント
 
