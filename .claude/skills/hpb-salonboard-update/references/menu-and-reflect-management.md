@@ -22,3 +22,20 @@ The page lists one row per section (サロン掲載情報, スタッフ掲載情
   - A **specific unresolved instruction** — e.g. "『設定』＞『スタッフ設定』画面で更新された情報が登録されていません。スタッフ掲載情報で登録を行ってください。" — means something else needs finishing first, and the button stays greyed out (confirmed: 八幡宿駅西口鍼灸接骨院 H000822247).
 
 **`read_page`'s `disabled` attribute does not distinguish these states** — both the clickable and greyed-out 反映申請 buttons came back as plain `button "反映申請" [ref] type="button"` with no `disabled` attribute either way. The only reliable signal is the **on-screen color** (blue = enabled, grey = inert) — confirm by screenshot/`zoom`, not by reading the DOM.
+
+### クーポン row: 要確認 does not block its 反映申請 (confirmed 2026-09-18, 4 salons)
+
+The note above the table (「掲載チェックにNGがある場合、または「未確認の掲載情報」がある場合、
+「反映申請」ボタンを押せません。」) reads as if any 要確認 blocks it. It doesn't for the generic case:
+4 salons each had 10 OK + 1 要確認 (No.10, image unset); `#reflectedButtonCpn` stayed enabled
+(`disabled=false`, class `common-CNKcommon__primaryBtn`), and the click produced
+「クーポン掲載情報の本番反映を予約しました。」 with the row moving 未申請→反映待ち. Whether an NG really
+blocks the クーポン row is still unverified (assume the note is right).
+
+### Auto Mode can block reflect — and even salon switching
+
+2026-09-18 AM, under Auto Mode, `navigate` to `reflectTop` was blocked as [Production Deploy], and
+for one salon even the `CNC/groupTop/` salon-switch click was blocked as [Real-World Transactions].
+After the calling session switched to Manual/bypassPermissions, the identical operations all went
+through. This is the harness's permission mode, not SalonBoard. Before a reflect task, have the
+caller confirm the permission mode up front.

@@ -96,3 +96,29 @@ straight clone.
 ## Publishing (反映)
 
 反映申請 lives on 掲載管理TOP (`CNK/reflect/reflectTop`), one row per section (サロン, スタッフ, フォトギャラリー, メニュー, こだわり, 特集, クーポン, …) — each with its own independent 反映申請 button. Click only the button in the row for the section you actually changed; sections already 反映済み show a greyed-out 反映申請 button in the same column, which is easy to mistake for the live one at a glance. **Re-screenshot immediately before clicking** — the row's vertical position shifts depending on how much content is above it (which salon, how many prior sections have data), so a coordinate reused from an earlier screenshot or a different salon will land on the wrong row. After a successful click the row's status changes from 未申請 to 反映待ち with a timestamp; the change usually goes live within ~15 minutes (SalonBoard's own estimate, can take longer during maintenance).
+
+## New-coupon form quirks (learned 2026-09-17/18, あはき柔整4院への11件横展開)
+
+- **アイコン用カテゴリ (`frmCouponEditCnkDto.selectedMenuCategoryCd` checkboxes) is not saved
+  by setting `checked=true` via JS alone** — the parent form's 登録 then saves the coupon with
+  掲載チェック **NG** (happened once, ライフガーデン茂原 No.4). After setting the checkboxes,
+  click 「カテゴリ選択」 to open the modal and press **the modal's own 登録** (separate from the
+  parent form's). Confirmed saved when
+  `document.getElementById('COUPON_CATEGORY_NAME_DISP').textContent` is non-empty. To recover an
+  NG coupon: reopen it → set checkboxes → open modal → modal 登録 → parent 登録 → becomes OK.
+- 「カテゴリ選択」 often doesn't open on the first click right after bulk-filling fields by JS
+  (~50%; the page just scrolls). Click → screenshot → click again if not open.
+- After `file_upload` of a large PNG (1.5–2MB) the preview modal can take up to ~15s to render;
+  `screenshot` times out ("renderer may be frozen") while `get_page_text` still responds.
+  `wait` 5–8s and retry the screenshot — no reload needed.
+- アイコン用カテゴリ modal contents differ by salon: 新静岡駅前・八幡宿駅西口 have an extra
+  「整体・カイロプラクティック・矯正」 group (整体/カイロ/骨盤・美容矯正/O脚・X脚矯正/小顔矯正/
+  その他メニュー). Same-named options (e.g. その他メニュー) can exist under several groups —
+  pick by `value` (MC02 ボディケア・マッサージ, MC37 鍼灸, MC25 フェイシャル, MC05 その他メニュー
+  (リラクゼーション) were unaffected).
+- New-coupon form defaults (メニュー指定=あり etc.) matched the source salon. Existing coupons in
+  salons sharing a template usually matched exactly, but free-text 利用条件 can carry a
+  salon-specific tweak (ライフガーデン茂原 had 「はりも人気」 appended). **Read every coupon's
+  current content before changing it — never bulk-replace on assumption.**
+- A coupon left at 要確認 (e.g. No.10 with no image) does **not** block the クーポン section's
+  反映申請 — see `menu-and-reflect-management.md`.

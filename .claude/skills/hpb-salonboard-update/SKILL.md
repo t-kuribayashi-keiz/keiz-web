@@ -59,7 +59,7 @@ Array.from(document.querySelectorAll('a'))
   .click();
 ```
 
-Use exact-text match (`.trim() === 店舗名`), not substring, so you don't hit a different salon whose name contains the target as a substring. Prefer this over coordinate/ref clicks for every `CNC/groupTop/` salon switch. (`salonboard-operator` needs `mcp__claude-in-chrome__javascript_tool` in its `tools:` list for this — added 2026-09-11.)
+Use exact-text match (`.trim() === 店舗名`), not substring, so you don't hit a different salon whose name contains the target as a substring (2026-09-18: a substring search for 「ライフガーデン茂原」 hit ライフガーデン茂原整骨院 H000528120 before the intended ライフガーデン茂原**鍼灸**整骨院 H000822239 — caught only by the footer check). Safer still when you know the ID: find the ID cell with `td.textContent.trim() === 'H0008xxxxx'` and click the `<a>` in its `closest('tr')`. Prefer this over coordinate/ref clicks for every `CNC/groupTop/` salon switch. (`salonboard-operator` needs `mcp__claude-in-chrome__javascript_tool` in its `tools:` list for this — added 2026-09-11.)
 
 A click that reports success is still not proof of navigation either way — **verify the resulting URL** (`tabs_context_mcp` or a screenshot, or the page footer's salon name) after any click that is supposed to move you.
 
@@ -96,6 +96,7 @@ Detailed, field-level notes (exact click paths, character limits, quirks of spec
 
 - `references/coupon-editing.md` — クーポン (coupon) tab.
 - `references/menu-and-reflect-management.md` — メニュー掲載情報の無変更再登録、および掲載管理TOP(`reflectTop`)の反映申請ボタンの束ね方・有効/無効判定。
+- `references/special-list-editing.md` — 特集の新規追加・画像設定・クーポン紐づけ(「変更内容を登録する」まで非永続)・非掲載化のconfirm()・反映所要時間。
 - `references/salon-profile-editing.md` — サロン基本情報(サロンの一言・サロントップ画像・サブコピー・フリーワード)の欄の区別と文字数制限。
 
 直営135院のうち、ライトプラン側ページとあはき柔整プラン側ページの両方を今も現役で運用している
