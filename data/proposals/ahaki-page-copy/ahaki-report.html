@@ -1,0 +1,633 @@
+<title>あはき柔整ページ 改修効果検証</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --paper:#FCFBFA; --card:#FFFFFF; --ink:#241F27; --ink2:#554D5B; --ink3:#857C8C;
+    --rule:#E4DEE4; --rule2:#F0EBF0;
+    --self:#C02E5E; --area:#0083A8; --light:#8E7A22;
+    --good:#1F7A4D; --warn:#A8620E; --hold:#6B6473;
+    --goodbg:#E8F3EC; --warnbg:#FAF0E3; --holdbg:#F0EEF2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --paper:#16141A; --card:#1E1B23; --ink:#EDE8EE; --ink2:#B6AEBC; --ink3:#857C8C;
+      --rule:#302B37; --rule2:#26222C;
+      --self:#DC4F78; --area:#1F9DC2; --light:#A98A24;
+      --good:#5FBF8C; --warn:#D9973F; --hold:#9A92A2;
+      --goodbg:#172A20; --warnbg:#2B2114; --holdbg:#232029;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --paper:#16141A; --card:#1E1B23; --ink:#EDE8EE; --ink2:#B6AEBC; --ink3:#857C8C;
+    --rule:#302B37; --rule2:#26222C;
+    --self:#DC4F78; --area:#1F9DC2; --light:#A98A24;
+    --good:#5FBF8C; --warn:#D9973F; --hold:#9A92A2;
+    --goodbg:#172A20; --warnbg:#2B2114; --holdbg:#232029;
+  }
+
+  body{ background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans JP", system-ui, sans-serif; font-size:15px; line-height:1.85;
+    -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:920px; margin:0 auto; padding-inline:20px; padding-block:48px 72px; }
+
+  h1,h2,h3{ font-family:"Shippori Mincho B1", serif; font-weight:700; text-wrap:balance; line-height:1.4; }
+  h1{ font-size:clamp(26px,5.2vw,38px); margin:0 0 14px; letter-spacing:.01em; }
+  h2{ font-size:clamp(19px,3.4vw,23px); margin:0 0 4px; }
+  h3{ font-size:16px; margin:0 0 6px; font-weight:600; }
+  p{ margin:0 0 14px; }
+  .lede{ color:var(--ink2); font-size:16px; margin:0; max-width:62ch; }
+
+  .meta{ display:flex; flex-wrap:wrap; gap:6px 22px; margin:22px 0 0;
+    padding-top:16px; border-top:1px solid var(--rule);
+    font-size:12.5px; color:var(--ink3); letter-spacing:.02em; }
+  .meta b{ color:var(--ink2); font-weight:500; }
+
+  section{ margin-top:56px; }
+  .eyebrow{ font-size:11.5px; letter-spacing:.14em; color:var(--ink3);
+    text-transform:uppercase; margin:0 0 8px; font-weight:700; }
+  .sechead{ margin-bottom:22px; }
+  .sechead p{ color:var(--ink2); margin:8px 0 0; max-width:62ch; }
+
+  .findings{ display:grid; gap:14px; margin-top:26px; }
+  .finding{ background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:4px 16px; align-items:start; }
+  .chip{ grid-row:1/3; align-self:start; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+    padding:4px 10px; border-radius:2px; white-space:nowrap; margin-top:3px; }
+  .chip.ok{ background:var(--goodbg); color:var(--good); }
+  .chip.na{ background:var(--holdbg); color:var(--hold); }
+  .chip.wa{ background:var(--warnbg); color:var(--warn); }
+  .finding h3{ margin:0; }
+  .finding p{ margin:0; color:var(--ink2); font-size:14px; }
+
+  figure{ margin:0; }
+  .chartcard{ background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:20px 18px 14px; }
+  .legend{ display:flex; flex-wrap:wrap; gap:8px 20px; margin:0 0 14px; font-size:13px; }
+  .lg{ display:inline-flex; align-items:center; gap:7px; color:var(--ink2); }
+  .sw{ width:16px; height:3px; border-radius:2px; flex:none; }
+  .sw.dash{ height:0; border-top:2px dashed currentColor; background:none!important; opacity:.8; }
+  .chartbox{ position:relative; }
+  svg{ display:block; width:100%; height:auto; overflow:visible; }
+  figcaption{ font-size:12.5px; color:var(--ink3); margin-top:12px; line-height:1.7; }
+
+  .tip{ position:absolute; pointer-events:none; opacity:0; transition:opacity .12s;
+    background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:9px 11px; font-size:12.5px; line-height:1.6; white-space:nowrap;
+    box-shadow:0 4px 14px rgba(0,0,0,.10); z-index:5; }
+  .tip b{ display:block; color:var(--ink); font-weight:700; margin-bottom:3px; font-size:12px; }
+  .tip .r{ display:flex; justify-content:space-between; gap:14px; color:var(--ink2); }
+  .tip .r i{ font-style:normal; font-variant-numeric:tabular-nums; color:var(--ink); }
+
+  .smallmult{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .sm{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:14px 14px 10px; }
+  .sm .hd{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:2px; }
+  .sm .nm{ font-weight:700; font-size:14px; color:var(--ink); }
+  .sm .rt{ font-size:12.5px; color:var(--ink3); font-variant-numeric:tabular-nums; }
+  .sm .rt b{ color:var(--self); font-size:15px; }
+  .sm .sub{ font-size:11.5px; color:var(--ink3); margin:0 0 8px; }
+
+  .tablewrap{ overflow-x:auto; border:1px solid var(--rule); border-radius:3px; background:var(--card); }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; min-width:600px; }
+  th,td{ padding:11px 14px; text-align:right; border-bottom:1px solid var(--rule2); }
+  th:first-child, td:first-child{ text-align:left; white-space:nowrap; }
+  thead th{ font-size:11.5px; letter-spacing:.05em; color:var(--ink3); font-weight:700;
+    border-bottom:1px solid var(--rule); background:var(--paper); }
+  td{ font-variant-numeric:tabular-nums; color:var(--ink2); }
+  td:first-child{ color:var(--ink); font-weight:500; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tfoot td{ border-top:1px solid var(--rule); border-bottom:none;
+    font-weight:700; color:var(--ink); background:var(--paper); }
+  .up{ color:var(--good); font-weight:700; }
+  .dn{ color:var(--warn); font-weight:700; }
+
+  .note{ border-left:2px solid var(--self); padding:2px 0 2px 18px; margin:22px 0;
+    color:var(--ink2); font-size:14px; }
+  .note b{ color:var(--ink); }
+
+  .stores{ display:grid; gap:14px; margin-top:8px; }
+  .store{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:16px 20px; }
+  .store h3{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .store p{ margin:4px 0 0; color:var(--ink2); font-size:14px; }
+  .tag{ font-size:11px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:2px; }
+  .tag.wa{ background:var(--warnbg); color:var(--warn); }
+  .tag.na{ background:var(--holdbg); color:var(--hold); }
+  .tag.ok{ background:var(--goodbg); color:var(--good); }
+
+  ol.steps{ margin:0; padding-left:0; list-style:none; counter-reset:s; display:grid; gap:14px; }
+  ol.steps li{ counter-increment:s; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:baseline; }
+  ol.steps li::before{ content:counter(s); font-family:"Shippori Mincho B1",serif; font-size:19px;
+    font-weight:700; color:var(--self); min-width:1.1em; }
+  ol.steps p{ margin:0; color:var(--ink2); font-size:14px; }
+  ol.steps strong{ color:var(--ink); display:block; font-weight:700; font-size:15px; }
+
+  .foot{ margin-top:56px; padding-top:20px; border-top:1px solid var(--rule);
+    font-size:12.5px; color:var(--ink3); line-height:1.8; }
+  .foot p{ margin:0 0 8px; }
+  .foot i{ font-style:normal; color:var(--ink2); font-weight:700; }
+
+  @media (max-width:560px){
+    .finding{ grid-template-columns:1fr; }
+    .chip{ grid-row:auto; justify-self:start; margin-bottom:6px; }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <h1>あはき柔整プランページ<br>改修の効果検証</h1>
+    <p class="lede">HotPepper Beauty のあはき柔整プラン側ページを5院で改修した。露出は明確に増え、これまで大きく引き離されていたライトプラン側に肉薄しつつある。予約数も8月を基準にすれば増えており、CRMと突合した実来院数でも第1段階の効果は確認できた。一方、第2段階の改修が効いたかどうかは、HPBの計測仕様上まだ切り分けられない。</p>
+    <div class="meta">
+      <span><b>対象</b> あはき柔整プラン5院</span>
+      <span><b>データ</b> SalonBoard 分析 / サロンレポート(日次)</span>
+      <span><b>期間</b> 2026年8月1日〜9月23日</span>
+      <span><b>作成</b> 2026年9月24日</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">要点</p>
+    <div class="findings">
+
+      <div class="finding">
+        <span class="chip ok">効果あり</span>
+        <h3>第1段階でPVが約1.9倍になった</h3>
+        <p>5院合計のサロン情報PVは7日間で432→819(+90%)。5院すべてが8月の週次最高値を上回った。同じ期間、同エリア同プランの競合平均はほぼ横ばい。</p>
+      </div>
+
+      <div class="finding">
+        <span class="chip ok">肉薄</span>
+        <h3>ライトプランとの差が36%→67%まで縮んだ</h3>
+        <p>8月はあはき柔整のPVがライトプランの36%しかなかったが、9月18〜23日には67%まで到達。新潟関屋は84%、新静岡駅前77%、八幡宿西口75%と、3院は7〜8割まで来ている。</p>
+      </div>
+
+      <div class="finding">
+        <span class="chip ok">競争力</span>
+        <h3>エリア平均の51%から94%へ</h3>
+        <p>あはき柔整プランのエリア平均に対する自店の達成率。ライトプランは同じ期間に55%→57%とほぼ動いていないので、これは改修した側だけに起きた変化。新静岡駅前124%、八幡宿西口111%と、エリア平均を超えた院も出ている。</p>
+      </div>
+
+      <div class="finding">
+        <span class="chip ok">増加</span>
+        <h3>予約数は1日あたり6.3倍</h3>
+        <p>8月は31日間で8件(0.26件/日)。改修後の9月11〜23日は13日間で21件(1.62件/日)。改修前の9月1〜10日(0.60件/日)と比べても2.7倍。ただし実数が小さく、月次の確定値での再確認が要る。</p>
+      </div>
+
+      <div class="finding">
+        <span class="chip ok">増加</span>
+        <h3>実来院数は2件から8件へ</h3>
+        <p>CRMのカルテと突合して実際の来院を確認した数。改修前の7日間(9月4〜10日)は5院合計2件、第1段階後の同じ7日間は8件。続く6日間も7件。改修前にゼロだった4院すべてで来院が立ち上がっている。</p>
+      </div>
+
+      <div class="finding">
+        <span class="chip na">判定不能</span>
+        <h3>第2段階(特集・クーポン)は切り分けられない</h3>
+        <p>HPBはCVR・ACRを月単位の1行でしか出さず、期間を区切って比較できない。10月1日に9月の確定値を取れば算出できる。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">推移 — 実数</p>
+      <h2>ライトプランに追いつきつつある</h2>
+      <p>5院合計のサロン情報PV(1日あたり、7日移動平均)。実線が自店、破線がそのプランのエリア平均。<b>あはき柔整とライトプランはエリア平均そのものが2.3倍違う</b>ため、両プランを1本の平均線で比べることはできない。それぞれ自分のプランの平均と並べている。</p>
+    </div>
+
+    <figure class="chartcard">
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--self)"></span>あはき柔整 自店</span>
+        <span class="lg" style="color:var(--ink2)"><span class="sw dash" style="color:var(--self)"></span>あはき柔整 エリア平均</span>
+        <span class="lg"><span class="sw" style="background:var(--light)"></span>ライトプラン 自店</span>
+        <span class="lg" style="color:var(--ink2)"><span class="sw dash" style="color:var(--light)"></span>ライトプラン エリア平均</span>
+      </div>
+      <div class="chartbox" id="cbA">
+        <svg id="chartA" viewBox="0 0 900 372" role="img"
+             aria-label="8月1日から9月23日の1日あたりサロン情報PV。あはき柔整は8月の約57から9月中旬に約187まで上昇し、ライトプランの約152を一時上回った。"></svg>
+        <div class="tip" id="tipA"></div>
+      </div>
+      <figcaption>縦の灰色破線は本番反映日。9月19〜23日はシルバーウィークの5連休にあたる。エリア平均は1日あたり あはき柔整 117.6 PV / ライトプラン 271.6 PV(9月1〜23日・5院合計)で、母数の大きさがまったく違う。</figcaption>
+    </figure>
+
+    <div class="note">
+      <b>8月はライトプランの36%、9月18〜23日は67%。</b>1日あたりでは 56.7 → 101.3 PV(あはき柔整)に対し、ライトプランは 157.9 → 151.6 PV。あはき柔整が伸びた分がそのまま差の縮小になっており、ライトプランを削って増えたわけではない。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">推移 — 指数</p>
+      <h2>自店だけが8月の水準を離れた</h2>
+      <p>同じデータを、3系列それぞれの8月日平均=100として指数化したもの。絶対値の大きさを揃えることで、動きの向きと大きさだけを比べられる。9月下旬の落ち込みが自店固有のものか市場全体のものかは、この図で判断する。</p>
+    </div>
+
+    <figure class="chartcard">
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--self)"></span>あはき柔整(改修した)</span>
+        <span class="lg"><span class="sw" style="background:var(--light)"></span>ライトプラン(改修していない)</span>
+        <span class="lg"><span class="sw" style="background:var(--area)"></span>あはき柔整プランのエリア平均</span>
+      </div>
+      <div class="chartbox" id="cbB">
+        <svg id="chartB" viewBox="0 0 900 372" role="img"
+             aria-label="8月平均を100とした指数の推移。あはき柔整は9月11日の改修後に180前後まで上昇し、競合平均とライトプランは100前後で推移した。"></svg>
+        <div class="tip" id="tipB"></div>
+      </div>
+      <figcaption>基準は8月の日平均(あはき柔整 56.6 / ライトプラン 157.7 / あはき柔整のエリア平均 111.4 PV・5院合計)。9月下旬は3系列とも下げており、自店の-13.5%に対してあはき柔整のエリア平均-16.4%・ライトプラン-15.2%。改修の効果が剥がれたのではなく市場側の動き。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">院別</p>
+      <h2>5院すべてで差が縮んだ</h2>
+      <p>院ごとの1日あたりサロン情報PV(7日移動平均)。縦軸は5院とも0〜50で共通なので、院どうしの規模の比較もそのままできる。右上の数字は9月18〜23日時点で、あはき柔整がライトプランの何%まで来ているか。</p>
+    </div>
+    <div class="smallmult" id="mult"></div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">競争力</p>
+      <h2>エリア平均にほぼ追いついた</h2>
+      <p>自店のPVが、そのプランのエリア平均の何%にあたるか。プランごとに母数が違うので、両プランを横に並べて比較するのではなく、<b>それぞれが自分の市場の中でどこまで来たか</b>を見る指標。改修したあはき柔整だけが大きく動いている。</p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>院</th><th>あはき柔整<br>8月</th><th>あはき柔整<br>9/18-23</th><th>変化</th><th>ライトプラン<br>8月</th><th>ライトプラン<br>9/18-23</th><th>変化</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>新静岡駅前</td><td>70%</td><td class="up">124%</td><td class="up">+54pt</td><td>63%</td><td>60%</td><td class="dn">-3pt</td></tr>
+          <tr><td>八幡宿西口</td><td>63%</td><td class="up">111%</td><td class="up">+48pt</td><td>45%</td><td>49%</td><td>+4pt</td></tr>
+          <tr><td>新潟関屋</td><td>28%</td><td class="up">98%</td><td class="up">+70pt</td><td>58%</td><td>88%</td><td>+30pt</td></tr>
+          <tr><td>本八幡南口</td><td>44%</td><td class="up">75%</td><td class="up">+31pt</td><td>51%</td><td>51%</td><td>0pt</td></tr>
+          <tr><td>ライフガーデン茂原</td><td>61%</td><td>59%</td><td class="dn">-2pt</td><td>62%</td><td>45%</td><td class="dn">-17pt</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>5院合計</td><td>51%</td><td class="up">94%</td><td class="up">+43pt</td><td>55%</td><td>57%</td><td>+2pt</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="note">
+      <b>新潟関屋はライトプランも+30pt動いている。</b>ここだけは改修以外の要因が働いているとみるべきで、あはき柔整の+70ptをそのまま改修の成果とは読めない。逆に新静岡駅前・八幡宿西口・本八幡南口は、ライトプランがほぼ横ばいのまま、あはき柔整だけが30〜54pt上がっている。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">第1段階 — TOP画像・サブコピー・写真・SEO(9月11〜12日反映)</p>
+      <h2>5院すべてが8月の最高値を超えた</h2>
+      <p>9月4〜10日と9月11〜17日の比較。曜日の並びが完全に一致する7日間どうしで、曜日差の影響を受けない。</p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>院</th><th>改修前</th><th>改修後</th><th>増減</th><th>8月の週次最高</th><th>判定</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>本八幡南口</td><td>62</td><td>190</td><td class="up">+206%</td><td>126</td><td>超えた</td></tr>
+          <tr><td>八幡宿西口</td><td>59</td><td>157</td><td class="up">+166%</td><td>78</td><td>超えた</td></tr>
+          <tr><td>新潟関屋</td><td>70</td><td>115</td><td class="up">+64%</td><td>74</td><td>超えた</td></tr>
+          <tr><td>新静岡駅前</td><td>148</td><td>224</td><td class="up">+51%</td><td>133</td><td>超えた</td></tr>
+          <tr><td>ライフガーデン茂原</td><td>93</td><td>133</td><td class="up">+43%</td><td>91</td><td>超えた</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>5院合計</td><td>432</td><td>819</td><td class="up">+90%</td><td>—</td><td>—</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="note">
+      <b>この伸びは他ページから奪ったものではない。</b>同じ店舗の未改修ページ(ライトプラン)は5院中4院で横ばいから微増、明確に減った院はゼロ。両プランを合算した店舗全体のPVも5院すべてで増えている(+9.9%〜+81.9%)。純粋な上乗せと判断してよい。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">予約</p>
+      <h2>改修後13日間で21件</h2>
+      <p>8月の31日間で8件だったものが、改修後は13日間で21件。1日あたりでは6.3倍になっている。9月1〜10日(改修前)も8月より高いため、その分を差し引いても2.7倍。</p>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>院</th><th>8月<br>31日間</th><th>9/1-10 改修前<br>10日間</th><th>9/11-23 改修後<br>13日間</th><th>1日あたり<br>8月 → 改修後</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>本八幡南口</td><td>1件</td><td>0件</td><td>8件</td><td>0.03 → <span class="up">0.62</span></td></tr>
+          <tr><td>新潟関屋</td><td>1件</td><td>1件</td><td>5件</td><td>0.03 → <span class="up">0.38</span></td></tr>
+          <tr><td>新静岡駅前</td><td>3件</td><td>4件</td><td>4件</td><td>0.10 → <span class="up">0.31</span></td></tr>
+          <tr><td>八幡宿西口</td><td>0件</td><td>1件</td><td>3件</td><td>0.00 → <span class="up">0.23</span></td></tr>
+          <tr><td>ライフガーデン茂原</td><td>3件</td><td>0件</td><td>1件</td><td>0.10 → <span class="dn">0.08</span></td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>5院合計</td><td>8件</td><td>6件</td><td>21件</td><td>0.26 → <span class="up">1.62</span></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p style="margin-top:14px; color:var(--ink2); font-size:14px">予約売上高は 8月の31日間で ¥25,840、改修後の13日間で ¥32,740。1日あたりに直すと <b style="color:var(--ink)">¥834 → ¥2,518</b> で、こちらも3.0倍になっている。</p>
+
+    <div class="note">
+      <b>実数が小さいので、この数字だけで結論を出さないこと。</b>5院合計でも改修後13日間で21件。1院あたりでは4件程度で、数件の増減が比率を大きく動かす。10月の月次確定値で再確認する必要がある。ライフガーデン茂原だけは8月より減っており、PVの落ち込みと合わせて個別に見る。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">実来院</p>
+      <h2>実来院数も同じ方向に動いた</h2>
+      <p>HPBの予約一覧をCRM(カルテ)と突合し、<b>実際に来院したことが確認できた人数</b>を院別に数えたもの。PV・予約数と同じ区間の切り方で並べている。改修前の7日間は5院合計で2件、第1段階後の7日間は8件、続く6日間は7件。</p>
+    </div>
+
+    <figure class="chartcard">
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--hold); height:11px; border-radius:1px"></span>改修前 9/4-10(7日)</span>
+        <span class="lg"><span class="sw" style="background:var(--self); opacity:.45; height:11px; border-radius:1px"></span>第1段階後 9/11-17(7日)</span>
+        <span class="lg"><span class="sw" style="background:var(--self); height:11px; border-radius:1px"></span>第1+2段階後 9/18-23(6日)</span>
+      </div>
+      <div class="chartbox">
+        <svg id="chartV" viewBox="0 0 900 306" role="img"
+             aria-label="院別の実来院数。改修前7日間は新静岡駅前の2件のみで他4院は0件。第1段階後の7日間は本八幡南口3件、八幡宿西口3件、新静岡駅前1件、新潟関屋1件、ライフガーデン茂原0件。続く6日間は新静岡駅前3件、本八幡南口2件、新潟関屋1件、ライフガーデン茂原1件、八幡宿西口0件。"></svg>
+      </div>
+      <figcaption>縦軸は実来院数(件)。3つの区間は7日・7日・6日とほぼ同じ長さなので、実数のまま並べている。5院合計は 2件 → 8件 → 7件。</figcaption>
+    </figure>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>院</th><th>改修前<br>9/4-10(7日)</th><th>第1段階後<br>9/11-17(7日)</th><th>第1+2段階後<br>9/18-23(6日)</th><th>1日あたり<br>改修前 → 9/11-23</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>本八幡南口</td><td>0件</td><td>3件</td><td>2件</td><td>0.00 → <span class="up">0.38</span></td></tr>
+          <tr><td>新静岡駅前</td><td>2件</td><td>1件</td><td>3件</td><td>0.29 → <span class="up">0.31</span></td></tr>
+          <tr><td>八幡宿西口</td><td>0件</td><td>3件</td><td>0件</td><td>0.00 → <span class="up">0.23</span></td></tr>
+          <tr><td>新潟関屋</td><td>0件</td><td>1件</td><td>1件</td><td>0.00 → <span class="up">0.15</span></td></tr>
+          <tr><td>ライフガーデン茂原</td><td>0件</td><td>0件</td><td>1件</td><td>0.00 → <span class="up">0.08</span></td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>5院合計</td><td>2件</td><td>8件</td><td>7件</td><td>0.29 → <span class="up">1.15</span></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="note">
+      <b>予約数の伸びと方向が一致している。</b>改修後13日間(9/11-23)の実来院は5院合計15件で、1日あたり 0.29 → 1.15件(4.0倍)。同じ期間の予約数は 0.43 → 1.62件/日(3.8倍)で、ほぼ同じ倍率。<b>PVの増加が予約で止まらず、来院まで通っている</b>と読める。
+    </div>
+
+    <div class="note">
+      <b>実数が小さいので断定はしない。</b>1院あたりでは1区間0〜3件で、1件の差が見た目を大きく動かす。伸びの中身も院によって違い、新静岡駅前は改修前から2件あったので増分は小さい。残り4院はゼロからの立ち上がりで、方向としては明確だが水準はまだ低い。9月分のCRMは登録内容の確認・修正が未了のため、確定値は10月の月次突合で取り直す。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">第2段階 — 特集・クーポン画像(9月17〜18日反映)</p>
+      <h2>効果は切り分けられていない</h2>
+      <p>作業は完了しているが、第1段階の効果と分けて測る手段が今のところない。理由は2つある。</p>
+    </div>
+
+    <div class="stores">
+      <div class="store">
+        <h3>CVR・ACRが期間で切り出せない<span class="tag na">HPBの仕様</span></h3>
+        <p>日次で取れるのはPV・総PV・予約数・予約売上高の4項目だけ。CVR(サロン情報PV→クーポン閲覧)とACR(クーポン閲覧→予約完了)は「基本情報」画面にしかなく、対象月の1行だけしか表示されない。サロンレポートのダウンロードも月単位でしか選べない。</p>
+      </div>
+      <div class="store">
+        <h3>反映から6日しか経っていない<span class="tag na">期間不足</span></h3>
+        <p>しかもその6日はシルバーウィークと重なる。予約数の増加は第1段階から続いているもので、第2段階がそこにどれだけ上乗せしたかは分離できない。</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>10月1日に9月の確定値を取れば算出できる。</b>基本情報の当月累計は9月23日時点のものを保存済み。10月1日に9月確定値を取り、差し引けば「9月24〜30日」——第2段階の反映後だけの7日間——のCVR・ACRが出せる。10月以降は週1回このスナップショットを取る運用にする。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">院別</p>
+      <h2>個別に見ておくべき3院</h2>
+    </div>
+
+    <div class="stores">
+      <div class="store">
+        <h3>ライフガーデン茂原<span class="tag wa">要確認</span></h3>
+        <p>5院で唯一、予約数が8月より減っている(3件→1件)。PVも9月下旬に122→55(-55%)まで落ち、8月の水準に戻った。ただし同じ店のライトプランも-41%、競合平均も-27%で、店舗・エリア全体の落ち込み。掲載順位の確認と再測定が要る。</p>
+      </div>
+      <div class="store">
+        <h3>新潟関屋<span class="tag ok">最も肉薄</span></h3>
+        <p>ライトプランの84%まで到達し、5院で最も差が縮んだ。予約数も1件→5件。ただし9月下旬にPVが+65%と伸びた点については、改修していないライトプランも+42%伸びているため、第2段階の効果とは言えない。</p>
+      </div>
+      <div class="store">
+        <h3>新静岡駅前<span class="tag wa">要確認</span></h3>
+        <p>5院で唯一、月次CVRが8月より下がった(72.8%→61.6%)。同じ期間に競合平均は上昇している。予約数は改修前後で4件→4件と横ばい。10月の確定値で再確認する。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">次にやること</p>
+      <h2>第2段階を測れる状態にする</h2>
+    </div>
+    <ol class="steps">
+      <li><div><strong>10月1日に9月の確定値を取得する</strong><p>基本情報のCVR・ACRを5院分。9月23日時点の累計との差し引きで、第2段階の反映後だけの7日間が出せる。</p></div></li>
+      <li><div><strong>週1回のスナップショット運用に切り替える</strong><p>当月累計を毎週記録しておけば、以後は任意の期間のCVR・ACRを差し引きで算出できる。同じ制約に二度ぶつからずに済む。</p></div></li>
+      <li><div><strong>10月中旬に月次リボンデータで再評価する</strong><p>9月は反映前・第1段階・第2段階が混ざる。第2段階を丸ごと含む10月の月次が、本来の評価材料になる。予約数もこの時点で確定値を見る。</p></div></li>
+      <li><div><strong>10月の月次突合で実来院数を確定させる</strong><p>9月分はCRM側の登録内容の確認・修正がまだ済んでいない。月次の突合が回ったあとに同じ区間で取り直し、実来院ベースの伸びを確定値で見る。抽出期間も来院日10月上旬まで延ばす。</p></div></li>
+      <li><div><strong>ライフガーデン茂原を個別に見る</strong><p>5院で唯一、PVも予約数も戻っている。エリア全体の落ち込みと重なっているため、掲載順位の変動がないかを別途確認する。</p></div></li>
+    </ol>
+  </section>
+
+  <div class="foot">
+    <p><i>指標の定義(HotPepper Beauty)</i> — サロン情報PV →CVR→ クーポン閲覧(クーポンメニューPV+紐付けクーポンクリック)→ACR→ 予約完了。CVRは興味の段階、ACRは予約の段階を表す。「予約数÷サロン情報PV」はこのどちらとも別の値。</p>
+    <p><i>比較区間</i> — 第1段階のPVは9月4〜10日と9月11〜17日(各7日)。第2段階のPVは9月11〜16日と9月18〜23日(各6日)。いずれも曜日の並びが一致する。反映当日で状態が混ざる9月17日は第2段階の比較から除外した。予約数は日次の実数が少ないため、区間ではなく8月・改修前・改修後の3期間で比較している。</p>
+    <p><i>グラフの処理</i> — 折れ線はいずれも7日移動平均。期間の先頭6日は、取得できた日数だけで平均している(8月1日は1日分、8月2日は2日分)。欠損の補間はしていない。</p>
+    <p><i>実来院の突合</i> — CRM(LiGUA)の分析Webから対象5院・来院日2026年9月1〜24日でカルテ一覧を抽出(1,292件)、SalonBoardの予約一覧(対象10掲載・9月1〜24日、154件)と突合。キャンセル16件は除外。カルテが確認できた予約を実来院として数えた。判定は電話番号→かな氏名の単純一致による簡易版で、既存の突合スクリプトの救済ルール(家族一致・店舗相違・同日重複)は適用していない。また9月分はCRM側の登録内容の確認・修正が未了のため、実来院数は過小評価の可能性がある(8月までのように修正済みの月では予約とほぼ一致する)。確定値は10月の月次突合で取り直す。氏名・電話番号を含む生データはリポジトリに保存していない。</p>
+    <p><i>注意</i> — 9月19〜23日はシルバーウィークの5連休にあたる。曜日の並びは揃っていても休日の数が違うため、PVの増減は競合平均と並べて読む必要がある。9月24日分はデータ未反映。</p>
+  </div>
+
+</div>
+
+<script>
+const ABS={"total":{"pv":[59.0,65.5,69.0,72.0,71.2,68.7,63.4,62.7,57.4,54.1,48.7,45.0,44.0,44.3,41.1,45.9,45.7,43.4,43.0,47.1,48.9,55.9,52.0,52.7,55.4,60.7,63.9,67.9,63.7,66.6,68.7,70.4,70.1,66.3,64.3,63.7,64.4,64.3,64.6,63.0,61.7,74.0,81.4,86.3,89.7,102.3,109.6,117.0,111.7,111.3,106.6,107.0,105.7,103.4],"area":[144.0,136.0,130.7,126.8,126.8,125.2,122.3,116.6,114.0,111.9,111.0,106.7,103.0,100.3,98.1,98.7,100.0,99.1,100.6,103.4,107.0,110.7,110.9,111.0,112.0,114.3,115.9,115.4,115.0,114.6,114.3,116.1,117.3,115.9,117.9,117.9,119.4,120.0,118.9,115.0,114.6,115.9,120.1,121.1,122.7,123.7,126.3,127.0,124.6,119.3,116.4,113.6,111.6,108.9],"lpv":[161.0,166.0,175.7,179.8,181.4,187.3,180.7,172.6,170.3,162.1,159.4,153.4,143.1,143.7,151.1,151.0,150.4,146.1,149.9,155.3,151.7,155.4,155.6,157.6,155.7,153.9,152.1,156.9,151.3,150.7,153.1,152.6,153.4,145.4,143.7,144.6,142.9,142.1,141.6,141.3,144.9,149.0,149.9,157.0,156.9,167.9,173.1,174.1,170.1,171.4,161.4,157.6,149.7,150.9]},"days":["0801","0802","0803","0804","0805","0806","0807","0808","0809","0810","0811","0812","0813","0814","0815","0816","0817","0818","0819","0820","0821","0822","0823","0824","0825","0826","0827","0828","0829","0830","0831","0901","0902","0903","0904","0905","0906","0907","0908","0909","0910","0911","0912","0913","0914","0915","0916","0917","0918","0919","0920","0921","0922","0923"],"stores":[{"name":"本八幡南口","a":[4.0,17.0,15.0,13.8,12.8,11.8,11.1,11.3,7.9,8.0,7.7,6.7,6.6,6.3,6.0,7.9,8.3,8.1,9.0,10.6,11.6,13.9,12.7,13.3,14.0,15.1,16.7,18.0,17.1,16.9,15.9,15.3,16.9,14.7,12.3,11.6,11.9,12.1,11.6,8.4,8.9,11.4,13.3,16.7,17.1,21.1,23.6,27.1,27.1,27.6,24.1,23.3,23.4,22.9],"l":[42.0,44.5,42.7,42.8,41.2,43.2,42.7,40.0,40.9,41.3,42.3,45.6,46.0,45.3,49.1,46.4,43.9,41.1,40.3,38.3,37.1,38.4,40.0,44.4,43.7,41.7,42.7,44.7,45.1,43.6,39.0,39.1,38.4,36.1,37.0,32.4,31.4,31.3,31.4,31.7,32.1,30.0,33.6,37.9,40.9,46.3,47.0,47.4,49.1,47.7,45.3,43.3,38.0,38.3],"r0":28,"r1":52,"augA":11.7,"augL":42.2,"latA":19.8,"latL":38.2},{"name":"ライフガーデン茂原","a":[10.0,8.5,12.7,12.2,13.2,13.8,13.0,12.1,11.9,9.9,10.0,8.6,7.0,6.1,6.6,7.7,7.7,6.3,5.9,6.7,8.0,9.3,8.9,8.4,9.6,11.1,11.4,10.6,9.9,10.3,12.0,11.4,11.6,11.4,13.3,12.4,12.4,12.4,13.7,13.3,13.3,16.0,17.4,16.9,17.6,18.4,19.3,19.0,15.3,14.6,15.0,12.9,11.4,9.4],"l":[18.0,25.5,29.7,29.2,30.6,32.5,30.4,30.9,30.4,29.6,30.7,29.4,28.0,29.1,32.9,34.3,34.6,33.6,35.7,36.1,36.3,34.7,36.9,36.1,35.4,34.1,34.1,34.9,32.4,29.7,29.4,28.9,29.3,27.0,28.6,31.4,30.7,31.3,32.3,33.4,34.6,36.0,33.6,36.1,36.1,35.7,35.1,33.6,30.0,31.1,26.3,24.1,23.3,20.9],"r0":30,"r1":42,"augA":9.8,"augL":32.2,"latA":9.2,"latL":21.7},{"name":"新潟関屋","a":[17.0,11.0,10.7,12.2,12.2,11.8,10.6,10.0,10.7,9.9,7.7,6.9,6.3,6.0,5.6,5.7,5.7,5.9,5.6,5.7,5.9,6.3,5.4,6.4,6.9,7.6,9.0,9.6,8.9,9.1,8.7,9.3,9.0,10.1,10.7,11.4,12.9,12.7,12.1,11.6,10.0,12.4,12.3,11.0,11.9,13.7,16.4,16.4,16.9,17.9,18.9,20.6,24.9,25.9],"l":[30.0,22.5,23.0,26.2,29.8,29.7,28.4,27.4,28.0,27.0,26.7,22.9,21.4,22.7,21.6,23.9,22.6,19.9,19.7,21.0,19.9,20.6,17.3,19.4,19.1,21.3,20.7,20.4,18.1,19.6,19.7,20.4,19.6,17.6,17.1,19.1,19.4,19.9,19.1,18.3,19.4,19.4,21.3,21.0,19.7,20.6,22.4,22.7,23.4,23.4,21.9,25.4,29.0,31.1],"r0":36,"r1":84,"augA":8.0,"augL":22.3,"latA":27.8,"latL":33.0},{"name":"新静岡駅前","a":[22.0,19.5,20.3,22.8,22.6,20.3,18.4,18.4,17.1,17.0,14.1,14.1,15.4,17.4,15.0,15.6,14.6,14.1,13.0,13.6,12.3,14.6,14.1,14.7,15.0,15.0,15.9,19.0,17.0,19.3,20.6,23.0,23.3,21.6,19.1,20.1,19.6,18.4,18.4,21.4,21.1,24.0,25.6,27.0,28.0,32.1,30.6,32.0,29.6,31.4,29.4,29.7,26.4,26.7],"l":[42.0,43.5,44.7,47.2,46.4,47.3,46.0,42.6,40.0,37.9,33.4,32.1,28.9,28.9,30.7,31.0,33.7,37.3,38.4,41.0,39.6,39.4,39.0,35.1,34.1,33.3,31.9,33.3,33.0,34.3,41.0,39.9,41.3,41.4,39.7,41.4,40.4,38.6,39.0,38.1,36.6,37.6,36.0,36.7,35.6,38.9,41.1,44.7,44.0,45.4,45.0,41.6,38.0,37.9],"r0":45,"r1":77,"augA":17.1,"augL":37.7,"latA":27.2,"latL":35.5},{"name":"八幡宿西口","a":[6.0,9.5,10.3,11.0,10.4,10.8,10.3,10.9,9.9,9.4,9.1,8.7,8.7,8.4,8.0,9.0,9.4,9.0,9.6,10.6,11.1,11.9,10.9,9.9,10.0,11.9,10.9,10.7,10.9,11.0,11.6,11.4,9.4,8.4,8.9,8.1,7.7,8.6,8.7,8.3,8.4,10.1,12.9,14.7,15.1,16.9,19.7,22.4,22.9,19.9,19.1,20.6,19.6,18.6],"l":[29.0,30.0,35.7,34.2,33.4,34.7,33.1,31.7,31.0,26.4,26.3,23.4,18.9,17.7,16.9,15.4,15.7,14.3,15.7,18.9,18.9,22.3,22.4,22.4,23.3,23.4,22.7,23.6,22.6,23.6,24.0,24.3,24.9,23.3,21.3,20.1,20.9,21.1,19.7,19.7,22.1,26.0,25.4,25.3,24.6,26.4,27.4,25.7,23.6,23.7,23.0,23.1,21.4,22.7],"r0":43,"r1":75,"augA":10.1,"augL":23.5,"latA":17.3,"latL":23.2}]};
+const ABS2={"days":["0801","0802","0803","0804","0805","0806","0807","0808","0809","0810","0811","0812","0813","0814","0815","0816","0817","0818","0819","0820","0821","0822","0823","0824","0825","0826","0827","0828","0829","0830","0831","0901","0902","0903","0904","0905","0906","0907","0908","0909","0910","0911","0912","0913","0914","0915","0916","0917","0918","0919","0920","0921","0922","0923"],"aSelf":[59.0,65.5,69.0,72.0,71.2,68.7,63.4,62.7,57.4,54.1,48.7,45.0,44.0,44.3,41.1,45.9,45.7,43.4,43.0,47.1,48.9,55.9,52.0,52.7,55.4,60.7,63.9,67.9,63.7,66.6,68.7,70.4,70.1,66.3,64.3,63.7,64.4,64.3,64.6,63.0,61.7,74.0,81.4,86.3,89.7,102.3,109.6,117.0,111.7,111.3,106.6,107.0,105.7,103.4],"aArea":[144.0,136.0,130.7,126.8,126.8,125.2,122.3,116.6,114.0,111.9,111.0,106.7,103.0,100.3,98.1,98.7,100.0,99.1,100.6,103.4,107.0,110.7,110.9,111.0,112.0,114.3,115.9,115.4,115.0,114.6,114.3,116.1,117.3,115.9,117.9,117.9,119.4,120.0,118.9,115.0,114.6,115.9,120.1,121.1,122.7,123.7,126.3,127.0,124.6,119.3,116.4,113.6,111.6,108.9],"lSelf":[161.0,166.0,175.7,179.8,181.4,187.3,180.7,172.6,170.3,162.1,159.4,153.4,143.1,143.7,151.1,151.0,150.4,146.1,149.9,155.3,151.7,155.4,155.6,157.6,155.7,153.9,152.1,156.9,151.3,150.7,153.1,152.6,153.4,145.4,143.7,144.6,142.9,142.1,141.6,141.3,144.9,149.0,149.9,157.0,156.9,167.9,173.1,174.1,170.1,171.4,161.4,157.6,149.7,150.9],"lArea":[333.0,332.0,315.3,305.0,302.8,301.2,297.1,291.0,287.6,289.4,297.6,296.6,293.9,292.7,290.6,290.9,286.4,274.7,271.7,269.9,271.1,274.6,271.7,271.6,271.0,272.9,275.0,273.9,274.6,276.9,277.6,284.9,285.9,283.6,283.3,281.9,279.9,277.7,270.9,265.7,264.3,267.1,271.3,272.3,273.1,276.0,279.3,279.3,275.0,268.4,263.1,263.7,263.4,264.1]};
+const IDX={"self":[104.7,116.2,122.4,127.7,126.3,121.9,112.5,111.2,101.8,96.0,86.4,79.8,78.0,78.6,72.9,81.4,81.1,77.0,76.3,83.5,86.7,99.2,92.2,93.5,98.3,107.7,113.3,120.4,113.0,118.1,121.9,124.9,124.3,117.6,114.1,113.0,114.2,114.1,114.6,111.8,109.4,131.3,144.4,153.1,159.1,181.5,194.4,207.5,198.1,197.4,189.1,189.8,187.5,183.4],"area":[127.0,119.9,115.2,111.8,111.8,110.4,107.8,102.8,100.5,98.7,97.9,94.1,90.8,88.4,86.5,87.0,88.2,87.4,88.7,91.2,94.3,97.6,97.8,97.9,98.7,100.8,102.2,101.7,101.4,101.0,100.8,102.4,103.4,102.2,103.9,103.9,105.3,105.8,104.8,101.4,101.0,102.2,105.9,106.8,108.2,109.1,111.3,112.0,109.8,105.2,102.6,100.2,98.4,96.0],"light":[101.1,104.3,110.4,113.0,114.0,117.7,113.5,108.4,107.0,101.8,100.1,96.4,89.9,90.3,94.9,94.9,94.5,91.8,94.2,97.6,95.3,97.6,97.8,99.0,97.8,96.7,95.6,98.6,95.1,94.7,96.2,95.9,96.4,91.3,90.3,90.8,89.8,89.3,89.0,88.8,91.0,93.6,94.2,98.6,98.6,105.5,108.8,109.4,106.9,107.7,101.4,99.0,94.0,94.8]};
+
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const C={self:'var(--self)',area:'var(--area)',light:'var(--light)',rule:'var(--rule)',hold:'var(--hold)',
+           ink:'var(--ink)',ink2:'var(--ink2)',ink3:'var(--ink3)',card:'var(--card)'};
+  const MARK=[['0911','第1段階'],['0917','第2段階']];
+  const TICKS=['0801','0808','0815','0822','0829','0905','0911','0918','0923'];
+
+  function bigChart(svgId, boxId, tipId, days, series, yMin, yMax, yStep, fmt){
+    const svg=document.getElementById(svgId);
+    const W=900,H=372,L=52,R=136,T=22,B=44;
+    const sx=i=>L+i/(days.length-1)*(W-L-R);
+    const sy=v=>T+(1-(v-yMin)/(yMax-yMin))*(H-T-B);
+    for(let v=yMin; v<=yMax+0.001; v+=yStep){
+      const y=sy(v), base=(fmt==='idx' && v===100);
+      svg.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:C.rule,
+        'stroke-width':base?1.4:1,'stroke-dasharray':base?'5 4':''}));
+      const t=el('text',{x:L-10,y:y+4,fill:C.ink3,'font-size':11.5,'text-anchor':'end'});
+      t.textContent=Math.round(v); svg.appendChild(t);
+    }
+    if(fmt==='idx'){ const l=el('text',{x:L-10,y:sy(100)-12,fill:C.ink3,'font-size':11,'text-anchor':'end'});
+      l.textContent='8月平均'; svg.appendChild(l); }
+    days.forEach((d,i)=>{ if(!TICKS.includes(d))return;
+      const t=el('text',{x:sx(i),y:H-B+20,fill:C.ink3,'font-size':11.5,'text-anchor':'middle'});
+      t.textContent=(+d.slice(0,2))+'/'+(+d.slice(2)); svg.appendChild(t); });
+    MARK.forEach(([day,label])=>{ const i=days.indexOf(day); if(i<0)return;
+      svg.appendChild(el('line',{x1:sx(i),x2:sx(i),y1:T,y2:H-B,stroke:C.ink3,
+        'stroke-width':1,'stroke-dasharray':'3 4','stroke-opacity':.75}));
+      const t=el('text',{x:sx(i)+5,y:T+12,fill:C.ink3,'font-size':11,'font-weight':700});
+      t.textContent=label+'反映'; svg.appendChild(t); });
+
+    series.forEach(s=>{
+      let p='';
+      s.v.forEach((v,i)=>{ p+=(i?'L':'M')+sx(i).toFixed(1)+','+sy(v).toFixed(1)+' '; });
+      const pa={d:p,fill:'none',stroke:s.c,'stroke-width':s.dash?1.5:2,
+        'stroke-linejoin':'round','stroke-linecap':'round'};
+      if(s.dash){ pa['stroke-dasharray']='5 4'; pa['stroke-opacity']=.75; }
+      svg.appendChild(el('path',pa));
+      const i=s.v.length-1, lx=sx(i), ly=sy(s.v[i])+(s.off||0);
+      svg.appendChild(el('circle',{cx:lx,cy:sy(s.v[i]),r:s.dash?3.5:5,fill:s.c,
+        stroke:C.card,'stroke-width':2,'fill-opacity':s.dash?.75:1}));
+      const num=el('text',{x:lx+12,y:ly+4,fill:s.c,'font-size':13,'font-weight':700});
+      num.textContent=Math.round(s.v[i]); svg.appendChild(num);
+      const nm=el('text',{x:lx+12+String(Math.round(s.v[i])).length*8+6,y:ly+4,fill:C.ink3,'font-size':11});
+      nm.textContent=s.n; svg.appendChild(nm);
+    });
+
+    const tip=document.getElementById(tipId), box=document.getElementById(boxId);
+    const hl=el('line',{x1:0,x2:0,y1:T,y2:H-B,stroke:C.ink3,'stroke-width':1,opacity:0});
+    svg.appendChild(hl);
+    const dots=series.map(s=>{ const c=el('circle',{r:4.5,fill:s.c,stroke:C.card,'stroke-width':2,opacity:0});
+      svg.appendChild(c); return c; });
+    const hit=el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'transparent'});
+    svg.appendChild(hit);
+    function move(ev){
+      const r=svg.getBoundingClientRect();
+      const rel=((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)/r.width*W;
+      let i=Math.round((rel-L)/(W-L-R)*(days.length-1));
+      i=Math.max(0,Math.min(days.length-1,i));
+      hl.setAttribute('x1',sx(i)); hl.setAttribute('x2',sx(i)); hl.setAttribute('opacity',.45);
+      series.forEach((s,n)=>{ dots[n].setAttribute('cx',sx(i)); dots[n].setAttribute('cy',sy(s.v[i]));
+        dots[n].setAttribute('opacity',1); });
+      tip.innerHTML='<b>'+(+days[i].slice(0,2))+'月'+(+days[i].slice(2))+'日</b>'+
+        series.map(s=>'<span class="r"><span style="color:'+s.c+'">'+s.n+'</span><i>'+
+          (fmt==='idx'?Math.round(s.v[i]):s.v[i].toFixed(1))+'</i></span>').join('');
+      const bw=box.getBoundingClientRect().width, fx=sx(i)/W*bw;
+      tip.style.opacity=1;
+      tip.style.left=Math.min(Math.max(fx-tip.offsetWidth/2,0),bw-tip.offsetWidth)+'px';
+      tip.style.top='0px';
+    }
+    function out(){ tip.style.opacity=0; hl.setAttribute('opacity',0); dots.forEach(d=>d.setAttribute('opacity',0)); }
+    hit.addEventListener('mousemove',move); hit.addEventListener('mouseleave',out);
+    hit.addEventListener('touchmove',move,{passive:true}); hit.addEventListener('touchend',out);
+  }
+
+  // 実数チャート
+  bigChart('chartA','cbA','tipA',ABS2.days,[
+    {n:'ライト エリア平均',v:ABS2.lArea,c:C.light,dash:1,off:0},
+    {n:'ライト 自店',v:ABS2.lSelf,c:C.light,off:0},
+    {n:'あはき エリア平均',v:ABS2.aArea,c:C.self,dash:1,off:-9},
+    {n:'あはき 自店',v:ABS2.aSelf,c:C.self,off:9}
+  ],0,350,50,'abs');
+
+  // 指数チャート
+  bigChart('chartB','cbB','tipB',ABS.days,[
+    {n:'ライトプラン',v:IDX.light,c:C.light,off:19},
+    {n:'あはきエリア平均',v:IDX.area,c:C.area,off:-1},
+    {n:'あはき柔整',v:IDX.self,c:C.self,off:0}
+  ],60,220,40,'idx');
+
+  // 実来院数(院別・区間別)
+  (function(){
+    const V={names:['本八幡南口','新静岡駅前','八幡宿西口','新潟関屋','ライフガーデン茂原'],
+      series:[{n:'改修前 9/4-10',v:[0,2,0,0,0],c:C.hold,o:1},
+              {n:'第1段階後 9/11-17',v:[3,1,3,1,0],c:C.self,o:.45},
+              {n:'第1+2段階後 9/18-23',v:[2,3,0,1,1],c:C.self,o:1}]};
+    const svg=document.getElementById('chartV'); if(!svg) return;
+    const W=900,H=306,L=46,R=16,T=20,B=56, yMax=4;
+    const sy=v=>T+(1-v/yMax)*(H-T-B);
+    const gw=(W-L-R)/V.names.length, bw=gw*0.20, gap=gw*0.05;
+    [0,1,2,3,4].forEach(v=>{
+      svg.appendChild(el('line',{x1:L,x2:W-R,y1:sy(v),y2:sy(v),
+        stroke:v===0?C.ink3:C.rule,'stroke-width':1,'stroke-opacity':v===0?.5:1}));
+      const t=el('text',{x:L-10,y:sy(v)+4,fill:C.ink3,'font-size':11.5,'text-anchor':'end'});
+      t.textContent=v; svg.appendChild(t);
+    });
+    const yl=el('text',{x:L-10,y:sy(4)-12,fill:C.ink3,'font-size':11,'text-anchor':'end'});
+    yl.textContent='件'; svg.appendChild(yl);
+    V.names.forEach((nm,gi)=>{
+      const gx=L+gi*gw, cx=gx+gw/2;
+      const total=bw*3+gap*2, x0=cx-total/2;
+      V.series.forEach((s,si)=>{
+        const v=s.v[gi], x=x0+si*(bw+gap);
+        const h=Math.max(sy(0)-sy(v),0);
+        if(v>0){
+          svg.appendChild(el('rect',{x:x.toFixed(1),y:sy(v).toFixed(1),width:bw.toFixed(1),
+            height:h.toFixed(1),fill:s.c,'fill-opacity':s.o,rx:1.5}));
+        } else {
+          svg.appendChild(el('line',{x1:x.toFixed(1),x2:(x+bw).toFixed(1),y1:sy(0),y2:sy(0),
+            stroke:s.c,'stroke-opacity':s.o,'stroke-width':2.5}));
+        }
+        const t=el('text',{x:(x+bw/2).toFixed(1),y:(sy(v)-7).toFixed(1),
+          fill:v>0?C.ink:C.ink3,'font-size':12.5,'font-weight':v>0?700:400,'text-anchor':'middle'});
+        t.textContent=v; svg.appendChild(t);
+      });
+      const lb=el('text',{x:cx.toFixed(1),y:H-B+22,fill:C.ink2,
+        'font-size':nm.length>7?10.5:12.5,'font-weight':500,'text-anchor':'middle'});
+      lb.textContent=nm; svg.appendChild(lb);
+    });
+  })();
+
+  // 院別スモールマルチプル
+  const mult=document.getElementById('mult');
+  ABS.stores.forEach(st=>{
+    const card=document.createElement('div'); card.className='sm';
+    card.innerHTML='<div class="hd"><span class="nm">'+st.name+'</span>'+
+      '<span class="rt"><b>'+st.r1+'%</b> <span style="opacity:.7">← '+st.r0+'%</span></span></div>'+
+      '<p class="sub">ライトプラン比 8月 → 9/18-23</p>';
+    const W=300,H=132,L=26,R=8,T=8,B=20, yMax=50;
+    const svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img',
+      'aria-label':st.name+'の1日あたりPV推移。あはき柔整はライトプランの'+st.r0+'%から'+st.r1+'%まで接近。'});
+    const sx=i=>L+i/(ABS.days.length-1)*(W-L-R);
+    const sy=v=>T+(1-v/yMax)*(H-T-B);
+    [0,25,50].forEach(v=>{
+      svg.appendChild(el('line',{x1:L,x2:W-R,y1:sy(v),y2:sy(v),stroke:C.rule,'stroke-width':1}));
+      const t=el('text',{x:L-6,y:sy(v)+3.5,fill:C.ink3,'font-size':9,'text-anchor':'end'});
+      t.textContent=v; svg.appendChild(t);
+    });
+    const mi=ABS.days.indexOf('0911');
+    svg.appendChild(el('line',{x1:sx(mi),x2:sx(mi),y1:T,y2:H-B,stroke:C.ink3,
+      'stroke-width':1,'stroke-dasharray':'2 3','stroke-opacity':.7}));
+    [['l',C.light],['a',C.self]].forEach(([k,c])=>{
+      let p=''; st[k].forEach((v,i)=>{ p+=(i?'L':'M')+sx(i).toFixed(1)+','+sy(v).toFixed(1)+' '; });
+      svg.appendChild(el('path',{d:p,fill:'none',stroke:c,'stroke-width':1.8,
+        'stroke-linejoin':'round','stroke-linecap':'round'}));
+      const i=st[k].length-1;
+      svg.appendChild(el('circle',{cx:sx(i),cy:sy(st[k][i]),r:3.2,fill:c,stroke:C.card,'stroke-width':1.5}));
+    });
+    ['8/1','9/1','9/23'].forEach((lab,n)=>{
+      const i=[0,ABS.days.indexOf('0901'),ABS.days.length-1][n];
+      const t=el('text',{x:sx(i),y:H-B+13,fill:C.ink3,'font-size':9,
+        'text-anchor':n===0?'start':(n===2?'end':'middle')});
+      t.textContent=lab; svg.appendChild(t);
+    });
+    card.appendChild(svg);
+    mult.appendChild(card);
+  });
+})();
+</script>
