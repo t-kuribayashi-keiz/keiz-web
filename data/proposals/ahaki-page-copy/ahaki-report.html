@@ -184,8 +184,8 @@
 
       <div class="finding">
         <span class="chip na">試算</span>
-        <h3>8月から効いていれば新規来院は55件</h3>
-        <p>掲載開始の8月1日から改修後の水準だった場合、8月1日〜9月24日の55日間で55件(幅18〜35件の上乗せ)。実績は28件。ただし8月は掲載直後で順位も口コミも育っておらず、前倒ししても同じ水準が出たとは限らない。</p>
+        <h3>8月は24件取り逃がし、9月はほぼ追いついた</h3>
+        <p>改修後の水準(1.00件/日)が最初から出ていた場合との比較。8月は想定31件に対し実績7件で-24件。9月(24日時点)は想定24件に対し実績21件で-3件まで縮んだ。残る差は改修前だった9/1-10のぶん。</p>
       </div>
 
       <div class="finding">
@@ -410,59 +410,64 @@
   <section>
     <div class="sechead">
       <p class="eyebrow">シミュレーション</p>
-      <h2>8月から効いていたら、新規来院は55件だった</h2>
-      <p>あはき柔整プランの掲載が始まったのは8月号から。改修が載ったのは9月11〜12日で、実際に改修後の水準で走ったのは13日間だけだった。<b>もし掲載開始の8月1日から改修後の水準だったら</b>、8月1日〜9月24日の55日間で新規来院は何件になっていたかを置いたもの。</p>
+      <h2>8月は24件取り逃がし、9月はほぼ追いついた</h2>
+      <p>改修後の実測レート(5院合計1.00件/日)が<b>その月の初日から出ていたら</b>、新規来院は何件だったかを月ごとに置いたもの。8月は丸ごと改修前、9月は10日ぶんだけ改修前という違いが、そのまま差になっている。</p>
     </div>
 
     <figure class="chartcard">
       <div class="legend">
-        <span class="lg"><span class="sw" style="background:var(--self)"></span>実績(累積)</span>
-        <span class="lg" style="color:var(--ink2)"><span class="sw dash" style="color:var(--area)"></span>8月から効いていた場合</span>
-        <span class="lg" style="color:var(--ink2)"><span class="sw" style="background:var(--area); opacity:.18; height:11px; border-radius:1px"></span>振れ幅(区間による)</span>
+        <span class="lg"><span class="sw" style="background:var(--self); opacity:.45; height:11px; border-radius:1px"></span>8月 実績</span>
+        <span class="lg"><span class="sw" style="background:var(--area); opacity:.45; height:11px; border-radius:1px"></span>8月 想定</span>
+        <span class="lg"><span class="sw" style="background:var(--self); height:11px; border-radius:1px"></span>9月 実績</span>
+        <span class="lg"><span class="sw" style="background:var(--area); height:11px; border-radius:1px"></span>9月 想定</span>
       </div>
       <div class="chartbox">
-        <svg id="chartS" viewBox="0 0 900 340" role="img"
-             aria-label="8月1日から9月24日までの新規来院の累積。実績は55日間で28件。改修後の水準が最初から続いていた場合は55件で、区間の取り方により46件から63件の幅がある。"></svg>
+        <svg id="chartS" viewBox="0 0 900 330" role="img"
+             aria-label="院別の新規来院、実績と想定の月別比較。8月は実績が新静岡駅前3件・本八幡南口1件・八幡宿西口0件・新潟関屋1件・ライフガーデン茂原2件に対し、想定は9.5件・7.2件・7.2件・4.8件・2.4件。9月24日時点の実績は8件・4件・3件・4件・2件に対し、想定は7.4件・5.5件・5.5件・3.7件・1.8件。"></svg>
       </div>
-      <figcaption>縦の灰色破線が改修の本番反映日(9月11日)。実績の8月分は日次が無いため月内を均して描いている。想定線は改修後13日間(9/11-23)の実測レート1.00件/日を55日に伸ばしたもの、帯は9/18-23の0.83件/日〜9/11-17の1.14件/日。</figcaption>
+      <figcaption>想定は各院の改修後実測レート(9/11-23)をその月の日数に掛けたもの。8月は31日、9月は実来院を確認できている9月24日までの24日で計算している。</figcaption>
     </figure>
 
     <div class="tablewrap">
       <table>
         <thead>
-          <tr><th>院</th><th>1日あたり<br>改修後の実測</th><th>実績<br>8/1-9/24</th><th>8月から効いていた場合<br>55日間</th><th>差</th></tr>
+          <tr><th>院</th><th>8月 実績<br>31日</th><th>8月 想定<br>31日</th><th>8月 差</th><th>9月 実績<br>24日時点</th><th>9月 想定<br>24日</th><th>9月 差</th></tr>
         </thead>
         <tbody>
-          <tr><td>八幡宿西口</td><td>0.23件</td><td>3件</td><td>13件</td><td class="up">+10件</td></tr>
-          <tr><td>本八幡南口</td><td>0.23件</td><td>5件</td><td>13件</td><td class="up">+8件</td></tr>
-          <tr><td>新静岡駅前</td><td>0.31件</td><td>11件</td><td>17件</td><td class="up">+6件</td></tr>
-          <tr><td>新潟関屋</td><td>0.15件</td><td>5件</td><td>8件</td><td class="up">+3件</td></tr>
-          <tr><td>ライフガーデン茂原</td><td>0.08件</td><td>4件</td><td>4件</td><td>±0件</td></tr>
+          <tr><td>新静岡駅前</td><td>3件</td><td>9.5件</td><td class="dn">-6.5</td><td>8件</td><td>7.4件</td><td class="up">+0.6</td></tr>
+          <tr><td>本八幡南口</td><td>1件</td><td>7.2件</td><td class="dn">-6.2</td><td>4件</td><td>5.5件</td><td class="dn">-1.5</td></tr>
+          <tr><td>八幡宿西口</td><td>0件</td><td>7.2件</td><td class="dn">-7.2</td><td>3件</td><td>5.5件</td><td class="dn">-2.5</td></tr>
+          <tr><td>新潟関屋</td><td>1件</td><td>4.8件</td><td class="dn">-3.8</td><td>4件</td><td>3.7件</td><td class="up">+0.3</td></tr>
+          <tr><td>ライフガーデン茂原</td><td>2件</td><td>2.4件</td><td>-0.4</td><td>2件</td><td>1.8件</td><td class="up">+0.2</td></tr>
         </tbody>
         <tfoot>
-          <tr><td>5院合計</td><td>1.00件</td><td>28件</td><td>55件</td><td class="up">+27件</td></tr>
+          <tr><td>5院合計</td><td>7件</td><td>31.0件</td><td class="dn">-24.0</td><td>21件</td><td>24.0件</td><td class="dn">-3.0</td></tr>
         </tfoot>
       </table>
     </div>
 
     <div class="note">
-      <b>取り逃がしは27件、幅を見ても18〜35件。</b>55日間のうち改修後の水準だったのは13日だけで、残り42日は改修前の水準で走っていた。<b>1院あたりでは5〜6件</b>。八幡宿西口と本八幡南口の差が大きいのは、この2院が8月にほぼゼロだったところから改修後に最も伸びたため。
+      <b>8月の-24件が、この改修を1ヶ月早く打てなかったコスト。</b>8月は31日すべてが改修前の水準(0.23件/日)だった。同じ5院・同じ掲載枠・同じ広告費で、新規来院が7件しか取れていない。
     </div>
 
     <div class="note">
-      <b>この数字を「損失額」として扱わないこと。</b>初回クーポンは¥1,480〜¥3,880で、27件分の初回売上は6〜7万円にしかならない。<b>新患の価値は2回目以降にあり、その単価をこの分析は持っていない</b>。金額で語るなら、まず5院のあはき柔整経由の新患のリピート率と平均単価を出す必要がある。
+      <b>9月の-3件は、改修前だった9月1〜10日のぶん。</b>9月は11日に改修が載ったので、24日間のうち14日が改修後。差が-24件から-3件まで縮んだのはそのため。<b>院別では新静岡駅前・新潟関屋・ライフガーデン茂原がすでに想定を上回っている</b>。残る差は本八幡南口(-1.5)と八幡宿西口(-2.5)の2院だけ。
     </div>
 
     <div class="note">
-      <b>前提として弱い点が3つある。</b>いずれも「8月に前倒ししても同じ水準は出なかったかもしれない」方向に効く。
+      <b>9月の着地見込みは23〜24件。</b>9月25〜30日にはすでに新規向けの予約が2件入っている。フルの30日で計算した想定は30.0件なので、月末では-6件前後の差が残る計算。<b>丸々1ヶ月を改修後の水準で走る最初の月は10月</b>で、そこが本当の答え合わせになる。
+    </div>
+
+    <div class="note">
+      <b>この試算が過大になり得る理由が3つある。</b>
       <br><br>
-      <b>1. 8月は掲載を始めた直後。</b>掲載順位も口コミもブログも育っていない。改修だけ前倒ししても、この伸びがそのまま出たとは限らない。これが一番大きい留保。<br>
-      <b>2. レートの元が13日間13件。</b>1件のブレが55日では±4件動く。表の院別の差はこの誤差と同じ桁。<br>
-      <b>3. 9月下旬は特殊。</b>9/19-23がシルバーウィークで、PVもエリア全体で-13〜16%落ちている。
+      <b>1. 8月は掲載を始めた直後。</b>掲載順位も口コミもブログも育っていない。改修だけ8月に前倒ししても、この水準が出たとは限らない。これが一番大きい留保。<br>
+      <b>2. レートの元が13日間13件。</b>1件のブレが1ヶ月では±2〜3件動く。院別の差はこの誤差と同じ桁。<br>
+      <b>3. 9月の想定には循環がある。</b>レート自体を9/11-23から取っているので、9月の実績とレートは独立ではない。9月の差が小さく出るのは当然で、意味があるのは8月の差のほう。
     </div>
 
     <div class="note">
-      <b>読み方としては「取り逃がした数」より「これから毎月積み上がる数」。</b>改修後の水準が続けば5院で月あたり約30件の新規来院。8月の実績(7件)と比べれば月+23件のペースになる。過去を悔やむ材料ではなく、<b>残り4院ぶんの横展開や、他ブランドへの適用を判断する材料</b>として使うのが筋。
+      <b>金額には換算していない。</b>初回クーポンは¥1,480〜¥3,880で、24件分の初回売上は5〜6万円にしかならない。新患の価値は2回目以降にあり、<b>あはき柔整経由の新患のリピート率と平均単価をまだ持っていない</b>。それが出れば、この月次の差をそのまま金額で語れる。
     </div>
   </section>
 
@@ -670,49 +675,43 @@ const IDX={"self":[104.7,116.2,122.4,127.7,126.3,121.9,112.5,111.2,101.8,96.0,86
     });
   })();
 
-  // シミュレーション(累積)
+  // シミュレーション(月別・院別)
   (function(){
-    const S={"days": ["0801", "0802", "0803", "0804", "0805", "0806", "0807", "0808", "0809", "0810", "0811", "0812", "0813", "0814", "0815", "0816", "0817", "0818", "0819", "0820", "0821", "0822", "0823", "0824", "0825", "0826", "0827", "0828", "0829", "0830", "0831", "0901", "0902", "0903", "0904", "0905", "0906", "0907", "0908", "0909", "0910", "0911", "0912", "0913", "0914", "0915", "0916", "0917", "0918", "0919", "0920", "0921", "0922", "0923", "0924"], "act": [0.23, 0.45, 0.68, 0.9, 1.13, 1.35, 1.58, 1.81, 2.03, 2.26, 2.48, 2.71, 2.94, 3.16, 3.39, 3.61, 3.84, 4.06, 4.29, 4.52, 4.74, 4.97, 5.19, 5.42, 5.65, 5.87, 6.1, 6.32, 6.55, 6.77, 7.0, 8.0, 9.0, 10.0, 10.29, 10.57, 10.86, 11.14, 11.43, 11.71, 12.0, 13.14, 14.29, 15.43, 16.57, 17.71, 18.86, 20.0, 20.83, 21.67, 22.5, 23.33, 24.17, 25.0, 28.0], "mid": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0], "lo": [0.83, 1.67, 2.5, 3.33, 4.17, 5.0, 5.83, 6.67, 7.5, 8.33, 9.17, 10.0, 10.83, 11.67, 12.5, 13.33, 14.17, 15.0, 15.83, 16.67, 17.5, 18.33, 19.17, 20.0, 20.83, 21.67, 22.5, 23.33, 24.17, 25.0, 25.83, 26.67, 27.5, 28.33, 29.17, 30.0, 30.83, 31.67, 32.5, 33.33, 34.17, 35.0, 35.83, 36.67, 37.5, 38.33, 39.17, 40.0, 40.83, 41.67, 42.5, 43.33, 44.17, 45.0, 45.83], "hi": [1.14, 2.29, 3.43, 4.57, 5.71, 6.86, 8.0, 9.14, 10.29, 11.43, 12.57, 13.71, 14.86, 16.0, 17.14, 18.29, 19.43, 20.57, 21.71, 22.86, 24.0, 25.14, 26.29, 27.43, 28.57, 29.71, 30.86, 32.0, 33.14, 34.29, 35.43, 36.57, 37.71, 38.86, 40.0, 41.14, 42.29, 43.43, 44.57, 45.71, 46.86, 48.0, 49.14, 50.29, 51.43, 52.57, 53.71, 54.86, 56.0, 57.14, 58.29, 59.43, 60.57, 61.71, 62.86]};
+    const V={names:['新静岡駅前','本八幡南口','八幡宿西口','新潟関屋','ライフガーデン茂原'],
+      series:[{v:[3,1,0,1,2],c:C.self,o:.45,f:0},
+              {v:[9.5,7.2,7.2,4.8,2.4],c:C.area,o:.45,f:1},
+              {v:[8,4,3,4,2],c:C.self,o:1,f:0},
+              {v:[7.4,5.5,5.5,3.7,1.8],c:C.area,o:1,f:1}]};
     const svg=document.getElementById('chartS'); if(!svg) return;
-    const W=900,H=340,L=52,R=120,T=22,B=44, yMax=70;
-    const sx=i=>L+i/(S.days.length-1)*(W-L-R);
+    const W=900,H=330,L=54,R=16,T=20,B=56, yMax=12;
     const sy=v=>T+(1-v/yMax)*(H-T-B);
-    [0,10,20,30,40,50,60,70].forEach(v=>{
-      svg.appendChild(el('line',{x1:L,x2:W-R,y1:sy(v),y2:sy(v),stroke:C.rule,'stroke-width':1}));
+    [0,3,6,9,12].forEach(v=>{
+      svg.appendChild(el('line',{x1:L,x2:W-R,y1:sy(v),y2:sy(v),
+        stroke:v===0?C.ink3:C.rule,'stroke-width':1,'stroke-opacity':v===0?.5:1}));
       const t=el('text',{x:L-10,y:sy(v)+4,fill:C.ink3,'font-size':11.5,'text-anchor':'end'});
       t.textContent=v; svg.appendChild(t);
     });
     const yl=el('text',{x:L-10,y:sy(yMax)-12,fill:C.ink3,'font-size':11,'text-anchor':'end'});
-    yl.textContent='件(累積)'; svg.appendChild(yl);
-    // 帯
-    let bp='';
-    S.hi.forEach((v,i)=>{ bp+=(i?'L':'M')+sx(i).toFixed(1)+','+sy(v).toFixed(1)+' '; });
-    for(let i=S.lo.length-1;i>=0;i--){ bp+='L'+sx(i).toFixed(1)+','+sy(S.lo[i]).toFixed(1)+' '; }
-    bp+='Z';
-    svg.appendChild(el('path',{d:bp,fill:C.area,'fill-opacity':.14,stroke:'none'}));
-    // 反映日
-    const mi=S.days.indexOf('0911');
-    svg.appendChild(el('line',{x1:sx(mi),x2:sx(mi),y1:T,y2:H-B,stroke:C.ink3,'stroke-width':1,
-      'stroke-dasharray':'3 4','stroke-opacity':.8}));
-    const mt=el('text',{x:sx(mi)+5,y:T+12,fill:C.ink3,'font-size':11,'font-weight':700});
-    mt.textContent='改修反映'; svg.appendChild(mt);
-    // 線
-    [['mid',C.area,1,'8月から効いていた場合'],['act',C.self,0,'実績']].forEach(([k,c,dash,nm])=>{
-      let p='';
-      S[k].forEach((v,i)=>{ p+=(i?'L':'M')+sx(i).toFixed(1)+','+sy(v).toFixed(1)+' '; });
-      const at={d:p,fill:'none',stroke:c,'stroke-width':dash?1.8:2.4,'stroke-linejoin':'round','stroke-linecap':'round'};
-      if(dash) at['stroke-dasharray']='6 5';
-      svg.appendChild(el('path',at));
-      const i=S[k].length-1;
-      const num=el('text',{x:sx(i)+12,y:sy(S[k][i])+4,fill:c,'font-size':14,'font-weight':700});
-      num.textContent=Math.round(S[k][i])+'件'; svg.appendChild(num);
-      const lb=el('text',{x:sx(i)+12,y:sy(S[k][i])+20,fill:C.ink3,'font-size':11});
-      lb.textContent=nm.length>8?'想定':nm; svg.appendChild(lb);
-    });
-    [['8/1',0],['9/1',S.days.indexOf('0901')],['9/11',mi],['9/24',S.days.length-1]].forEach(([lab,i],n)=>{
-      const t=el('text',{x:sx(i),y:H-B+20,fill:C.ink3,'font-size':11.5,
-        'text-anchor':n===0?'start':(n===3?'end':'middle')});
-      t.textContent=lab; svg.appendChild(t);
+    yl.textContent='件'; svg.appendChild(yl);
+    const gw=(W-L-R)/V.names.length, bw=gw*0.155, gap=gw*0.035;
+    V.names.forEach((nm,gi)=>{
+      const cx=L+gi*gw+gw/2, total=bw*4+gap*3, x0=cx-total/2;
+      V.series.forEach((se,si)=>{
+        const v=se.v[gi], x=x0+si*(bw+gap);
+        if(v>0){
+          svg.appendChild(el('rect',{x:x.toFixed(1),y:sy(v).toFixed(1),width:bw.toFixed(1),
+            height:(sy(0)-sy(v)).toFixed(1),fill:se.c,'fill-opacity':se.o,rx:1.5}));
+        } else {
+          svg.appendChild(el('line',{x1:x.toFixed(1),x2:(x+bw).toFixed(1),y1:sy(0),y2:sy(0),
+            stroke:se.c,'stroke-opacity':se.o,'stroke-width':2.5}));
+        }
+        const t=el('text',{x:(x+bw/2).toFixed(1),y:(sy(v)-7).toFixed(1),
+          fill:v>0?C.ink:C.ink3,'font-size':10,'font-weight':v>0?700:400,'text-anchor':'middle'});
+        t.textContent=se.f?v.toFixed(1):v; svg.appendChild(t);
+      });
+      const lb=el('text',{x:cx.toFixed(1),y:H-B+24,fill:C.ink2,
+        'font-size':nm.length>7?10.5:12.5,'font-weight':500,'text-anchor':'middle'});
+      lb.textContent=nm; svg.appendChild(lb);
     });
   })();
 
