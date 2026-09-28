@@ -1,0 +1,291 @@
+<title>あはき柔整 9月試算サマリ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --paper:#FCFBFA; --card:#FFFFFF; --ink:#241F27; --ink2:#554D5B; --ink3:#857C8C;
+    --rule:#E4DEE4; --rule2:#F0EBF0;
+    --self:#C02E5E; --area:#0083A8; --light:#8E7A22;
+    --good:#1F7A4D; --warn:#A8620E; --hold:#6B6473;
+    --goodbg:#E8F3EC; --warnbg:#FAF0E3; --holdbg:#F0EEF2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --paper:#16141A; --card:#1E1B23; --ink:#EDE8EE; --ink2:#B6AEBC; --ink3:#857C8C;
+      --rule:#302B37; --rule2:#26222C;
+      --self:#DC4F78; --area:#1F9DC2; --light:#A98A24;
+      --good:#5FBF8C; --warn:#D9973F; --hold:#9A92A2;
+      --goodbg:#172A20; --warnbg:#2B2114; --holdbg:#232029;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --paper:#16141A; --card:#1E1B23; --ink:#EDE8EE; --ink2:#B6AEBC; --ink3:#857C8C;
+    --rule:#302B37; --rule2:#26222C;
+    --self:#DC4F78; --area:#1F9DC2; --light:#A98A24;
+    --good:#5FBF8C; --warn:#D9973F; --hold:#9A92A2;
+    --goodbg:#172A20; --warnbg:#2B2114; --holdbg:#232029;
+  }
+
+  body{ background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans JP", system-ui, sans-serif; font-size:15px; line-height:1.85;
+    -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:920px; margin:0 auto; padding-inline:20px; padding-block:48px 72px; }
+
+  h1,h2,h3{ font-family:"Shippori Mincho B1", serif; font-weight:700; text-wrap:balance; line-height:1.4; }
+  h1{ font-size:clamp(26px,5.2vw,38px); margin:0 0 14px; letter-spacing:.01em; }
+  h2{ font-size:clamp(19px,3.4vw,23px); margin:0 0 4px; }
+  h3{ font-size:16px; margin:0 0 6px; font-weight:600; }
+  p{ margin:0 0 14px; }
+  .lede{ color:var(--ink2); font-size:16px; margin:0; max-width:62ch; }
+
+  .meta{ display:flex; flex-wrap:wrap; gap:6px 22px; margin:22px 0 0;
+    padding-top:16px; border-top:1px solid var(--rule);
+    font-size:12.5px; color:var(--ink3); letter-spacing:.02em; }
+  .meta b{ color:var(--ink2); font-weight:500; }
+
+  section{ margin-top:56px; }
+  .eyebrow{ font-size:11.5px; letter-spacing:.14em; color:var(--ink3);
+    text-transform:uppercase; margin:0 0 8px; font-weight:700; }
+  .sechead{ margin-bottom:22px; }
+  .sechead p{ color:var(--ink2); margin:8px 0 0; max-width:62ch; }
+
+  .findings{ display:grid; gap:14px; margin-top:26px; }
+  .finding{ background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:4px 16px; align-items:start; }
+  .chip{ grid-row:1/3; align-self:start; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+    padding:4px 10px; border-radius:2px; white-space:nowrap; margin-top:3px; }
+  .chip.ok{ background:var(--goodbg); color:var(--good); }
+  .chip.na{ background:var(--holdbg); color:var(--hold); }
+  .chip.wa{ background:var(--warnbg); color:var(--warn); }
+  .finding h3{ margin:0; }
+  .finding p{ margin:0; color:var(--ink2); font-size:14px; }
+
+  figure{ margin:0; }
+  .chartcard{ background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:20px 18px 14px; }
+  .legend{ display:flex; flex-wrap:wrap; gap:8px 20px; margin:0 0 14px; font-size:13px; }
+  .lg{ display:inline-flex; align-items:center; gap:7px; color:var(--ink2); }
+  .sw{ width:16px; height:3px; border-radius:2px; flex:none; }
+  .sw.dash{ height:0; border-top:2px dashed currentColor; background:none!important; opacity:.8; }
+  .chartbox{ position:relative; }
+  svg{ display:block; width:100%; height:auto; overflow:visible; }
+  figcaption{ font-size:12.5px; color:var(--ink3); margin-top:12px; line-height:1.7; }
+
+  .tip{ position:absolute; pointer-events:none; opacity:0; transition:opacity .12s;
+    background:var(--card); border:1px solid var(--rule); border-radius:3px;
+    padding:9px 11px; font-size:12.5px; line-height:1.6; white-space:nowrap;
+    box-shadow:0 4px 14px rgba(0,0,0,.10); z-index:5; }
+  .tip b{ display:block; color:var(--ink); font-weight:700; margin-bottom:3px; font-size:12px; }
+  .tip .r{ display:flex; justify-content:space-between; gap:14px; color:var(--ink2); }
+  .tip .r i{ font-style:normal; font-variant-numeric:tabular-nums; color:var(--ink); }
+
+  .smallmult{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .sm{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:14px 14px 10px; }
+  .sm .hd{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:2px; }
+  .sm .nm{ font-weight:700; font-size:14px; color:var(--ink); }
+  .sm .rt{ font-size:12.5px; color:var(--ink3); font-variant-numeric:tabular-nums; }
+  .sm .rt b{ color:var(--self); font-size:15px; }
+  .sm .sub{ font-size:11.5px; color:var(--ink3); margin:0 0 8px; }
+
+  .tablewrap{ overflow-x:auto; border:1px solid var(--rule); border-radius:3px; background:var(--card); }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; min-width:600px; }
+  th,td{ padding:11px 14px; text-align:right; border-bottom:1px solid var(--rule2); }
+  th:first-child, td:first-child{ text-align:left; white-space:nowrap; }
+  thead th{ font-size:11.5px; letter-spacing:.05em; color:var(--ink3); font-weight:700;
+    border-bottom:1px solid var(--rule); background:var(--paper); }
+  td{ font-variant-numeric:tabular-nums; color:var(--ink2); }
+  td:first-child{ color:var(--ink); font-weight:500; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tfoot td{ border-top:1px solid var(--rule); border-bottom:none;
+    font-weight:700; color:var(--ink); background:var(--paper); }
+  .up{ color:var(--good); font-weight:700; }
+  .dn{ color:var(--warn); font-weight:700; }
+
+  .note{ border-left:2px solid var(--self); padding:2px 0 2px 18px; margin:22px 0;
+    color:var(--ink2); font-size:14px; }
+  .note b{ color:var(--ink); }
+
+  .stores{ display:grid; gap:14px; margin-top:8px; }
+  .store{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:16px 20px; }
+  .store h3{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .store p{ margin:4px 0 0; color:var(--ink2); font-size:14px; }
+  .tag{ font-size:11px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:2px; }
+  .tag.wa{ background:var(--warnbg); color:var(--warn); }
+  .tag.na{ background:var(--holdbg); color:var(--hold); }
+  .tag.ok{ background:var(--goodbg); color:var(--good); }
+
+  ol.steps{ margin:0; padding-left:0; list-style:none; counter-reset:s; display:grid; gap:14px; }
+  ol.steps li{ counter-increment:s; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:baseline; }
+  ol.steps li::before{ content:counter(s); font-family:"Shippori Mincho B1",serif; font-size:19px;
+    font-weight:700; color:var(--self); min-width:1.1em; }
+  ol.steps p{ margin:0; color:var(--ink2); font-size:14px; }
+  ol.steps strong{ color:var(--ink); display:block; font-weight:700; font-size:15px; }
+
+  .foot{ margin-top:56px; padding-top:20px; border-top:1px solid var(--rule);
+    font-size:12.5px; color:var(--ink3); line-height:1.8; }
+  .foot p{ margin:0 0 8px; }
+  .foot i{ font-style:normal; color:var(--ink2); font-weight:700; }
+
+  @media (max-width:560px){
+    .finding{ grid-template-columns:1fr; }
+    .chip{ grid-row:auto; justify-self:start; margin-bottom:6px; }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none!important; } }
+</style>
+<style>
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:26px; }
+  .kpi{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:18px 20px; }
+  .kpi .lb{ font-size:12px; color:var(--ink3); letter-spacing:.04em; font-weight:700; margin:0 0 10px; }
+  .kpi .bg{ font-family:"Shippori Mincho B1",serif; font-size:32px; font-weight:700; color:var(--self);
+    line-height:1.1; font-variant-numeric:tabular-nums; }
+  .kpi .sub{ font-size:13px; color:var(--ink2); margin:8px 0 0; font-variant-numeric:tabular-nums; }
+  .kpi .sub b{ color:var(--ink); }
+  .kpi .tiny{ font-size:11.5px; color:var(--ink3); margin:3px 0 0; }
+  .mini{ display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px; }
+  .mc{ background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:16px 16px 12px; }
+  .mc h4{ margin:0 0 2px; font-size:13.5px; font-weight:700; color:var(--ink); font-family:inherit; }
+  .mc .u{ font-size:11.5px; color:var(--ink3); margin:0 0 10px; }
+</style>
+<div class="wrap">
+  <header>
+    <h1>あはき柔整プラン<br>9月に最初から効いていたら<span style="font-size:.5em; font-weight:400; color:var(--ink3)">(試算)</span></h1>
+    <p class="lede">改修が実際に載ったのは9月11〜12日と17〜18日で、9月のうち改修後の状態だったのは13日間だけだった。<b>もし9月1日から改修後の状態だったら</b>、9月の数字がどうなっていたかを置いたもの。<b>実績ではない。</b></p>
+    <div class="meta">
+      <span><b>対象</b> あはき柔整プラン5院</span>
+      <span><b>比較</b> 2026年8月 実績 vs 9月 試算</span>
+      <span><b>試算の根拠</b> 9月11〜23日の実測レート×30日</span>
+      <span><b>作成</b> 2026年9月28日</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">試算結果</p>
+    <div class="kpis">
+      <div class="kpi"><p class="lb">サロン情報PV</p><div class="bg" style="color:var(--area)">2.0倍</div>
+        <p class="sub">1院あたり 325 → <b>659</b></p><p class="tiny">5院計 1,626 → 3,293</p></div>
+      <div class="kpi"><p class="lb">予約数</p><div class="bg" style="color:var(--area)">6.1倍</div>
+        <p class="sub">1院あたり 1.6 → <b>9.7件</b></p><p class="tiny">5院計 8件 → 48.5件</p></div>
+      <div class="kpi"><p class="lb">新規来院</p><div class="bg" style="color:var(--area)">4.3倍</div>
+        <p class="sub">1院あたり 1.4 → <b>6.0件</b></p><p class="tiny">5院計 7件 → 30件</p></div>
+      <div class="kpi"><p class="lb">エリア平均達成率</p><div class="bg" style="color:var(--area)">93%</div>
+        <p class="sub">8月は <b>51%</b></p><p class="tiny">同プラン同エリアの平均比</p></div>
+    </div>
+    <div class="note" style="margin-top:22px">
+      <b>実際の9月実績との差。</b>9月は後半が改修後だったため、30日換算した実績と試算の差はPVで+4%にとどまる一方、<b>予約数は+38%、新規来院は+14%</b>。<b>改修前だった9月1〜10日のぶんが、そのまま取りこぼしになっている。</b>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">指標別</p>
+      <h2>8月実績と、9月に最初から効いていた場合</h2>
+      <p>1院あたり。8月は31日間の実績、想定は30日間で計算している。</p>
+    </div>
+    <div class="mini"><div class="mc"><h4>サロン情報PV</h4><p class="u">1院あたり</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績325、9月想定659">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="69.1" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="105.1" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">325</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">659</text>
+    </svg></div>
+<div class="mc"><h4>クーポン閲覧</h4><p class="u">1院あたり</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績193、9月想定479">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="56.6" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="92.6" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">193</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">479</text>
+    </svg></div>
+<div class="mc"><h4>予約数</h4><p class="u">1院あたり(既存様向け¥0枠を含む)</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績1.6、9月想定9.7">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="23.1" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="59.1" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">1.6</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">9.7</text>
+    </svg></div>
+<div class="mc"><h4>新規来院</h4><p class="u">1院あたり</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績1.4、9月想定6.0">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="32.7" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="68.7" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">1.4</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">6.0</text>
+    </svg></div>
+<div class="mc"><h4>予約売上高</h4><p class="u">1院あたり(円)</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績5,168、9月想定15,111">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="47.9" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="83.9" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">5,168</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">15,111</text>
+    </svg></div>
+<div class="mc"><h4>エリア平均達成率</h4><p class="u">同プラン同エリアの平均比</p><svg viewBox="0 0 220 74" role="img" aria-label="8月実績51%、9月想定93%">
+      <text x="0" y="12" fill="var(--ink3)" font-size="10.5">8月</text>
+      <rect x="30" y="4" width="76.6" height="11" rx="1.5" fill="var(--self)" fill-opacity=".38"/>
+      <text x="112.6" y="13.5" fill="var(--ink2)" font-size="11.5" font-weight="700">51%</text>
+      <text x="0" y="40" fill="var(--ink3)" font-size="10.5">想定</text>
+      <rect x="30" y="32" width="140.0" height="11" rx="1.5" fill="var(--area)"/>
+      <text x="176.0" y="41.5" fill="var(--ink)" font-size="11.5" font-weight="700">93%</text>
+    </svg></div></div>
+    <div class="note">
+      <b>予約数と新規来院の差に注意。</b>予約数(9.7件)はSalonBoard上の実数で、<b>既存様向けの¥0クーポン(口コミ投稿・無料カウンセリング)を含む</b>。新規獲得だけを見るなら新規来院(6.0件)のほう。9月の実績でも、予約27件のうち8件が既存様向けの¥0枠だった。
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">院別</p>
+      <h2>3院がエリア平均を超える計算になる</h2>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>院</th><th>サロン情報PV</th><th>エリア平均達成率</th><th>予約数</th><th>新規来院</th></tr></thead>
+        <tbody><tr><td>新静岡駅前</td><td>456 → <b>893</b></td>
+ <td>65% → <b>125%</b></td>
+ <td>3件 → <b>9.2件</b></td>
+ <td>3件 → <b>9.2件</b></td></tr>
+<tr><td>本八幡南口</td><td>325 → <b>713</b></td>
+ <td>43% → <b>84%</b></td>
+ <td>1件 → <b>18.5件</b></td>
+ <td>1件 → <b>6.9件</b></td></tr>
+<tr><td>八幡宿西口</td><td>309 → <b>602</b></td>
+ <td>67% → <b>109%</b></td>
+ <td>0件 → <b>6.9件</b></td>
+ <td>0件 → <b>6.9件</b></td></tr>
+<tr><td>新潟関屋</td><td>240 → <b>651</b></td>
+ <td>30% → <b>74%</b></td>
+ <td>1件 → <b>11.5件</b></td>
+ <td>1件 → <b>4.6件</b></td></tr>
+<tr><td>ライフガーデン茂原</td><td>296 → <b>434</b></td>
+ <td>64% → <b>78%</b></td>
+ <td>3件 → <b>2.3件</b></td>
+ <td>2件 → <b>2.3件</b></td></tr></tbody>
+        <tfoot><tr><td>5院合計</td><td>1,626 → 3,293</td><td>51% → 93%</td><td>8件 → 48.5件</td><td>7件 → 30件</td></tr></tfoot>
+      </table>
+    </div>
+    <div class="note">
+      <b>ライフガーデン茂原だけが伸びない計算になる。</b>試算は各院の改修後の実測レートを使うため、土曜4日すべてを休業していたこの院は低いままになる。<b>土曜シフトを是正すれば、この試算の前提自体が変わって上振れる。</b>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">この試算の前提</p>
+      <h2>3つ、割り引いて読む点がある</h2>
+    </div>
+    <ol class="steps">
+      <li><div><strong>元になっているのは13日間の実績</strong><p>9月11〜23日の実測を30日に伸ばしている。新規来院は5院で13件しかないため、1件のブレが1ヶ月では±2〜3件動く。院別の数字はこの誤差と同じ桁。</p></div></li>
+      <li><div><strong>9月後半は特殊な条件だった</strong><p>9月19〜23日がシルバーウィークの5連休。同じ期間にPVはエリア全体で13〜16%落ちている。上振れにも下振れにも効く。</p></div></li>
+      <li><div><strong>CVR・ACRは9月実績の水準で据え置いている</strong><p>この2つは月単位でしか取得できず期間を区切れないため、試算の入力として9月の実績値を使った。クーポン閲覧はこのCVRから算出している。</p></div></li>
+    </ol>
+  </section>
+
+  <div class="foot">
+    <p><i>試算方法</i> — PV・予約数・予約売上高は各院の日次データから9月11〜23日(13日間)の1日あたりを求め、30日に換算。新規来院も同期間の実測(5院で13件)を30日換算。エリア平均も同じ13日間から30日換算し、達成率を計算した。クーポン閲覧は 試算PV × 9月実績のCVR。</p>
+    <p><i>実績値は別紙</i> — 実際の8月・9月の数字は概要レポート(実績版)を参照。この試算はあくまで「9月1日から改修後の状態だった場合」の置き数字であり、報告に使う際は実績と取り違えないこと。</p>
+  </div>
+</div>

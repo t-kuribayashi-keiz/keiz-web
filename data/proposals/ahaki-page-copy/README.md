@@ -106,8 +106,13 @@
 | レポート | URL | 用途 |
 |---|---|---|
 | **概要版** | https://claude.ai/artifact/Sa2jLBDRoiN3B2M7pQF5df | 8月→9月の主要指標の変化だけ。共有・報告用。実体は `ahaki-summary.html` |
+| **概要版(9月試算)** | https://claude.ai/artifact/CXB1Pd2F2S3x4A12Q9uypL | 概要版の9月を「9/1から改修後だった場合」の試算値に置き換えたもの。実体は `ahaki-summary-sim.html`。**実績と取り違えないこと** |
 | 検証レポート | https://claude.ai/artifact/UTids3qa3VPULmQdKmwWgg | PV/CVR/ACR/予約/実来院の分解、シミュレーション、LG茂原の深掘り。実体は `ahaki-report.html` |
 
 概要版は `scripts` を持たず、`data/kpi-history/hpb-ahaki-light-2026-monthly-basicinfo.csv` と
 `hpb-ahaki-actual-visits-by-store-2026-09.csv` から手作業で組んでいる。
 月次で更新する場合はこの2ファイルを更新してから数字を差し替える。
+
+試算版の計算根拠: PV・予約数・予約売上高は各院の日次CSVから9/11-23(13日)の1日あたりを求めて30日換算。
+新規来院も同期間の実測(5院13件)を30日換算。エリア平均も同じ13日から30日換算して達成率を算出。
+クーポン閲覧は 試算PV × 9月実績のCVR。CVR・ACRは月単位でしか取れないため9月実績の水準で据え置き。
