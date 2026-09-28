@@ -100,3 +100,14 @@
 5院共通のクーポン価格帯は、本八幡南口で実際に運用中だった価格(美容鍼¥4,500・全身鍼¥3,000)と
 今回参考にした2院の相場(¥3,000〜¥6,400、元値からの半額弱訴求)を踏まえて統一設計した。
 **割引率・実際の原価は各院の判断で調整可**。ここに書いた数字はそのまま使える叩き台として提示する。
+
+## レポート(2026-09-28時点)
+
+| レポート | URL | 用途 |
+|---|---|---|
+| **概要版** | https://claude.ai/artifact/Sa2jLBDRoiN3B2M7pQF5df | 8月→9月の主要指標の変化だけ。共有・報告用。実体は `ahaki-summary.html` |
+| 検証レポート | https://claude.ai/artifact/UTids3qa3VPULmQdKmwWgg | PV/CVR/ACR/予約/実来院の分解、シミュレーション、LG茂原の深掘り。実体は `ahaki-report.html` |
+
+概要版は `scripts` を持たず、`data/kpi-history/hpb-ahaki-light-2026-monthly-basicinfo.csv` と
+`hpb-ahaki-actual-visits-by-store-2026-09.csv` から手作業で組んでいる。
+月次で更新する場合はこの2ファイルを更新してから数字を差し替える。
