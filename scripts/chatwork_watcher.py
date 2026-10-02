@@ -134,6 +134,10 @@ def load_config() -> tuple[list[dict], list[str]]:
             f"room set to require_mention could never match anything."
         )
 
+    # Send-only rooms (e.g. マイチャット, 西新宿組) exist in the config so chatwork_send.py can
+    # post to them; the watcher must neither read them nor demand keywords for them.
+    rooms = [room for room in rooms if not room.get("send_only")]
+
     for room in rooms:
         if not room.get("room_name"):
             fail(f"Room entry needs a room_name: {room}")

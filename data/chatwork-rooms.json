@@ -41,6 +41,7 @@
       "room_name": "マイチャット",
       "brand": null,
       "purpose": "栗林さん個人のマイチャット。定期実行される自動化(月次のHPB口コミ・ブログ集計など)が「本当に動いたか」を確認するための実行結果通知の送り先。監視(watcher)対象ではなく送信専用。",
+      "send_only": true,
       "require_mention": false,
       "_allow_auto_hearing_comment": "マイチャットはwatcherの監視対象ではないため、kind: hearing は使わない想定(falseのままでよい)。",
       "allow_auto_hearing": false,
@@ -48,6 +49,19 @@
       "allow_auto_status_report": true,
       "watch_keywords": [],
       "notes": "2026-09-09、hpb-review-blog-check(口コミブログチェック表の月次自動集計)の実行結果通知先として追加。room_id=284517272(参考情報。実行時に名前から解決する)。"
+    },
+    {
+      "room_name": "西新宿組",
+      "brand": null,
+      "purpose": "GBP(Googleビジネスプロフィール)担当の吉田さん・宇塚さんがいるルーム。2026-10-02、gbp-masterの引き継ぎ案内を送るために追加。監視(watcher)対象ではなく送信専用。",
+      "send_only": true,
+      "require_mention": false,
+      "allow_auto_hearing": false,
+      "allow_auto_status_report": false,
+      "_allow_approved_messages_comment": "true = 栗林さんがチャット上で全文を確認・承認した単発メッセージ(kind: approved_message)を、AIが代理で投稿してよいルーム。2026-10-02、栗林さんの指示で追加(「栗林さんが内容を確認した単発メッセージだけを送れる新しい種類を追加」)。承認記録(approval.body_sha256)が本文と一致しない限り送信されない。hearing/status_reportの自動送信は許可していない。",
+      "allow_approved_messages": true,
+      "watch_keywords": [],
+      "notes": "ルーム名は『西新宿組』で確定。トークンの所有者(栗林さん)がメンバーであることは初回送信時にresolve_room_idで確認される。"
     }
   ]
 }

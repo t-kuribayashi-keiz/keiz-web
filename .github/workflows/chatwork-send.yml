@@ -4,8 +4,12 @@ name: Chatwork message sender
 # directly — the token only reaches GitHub Actions — so this workflow is the delivery half of
 # the loop. See .claude/skills/chatwork-integration/SKILL.md.
 #
-# Only information-gathering questions (kind: "hearing") to rooms with allow_auto_hearing may
-# be delivered this way; the sender script refuses anything else.
+# Only these kinds are delivered, each to rooms that opted in via its own flag; the sender
+# script refuses anything else:
+#   hearing          - information-gathering questions (allow_auto_hearing)
+#   status_report    - scheduled-job reports (allow_auto_status_report)
+#   approved_message - one-off text the user approved in chat; needs an approval record whose
+#                      SHA-256 matches the body (allow_approved_messages)
 
 on:
   push:

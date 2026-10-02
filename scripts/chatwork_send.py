@@ -11,6 +11,13 @@ automation reporting whether it ran, e.g. hpb-review-blog-check's monthly job). 
 gated per-room by its own flag in data/chatwork-rooms.json, so opting a room into one doesn't
 opt it into the other.
 
+A third kind, "approved_message", is the opposite: a one-off message whose exact text the user
+read and approved in chat before it was queued (e.g. a hand-over announcement). It carries an
+"approval" record bound to the body by SHA-256, so editing the text after approval makes the
+file invalid and it is refused. The hash catches accidental edits and stale approvals; it is
+not authentication, since whoever queues the file also writes the record. The real control is
+that the message was shown to the user and confirmed before queuing (see SKILL.md).
+
 Every delivered message carries a visible "Claudeによる自動確認" header, for two reasons: the
 token belongs to a real person's account, so without it the recipient would think that person
 wrote the message; and the watcher uses the same string to skip Claude's own posts instead of
@@ -23,6 +30,7 @@ Exit codes:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -46,7 +54,10 @@ AUTO_POST_MARKER = "Claudeによる自動確認"
 # specifically opted in for that purpose (data/chatwork-rooms.json's allow_auto_status_report).
 # Anything else that commits to work, reports on a business decision, or answers a business
 # question is not covered by either standing permission.
-ALLOWED_KINDS = {"hearing", "status_report"}
+#
+# "approved_message" is different in kind: it is allowed only with a per-message approval record
+# (validate_approval) AND a room that opted in via allow_approved_messages.
+ALLOWED_KINDS = {"hearing", "status_report", "approved_message"}
 
 # kind -> (room permission flag required, max body length, message framing under the header)
 KIND_CONFIG = {
@@ -63,7 +74,19 @@ KIND_CONFIG = {
         "max_body_chars": 3000,
         "intro": "定期実行(GitHub Actions)からの自動レポートです。返信は不要です。",
     },
+    "approved_message": {
+        "permission_flag": "allow_approved_messages",
+        "max_body_chars": 5000,
+        "title_suffix": " ─ AI(Claude Code)からの連絡",
+        "intro": (
+            "【AI(Claude Code)からの連絡です】"
+            "栗林さんが内容を確認・承認したうえで、AIが代理で送信しています。"
+        ),
+    },
 }
+
+# Kinds that must carry an "approval" record matching the exact body.
+APPROVAL_REQUIRED_KINDS = {"approved_message"}
 
 
 def fail(message: str) -> None:
@@ -133,7 +156,8 @@ def render_body(message: dict) -> str:
     reply_to = message.get("in_reply_to_message_id")
     intro = KIND_CONFIG[message["kind"]]["intro"]
     lines = [
-        f"[info][title]{AUTO_POST_MARKER}[/title]",
+        f"[info][title]{AUTO_POST_MARKER}{KIND_CONFIG[message['kind']].get('title_suffix', '')}"
+        f"[/title]",
         intro,
         "",
         body,
@@ -144,6 +168,26 @@ def render_body(message: dict) -> str:
         # which is the token owner's, and would render as if they had hit reply themselves.
         lines.insert(0, "")
     return "\n".join(lines).strip()
+
+
+def body_sha256(body: str) -> str:
+    """Hash of the body as it will be rendered (surrounding whitespace is stripped there too)."""
+    return hashlib.sha256(body.strip().encode("utf-8")).hexdigest()
+
+
+def validate_approval(message: dict, path: Path) -> None:
+    approval = message.get("approval")
+    if not isinstance(approval, dict):
+        fail(f"{path.name}: kind {message['kind']!r} needs an 'approval' record.")
+    for field in ("approved_by", "approved_at", "body_sha256"):
+        if not str(approval.get(field, "")).strip():
+            fail(f"{path.name}: approval is missing {field!r}")
+    expected = body_sha256(message["body"])
+    if str(approval["body_sha256"]).strip().lower() != expected:
+        fail(
+            f"{path.name}: the body does not match the approved text (sha256 mismatch). "
+            f"The message was changed after approval, so it must be shown to the user again."
+        )
 
 
 def validate(message: dict, path: Path, rooms: dict[str, dict]) -> dict:
@@ -181,6 +225,9 @@ def validate(message: dict, path: Path, rooms: dict[str, dict]) -> dict:
 
     if AUTO_POST_MARKER in message["body"]:
         fail(f"{path.name}: body must not contain the auto-post marker itself.")
+
+    if kind in APPROVAL_REQUIRED_KINDS:
+        validate_approval(message, path)
 
     return message
 
