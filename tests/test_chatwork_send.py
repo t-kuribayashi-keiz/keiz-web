@@ -80,9 +80,41 @@ class ApprovedMessageTest(unittest.TestCase):
     def test_render_starts_with_ai_notice_and_marker(self):
         out = cs.render_body(approved(body="本文です"))
         self.assertTrue(out.startswith("[info][title]" + cs.AUTO_POST_MARKER))
-        self.assertIn("AI(Claude Code)からの連絡", out.split("\n")[0])
-        self.assertIn("【AI(Claude Code)からの連絡です】", out.split("\n")[1])
+        self.assertIn("栗林さん専用Claude(AI)からの連絡", out.split("\n")[0])
+        self.assertIn("【栗林さん専用のClaude(AI)からの連絡です】", out.split("\n")[1])
         self.assertIn("本文です", out)
+
+
+MEMBERS = [
+    {"account_id": 111, "name": "吉田 太郎"},
+    {"account_id": 222, "name": "宇塚　花子"},
+    {"account_id": 333, "name": "吉田 次郎"},
+]
+
+
+class MentionTest(unittest.TestCase):
+    def test_resolves_unique_names_ignoring_spaces(self):
+        out = cs.resolve_mentions("{{to:宇塚}}宇塚さん\n{{to:吉田太郎}}吉田さん", MEMBERS)
+        self.assertEqual(out, "[To:222]宇塚さん\n[To:111]吉田さん")
+
+    def test_ambiguous_name_aborts(self):
+        with self.assertRaises(SystemExit):
+            cs.resolve_mentions("{{to:吉田}}", MEMBERS)
+
+    def test_unknown_name_aborts(self):
+        with self.assertRaises(SystemExit):
+            cs.resolve_mentions("{{to:佐藤}}", MEMBERS)
+
+    def test_body_without_placeholder_is_untouched(self):
+        self.assertEqual(cs.resolve_mentions("吉田さん", MEMBERS), "吉田さん")
+
+    def test_mention_allowed_in_approved_message(self):
+        cs.validate(approved(body="{{to:宇塚}}宇塚さん"), PATH, ROOMS)
+
+    def test_mention_refused_in_other_kinds(self):
+        msg = {"room_name": "マイチャット", "kind": "status_report", "body": "{{to:宇塚}}"}
+        with self.assertRaises(SystemExit):
+            cs.validate(msg, PATH, ROOMS)
 
 
 class ExistingKindsUnchangedTest(unittest.TestCase):

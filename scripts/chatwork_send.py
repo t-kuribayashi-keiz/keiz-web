@@ -33,6 +33,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -77,10 +78,10 @@ KIND_CONFIG = {
     "approved_message": {
         "permission_flag": "allow_approved_messages",
         "max_body_chars": 5000,
-        "title_suffix": " ─ AI(Claude Code)からの連絡",
+        "title_suffix": " ─ 栗林さん専用Claude(AI)からの連絡",
         "intro": (
-            "【AI(Claude Code)からの連絡です】"
-            "栗林さんが内容を確認・承認したうえで、AIが代理で送信しています。"
+            "【栗林さん専用のClaude(AI)からの連絡です】"
+            "栗林さんが内容を確認・承認したうえで、栗林さん専用のClaude Codeが代理で送信しています。"
         ),
     },
 }
@@ -148,6 +149,35 @@ def resolve_room_id(room_name: str, token: str) -> int:
     if len(matches) > 1:
         fail(f"Room name {room_name!r} matched {len(matches)} rooms; cannot pick one safely.")
     return matches[0]
+
+
+MENTION_PATTERN = re.compile(r"\{\{to:([^{}]+)\}\}")
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", "", text)
+
+
+def resolve_mentions(body: str, members: list[dict]) -> str:
+    """Replace {{to:名前}} with Chatwork's [To:account_id], looked up in the room's members.
+
+    The account ids are resolved at send time so they never need to be written down (or hashed
+    into the approval): the approved text says {{to:吉田}}, the person it resolves to is whoever
+    in that room's member list matches. A name that matches nobody or more than one member
+    aborts the send rather than guessing, since a wrong [To:] pings the wrong person.
+    """
+
+    def replace(match: re.Match) -> str:
+        key = _squash(match.group(1))
+        hits = [m for m in members if key and key in _squash(str(m.get("name", "")))]
+        if len(hits) != 1:
+            fail(
+                f"{{{{to:{match.group(1)}}}}} matched {len(hits)} members of the room "
+                f"(need exactly 1). Use a more specific name."
+            )
+        return f"[To:{hits[0]['account_id']}]"
+
+    return MENTION_PATTERN.sub(replace, body)
 
 
 def render_body(message: dict) -> str:
@@ -226,6 +256,9 @@ def validate(message: dict, path: Path, rooms: dict[str, dict]) -> dict:
     if AUTO_POST_MARKER in message["body"]:
         fail(f"{path.name}: body must not contain the auto-post marker itself.")
 
+    if MENTION_PATTERN.search(message["body"]) and kind not in APPROVAL_REQUIRED_KINDS:
+        fail(f"{path.name}: {{{{to:...}}}} mentions are only allowed in approved messages.")
+
     if kind in APPROVAL_REQUIRED_KINDS:
         validate_approval(message, path)
 
@@ -256,6 +289,9 @@ def main() -> int:
 
         validate(message, path, rooms)
         room_id = resolve_room_id(message["room_name"].strip(), token)
+        if MENTION_PATTERN.search(message["body"]):
+            members = api_get(f"/rooms/{room_id}/members", token) or []
+            message = {**message, "body": resolve_mentions(message["body"], members)}
         result = api_post(
             f"/rooms/{room_id}/messages", token, {"body": render_body(message)}
         )
