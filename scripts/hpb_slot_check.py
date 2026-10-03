@@ -140,15 +140,25 @@ def judge_occupancy_rate(slots, start_min, end_min, b_start, b_end, is_am):
     return "✕" if (ng_count / len(target_slots)) >= 0.5 else "○"
 
 
-def default_date_window():
+LATE_RUN_HOUR = 14  # この時刻(JST)以降の実行は「遅延実行」とみなす
+
+
+def default_date_window(now=None):
     """明示指定がない場合の既定ウィンドウ: 当日PM〜3日後AM(2026-09-11、栗林さん指定)。
 
-    毎日13:00 JSTに実行する前提(ワークフロー側のcronと対応)。実行時点で当日AMは既に
+    毎日12:00 JSTに実行する前提(ワークフロー側のcronと対応)。実行時点で当日AMは既に
     過ぎているので、当日PMから3日後AMまでを判定対象にする。
+
+    遅延ガード(2026-10-03): 実行が14:00 JST以降に遅れた場合、当日PMの経過済み時間帯を
+    「予約不可」と誤検知して✕が大量発生する(2026-09-11に実害)。その場合は当日を丸ごと
+    外し、翌日AM〜3日後AMを対象にする。
     """
-    today = datetime.datetime.now()
-    end = today + datetime.timedelta(days=3)
-    return today.strftime("%Y-%m-%d"), "PM", end.strftime("%Y-%m-%d"), "AM"
+    now = now or datetime.datetime.now()
+    end = now + datetime.timedelta(days=3)
+    if now.hour >= LATE_RUN_HOUR:
+        start = now + datetime.timedelta(days=1)
+        return start.strftime("%Y-%m-%d"), "AM", end.strftime("%Y-%m-%d"), "AM"
+    return now.strftime("%Y-%m-%d"), "PM", end.strftime("%Y-%m-%d"), "AM"
 
 
 HISTORY_WORKSHEET_NAME = "K,L履歴"
@@ -215,6 +225,7 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
 
     # 一括書き込み用のデータを準備(K列とL列)
     bulk_updates = []
+    ng_shops = []  # Chatwork通知用: (店舗名, 詳細)
     # 履歴タブ用: 対象日・区分ごとに1行、判定結果を毎回積み上げる(K/L列自体は毎回上書きのため)
     history_rows = []
     run_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -286,6 +297,8 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
             final_judge = "✕" if has_any_ng else ("○" if has_any_data else "?")
             detail = " | ".join(summary_results)
             bulk_updates.append([detail, final_judge])
+            if final_judge == "✕":
+                ng_shops.append({"name": shop_name, "detail": detail})
             print(f"  -> 結果: {final_judge} ({detail})", flush=True)
         await browser.close()
 
@@ -300,6 +313,7 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
             history_ws.append_rows(history_rows)
             print(f"📚 履歴タブ「{HISTORY_WORKSHEET_NAME}」に{len(history_rows)}件追記しました。")
         print("✅ すべて完了しました。")
+        write_summary(start_date, start_half, end_date, end_half, bulk_updates, ng_shops)
     else:
         ng_count = sum(1 for _, judge in bulk_updates if judge == "✕")
         ok_count = sum(1 for _, judge in bulk_updates if judge == "○")
@@ -311,6 +325,23 @@ async def main_process(spreadsheet, worksheet, start_date, start_half, end_date,
             " (--apply を付けると書き込みます)"
         )
     return bulk_updates
+
+
+def write_summary(start_date, start_half, end_date, end_half, bulk_updates, ng_shops):
+    """環境変数 SLOT_CHECK_SUMMARY にパスがあれば、通知用の集計JSONを書く。"""
+    path = os.environ.get("SLOT_CHECK_SUMMARY")
+    if not path:
+        return
+    judges = [j for _, j in bulk_updates]
+    summary = {
+        "window": f"{start_date}{start_half}〜{end_date}{end_half}",
+        "ok": judges.count("○"),
+        "ng": judges.count("✕"),
+        "unknown": judges.count("?"),
+        "ng_shops": ng_shops,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
 
 
 def parse_args():

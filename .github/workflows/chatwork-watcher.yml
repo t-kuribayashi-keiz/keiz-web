@@ -8,11 +8,9 @@ name: Chatwork request watcher
 # and never reaches a Claude session.
 
 on:
-  schedule:
-    # Every 30 minutes. Shorter intervals detect faster but burn more Actions minutes on a
-    # private repo; the watcher reads the latest 100 messages per run, so this cadence has
-    # plenty of headroom for these rooms.
-    - cron: "*/30 * * * *"
+  # 定期実行(schedule)は2026-10-03に停止した(栗林さん指示)。再開する際は下記を戻すこと:
+  #   schedule:
+  #     - cron: "*/30 * * * *"
   workflow_dispatch:
     inputs:
       list_rooms:

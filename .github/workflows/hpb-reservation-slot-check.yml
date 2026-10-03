@@ -15,13 +15,13 @@ name: HPB reservation slot check
 # 編集者共有するだけでよい。
 
 on:
-  # 定期実行(schedule)は2026-09-11に停止した(栗林さん指示)。
-  # 理由: 発火が想定13:07 JSTから恒常的に4〜5時間遅れ(17:30〜18:15 JST)ており、
-  # 当日PMの経過済み時間帯を「予約不可」と誤検知して✕が大量発生する実害が出た
-  # (ある実行で○111/✕26 → 数時間後の遅延実行で○16/✕121に激変)。
-  # 原因(遅延そのもの、および遅い時刻の実行が構造的に誤検知を生む設計)が直るまで、
-  # 手動実行(workflow_dispatch)のみで運用する。再開する際は、この停止理由が
-  # 解消されたことを確認してから schedule ブロックを戻すこと。
+  schedule:
+    # 毎日12:00 JST (03:00 UTC)。2026-10-03に再開(栗林さん指示)。
+    # 9/11に停止した理由は、発火が4〜5時間遅れて当日PMの経過済み時間帯を誤って✕と
+    # 判定したこと。再開にあたり、scripts/hpb_slot_check.py の default_date_window() に
+    # 遅延ガードを入れた(14:00 JST以降の実行は当日を除き翌日AMから判定)。
+    # 数分〜十数分の遅れは許容。
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -76,14 +76,43 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_hpb_slot_check.py" -v
 
       - name: Run K/L scraper (公開カレンダー)
+        id: run
         env:
           GCP_KPI_WRITER_KEY: ${{ secrets.GCP_KPI_WRITER_KEY }}
+          SLOT_CHECK_SUMMARY: slot_summary.json
           TZ: Asia/Tokyo
         run: |
+          set +e
           args=()
           [ "${{ github.event.inputs.mode || 'apply' }}" = "apply" ] && args+=(--apply)
           [ -n "${{ github.event.inputs.start_date }}" ] && args+=(--start-date "${{ github.event.inputs.start_date }}")
           [ -n "${{ github.event.inputs.start_half }}" ] && args+=(--start-half "${{ github.event.inputs.start_half }}")
           [ -n "${{ github.event.inputs.end_date }}" ] && args+=(--end-date "${{ github.event.inputs.end_date }}")
           [ -n "${{ github.event.inputs.end_half }}" ] && args+=(--end-half "${{ github.event.inputs.end_half }}")
-          python3 scripts/hpb_slot_check.py "${args[@]}"
+          python3 scripts/hpb_slot_check.py "${args[@]}" 2>&1 | tee run.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -eq 0 ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
+      - name: Queue Chatwork status report
+        if: always() && (github.event.inputs.mode || 'apply') == 'apply'
+        run: |
+          if [ "${{ steps.run.outputs.status }}" = "success" ]; then
+            python3 scripts/notify_hpb_slot_check.py --status success --summary slot_summary.json --log run.log
+          else
+            python3 scripts/notify_hpb_slot_check.py --status failure --log run.log
+          fi
+
+      - name: Send Chatwork status report
+        if: always() && (github.event.inputs.mode || 'apply') == 'apply'
+        env:
+          CHATWORK_API_TOKEN: ${{ secrets.CHATWORK_API_TOKEN }}
+        run: python3 scripts/chatwork_send.py
+
+      - name: Fail the job if the check itself failed
+        if: steps.run.outputs.status == 'failure'
+        run: exit 1

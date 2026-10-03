@@ -20,8 +20,9 @@ name: HPB review/blog check (monthly)
 
 on:
   schedule:
-    # 毎月1日 10:00 JST (01:00 UTC)。月初の実行なので前月分を対象にする。
-    - cron: "0 1 1 * *"
+    # 毎月5日 10:00 JST (01:00 UTC)。月初の実行なので前月分を対象にする。
+    # (2026-10-03、栗林さん指示で毎月1日から5日に変更)
+    - cron: "0 1 5 * *"
   workflow_dispatch:
     inputs:
       month:

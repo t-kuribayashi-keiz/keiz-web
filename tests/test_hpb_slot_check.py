@@ -90,5 +90,19 @@ class TestJudgeOccupancyRate(unittest.TestCase):
         )
 
 
+class TestDefaultDateWindow(unittest.TestCase):
+    def test_normal_run_starts_today_pm(self):
+        now = datetime.datetime(2026, 10, 5, 12, 10)
+        self.assertEqual(slot_check.default_date_window(now), ("2026-10-05", "PM", "2026-10-08", "AM"))
+
+    def test_late_run_skips_today(self):
+        now = datetime.datetime(2026, 10, 5, 17, 40)
+        self.assertEqual(slot_check.default_date_window(now), ("2026-10-06", "AM", "2026-10-08", "AM"))
+
+    def test_boundary_hour(self):
+        self.assertEqual(slot_check.default_date_window(datetime.datetime(2026, 10, 5, 13, 59))[1], "PM")
+        self.assertEqual(slot_check.default_date_window(datetime.datetime(2026, 10, 5, 14, 0))[1], "AM")
+
+
 if __name__ == "__main__":
     unittest.main()
